@@ -1,0 +1,19 @@
+{
+  "name": "apex-talent-management",
+  "version": "1.0.0",
+  "description": "Apex Talent Management Ltd — Kenya sports talent registry, video showcase, and representation platform API.",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "migrate": "node src/migrate.js",
+    "start": "node src/migrate.js && node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "dotenv": "^16.4.5"
+  }
+}

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apex Talent Management — Kenya's Sports Talent Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch:#0E3B2C;
+    --pitch-deep:#092A1F;
+    --paper:#EEF1EA;
+    --paper-alt:#F7F8F4;
+    --ink:#11201A;
+    --ink-soft:#4C5A52;
+    --gold:#C8962B;
+    --gold-deep:#A87A1E;
+    --red:#A32638;
+    --line:#D6DBCE;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  .display{font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.5px;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  button{font-family:inherit; cursor:pointer;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:100;
+    background:var(--pitch);
+    border-bottom:3px solid var(--gold);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px; max-width:1180px; margin:0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    color:var(--white); font-size:22px;
+  }
+  .logo .mark{
+    width:34px; height:34px; border-radius:50%;
+    background:var(--gold); color:var(--pitch-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Anton', sans-serif; font-size:18px;
+    flex-shrink:0;
+  }
+  nav.links{display:flex; gap:28px; list-style:none;}
+  nav.links a{
+    color:#DCE6DD; font-size:14px; font-weight:600; text-decoration:none;
+    letter-spacing:0.3px; transition:color .15s ease;
+  }
+  nav.links a:hover, nav.links a:focus-visible{color:var(--gold);}
+  .nav-cta{
+    background:var(--gold); color:var(--pitch-deep); border:none;
+    padding:10px 18px; font-weight:700; font-size:13.5px; border-radius:2px;
+    text-transform:uppercase; letter-spacing:0.4px;
+  }
+  .nav-cta:hover{background:#DBA939;}
+  .burger{display:none; background:none; border:none; color:var(--white); font-size:26px;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(180deg, var(--pitch) 0%, var(--pitch) 55%, var(--paper) 55%);
+    padding:64px 0 0;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px;
+    align-items:start;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:1.5px;
+    color:var(--gold); text-transform:uppercase; margin-bottom:18px;
+  }
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--red); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+  .hero h1{
+    color:var(--white); font-size:clamp(38px, 5.4vw, 64px);
+    line-height:0.98; margin-bottom:20px;
+  }
+  .hero h1 span{color:var(--gold);}
+  .hero p.lead{
+    color:#D6E0D8; font-size:17px; max-width:520px; margin-bottom:28px;
+  }
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:56px;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:13px 24px; font-weight:700; font-size:14px; text-decoration:none;
+    border-radius:2px; letter-spacing:0.3px; border:2px solid transparent;
+    transition:transform .12s ease, background .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
+  .btn-gold:hover{background:#DBA939;}
+  .btn-outline{background:transparent; border-color:#4E6B5C; color:var(--white);}
+  .btn-outline:hover{border-color:var(--gold); color:var(--gold);}
+  .btn-dark{background:var(--pitch); color:var(--white);}
+  .btn-dark:hover{background:var(--pitch-deep);}
+
+  /* Scoreboard */
+  .scoreboard{
+    background:var(--pitch-deep); border:2px solid var(--gold);
+    border-radius:4px; padding:22px; margin-top:8px; margin-bottom:24px;
+  }
+  .scoreboard-head{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid #24493A; padding-bottom:12px; margin-bottom:14px;
+  }
+  .scoreboard-head span{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;}
+  .score-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .score-cell{}
+  .score-num{
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:32px;
+    color:var(--white); line-height:1;
+  }
+  .score-label{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#9FB6A6;
+    text-transform:uppercase; letter-spacing:0.8px; margin-top:6px;
+  }
+
+  /* ---------- SECTION GENERIC ---------- */
+  section{padding:72px 0;}
+  .section-alt{background:var(--paper-alt);}
+  .sec-head{margin-bottom:36px; max-width:640px;}
+  .sec-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--gold-deep);
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; display:block;
+  }
+  .sec-head h2{font-size:clamp(26px,3.4vw,38px); color:var(--ink); margin-bottom:12px;}
+  .sec-head p{color:var(--ink-soft); font-size:15.5px; max-width:560px;}
+
+  /* How it works */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  .step{
+    background:var(--white); border:1px solid var(--line); border-radius:4px;
+    padding:28px 24px; position:relative;
+  }
+  .step .num{
+    font-family:'Anton', sans-serif; font-size:44px; color:var(--paper);
+    -webkit-text-stroke:1.5px var(--pitch); text-stroke:1.5px var(--pitch);
+    position:absolute; top:16px; right:20px; opacity:.9;
+  }
+  .step h3{font-size:18px; margin-bottom:10px; padding-right:40px;}
+  .step p{color:var(--ink-soft); font-size:14px;}
+
+  /* Directory */
+  .dir-controls{
+    display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:28px;
+  }
+  .dir-controls input[type=text]{
+    flex:1; min-width:220px; padding:12px 14px; border:1.5px solid var(--line);
+    border-radius:2px; font-family:'Work Sans'; font-size:14px; background:var(--white);
+  }
+  .chip{
+    padding:9px 16px; border:1.5px solid var(--line); border-radius:20px;
+    background:var(--white); font-size:13px; font-weight:600; color:var(--ink-soft);
+  }
+  .chip.active{background:var(--pitch); color:var(--white); border-color:var(--pitch);}
+  .chip:hover{border-color:var(--pitch);}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;}
+  .cap-card{
+    background:var(--white); border:1px solid var(--line); border-radius:6px;
+    overflow:hidden; transition:transform .15s ease, box-shadow .15s ease;
+    display:flex; flex-direction:column;
+  }
+  .cap-card:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(14,59,44,0.12);}
+  .cap-top{
+    background:var(--pitch); color:var(--white); padding:16px 16px 34px;
+    position:relative;
+  }
+  .cap-num{
+    font-family:'Anton', sans-serif; font-size:38px; color:rgba(255,255,255,0.18);
+    position:absolute; top:8px; right:14px;
+  }
+  .cap-sport{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase;
+    letter-spacing:1px; color:var(--gold);
+  }
+  .cap-name{font-size:19px; font-weight:700; margin-top:6px; padding-right:30px;}
+  .cap-tab{
+    background:var(--gold); color:var(--pitch-deep); font-family:'JetBrains Mono', monospace;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+    padding:5px 14px; display:inline-block; border-radius:0 0 4px 0;
+    position:absolute; left:0; top:-1px;
+  }
+  .cap-body{padding:16px; flex:1; display:flex; flex-direction:column; gap:6px;}
+  .cap-row{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft);}
+  .cap-row b{color:var(--ink); font-weight:600;}
+  .cap-bio{font-size:12.5px; color:var(--ink-soft); margin-top:4px; flex:1;}
+  .empty-state{
+    border:1.5px dashed var(--line); border-radius:6px; padding:40px 24px;
+    text-align:center; color:var(--ink-soft); background:var(--white);
+  }
+  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
+
+  /* Register form */
+  .form-panel{
+    background:var(--white); border:1px solid var(--line); border-radius:6px;
+    padding:32px; max-width:680px;
+  }
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:12.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.4px;}
+  .field .req{color:var(--red);}
+  .field input, .field select, .field textarea{
+    padding:11px 12px; border:1.5px solid var(--line); border-radius:2px;
+    font-family:'Work Sans'; font-size:14px; background:var(--paper-alt);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--gold); outline-offset:1px; background:var(--white);
+  }
+  .field textarea{resize:vertical; min-height:80px;}
+  .consent{
+    display:flex; gap:10px; align-items:flex-start; background:var(--paper-alt);
+    border:1px solid var(--line); padding:14px; border-radius:4px; margin-bottom:18px; font-size:13px; color:var(--ink-soft);
+  }
+  .consent input{margin-top:3px;}
+  .helper-note{
+    font-size:12.5px; color:var(--ink-soft); background:var(--paper-alt);
+    border-left:3px solid var(--gold); padding:10px 14px; margin-bottom:22px; border-radius:2px;
+  }
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
+    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold);
+    font-size:14px; font-weight:600; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,.25);
+    transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;
+  }
+  .toast.show{transform:translateY(0); opacity:1;}
+
+  /* Managed athletes */
+  .managed-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:22px;}
+  .managed-card{
+    background:var(--pitch); color:var(--white); border-radius:6px; overflow:hidden;
+    border:1.5px solid var(--gold); position:relative;
+  }
+  .managed-ribbon{
+    position:absolute; top:14px; right:-32px; background:var(--gold); color:var(--pitch-deep);
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
+    padding:5px 40px; transform:rotate(40deg); letter-spacing:.5px;
+  }
+  .managed-body{padding:24px;}
+  .managed-body .cap-sport{color:var(--gold);}
+  .managed-body h3{font-size:20px; margin:8px 0 4px;}
+  .managed-body .role{color:#B9C9BE; font-size:13px; margin-bottom:14px;}
+  .managed-body p{font-size:13.5px; color:#D6E0D8;}
+  .managed-stats{display:flex; gap:18px; margin-top:16px; padding-top:16px; border-top:1px solid #24493A;}
+  .managed-stats div{font-family:'JetBrains Mono', monospace;}
+  .managed-stats .n{font-size:18px; font-weight:700; color:var(--gold);}
+  .managed-stats .l{font-size:10px; color:#9FB6A6; text-transform:uppercase; letter-spacing:.5px;}
+
+  /* Showcase */
+  .showcase-layout{display:grid; grid-template-columns:0.9fr 1.1fr; gap:36px;}
+  .highlight-list{display:flex; flex-direction:column; gap:14px;}
+  .highlight-item{
+    background:var(--white); border:1px solid var(--line); border-radius:5px;
+    padding:16px; display:flex; gap:14px; align-items:flex-start;
+  }
+  .highlight-thumb{
+    width:60px; height:60px; flex-shrink:0; border-radius:4px;
+    background:var(--pitch); display:flex; align-items:center; justify-content:center;
+    color:var(--gold); font-family:'Anton'; font-size:20px;
+  }
+  .highlight-meta{flex:1;}
+  .highlight-meta .title{font-weight:700; font-size:14.5px; margin-bottom:2px;}
+  .highlight-meta .sub{font-size:12px; color:var(--ink-soft); margin-bottom:6px;}
+  .highlight-meta a{font-size:12.5px; color:var(--gold-deep); font-weight:600; text-decoration:none;}
+  .highlight-meta a:hover{text-decoration:underline;}
+
+  /* Sponsors */
+  .sponsor-panel{
+    background:var(--pitch); color:var(--white); border-radius:8px;
+    padding:44px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:36px; align-items:center;
+  }
+  .sponsor-panel h2{color:var(--white);}
+  .sponsor-panel p{color:#D6E0D8; font-size:15px; margin-bottom:22px;}
+  .sponsor-list{list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:24px;}
+  .sponsor-list li{font-size:14px; color:#E4ECE5; padding-left:22px; position:relative;}
+  .sponsor-list li::before{content:"✓"; position:absolute; left:0; color:var(--gold); font-weight:700;}
+  .lead-form{background:var(--pitch-deep); border-radius:6px; padding:24px; border:1px solid #24493A;}
+  .lead-form input, .lead-form select{
+    width:100%; margin-bottom:12px; padding:11px 12px; border-radius:2px; border:1px solid #2E5744;
+    background:#0C3226; color:var(--white); font-size:13.5px;
+  }
+  .lead-form label{font-size:11.5px; color:#9FB6A6; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
+
+  /* Footer */
+  footer{background:var(--pitch-deep); color:#B9C9BE; padding:48px 0 24px;}
+  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; margin-bottom:32px;}
+  .footer-grid h4{color:var(--white); font-size:13px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:14px;}
+  .footer-grid ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
+  .footer-grid a{color:#9FB6A6; font-size:13px; text-decoration:none;}
+  .footer-grid a:hover{color:var(--gold);}
+  .footer-note{font-size:12.5px; color:#7E9587; max-width:420px; line-height:1.6;}
+  .footer-bottom{
+    border-top:1px solid #1D3F31; padding-top:20px; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; font-size:12px; color:#7E9587;
+  }
+
+  @media (max-width:860px){
+    nav.links{display:none;}
+    .burger{display:block;}
+    .hero-grid, .showcase-layout, .sponsor-panel, .footer-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="mark">A</div>
+      <span class="display" style="font-size:20px;">Apex Talent</span>
+    </div>
+    <nav class="links">
+      <a href="#how">How it works</a>
+      <a href="#directory">Directory</a>
+      <a href="#showcase">Showcase</a>
+      <a href="#managed">Managed athletes</a>
+      <a href="#sponsors">Sponsors &amp; scouts</a>
+    </nav>
+    <a href="#register" class="nav-cta">Register free</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div style="padding-bottom:56px;">
+      <div class="eyebrow"><span class="dot"></span> Kenya · Football · Rugby · Basketball · E-football</div>
+      <h1 class="display">Talent isn't<br>the problem.<br><span>Visibility</span> is.</h1>
+      <p class="lead">Apex Talent Management is the verified registry and showcase for Kenyan athletes at every level — from county leagues to the Premier League. Register free, build a scoutable record, and get discovered by clubs, sponsors, and agents.</p>
+      <div class="hero-actions">
+        <a href="#register" class="btn btn-gold">Register as a player</a>
+        <a href="#sponsors" class="btn btn-outline">I'm a scout or sponsor</a>
+      </div>
+    </div>
+    <div>
+      <div class="scoreboard">
+        <div class="scoreboard-head">
+          <span>Live registry</span>
+          <span id="scoreboard-updated">—</span>
+        </div>
+        <div class="score-grid">
+          <div class="score-cell">
+            <div class="score-num" id="stat-players">0</div>
+            <div class="score-label">Players registered</div>
+          </div>
+          <div class="score-cell">
+            <div class="score-num" id="stat-highlights">0</div>
+            <div class="score-label">Highlights logged</div>
+          </div>
+          <div class="score-cell">
+            <div class="score-num">4</div>
+            <div class="score-label">Sports covered</div>
+          </div>
+          <div class="score-cell">
+            <div class="score-num" id="stat-counties">0</div>
+            <div class="score-label">Counties reached</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-eyebrow">The process</span>
+      <h2 class="display">Three steps from unseen to scouted</h2>
+      <p>The same path for every athlete, whether you play for a top-flight club or a county-division side.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Register your profile</h3>
+        <p>Add your bio-data, sport, club or division, and playing history. Free, permanently, for every athlete.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Get verified &amp; add highlights</h3>
+        <p>Upload or link match highlights and let your club co-sign your record. Verified profiles get priority in scout searches.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Get scouted, sponsored, signed</h3>
+        <p>Clubs and sponsors search the registry directly. Standout athletes may be offered a Managed Athlete package.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="directory" class="section-alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-eyebrow">Player registry</span>
+      <h2 class="display">The open directory</h2>
+      <p>Every registered athlete, searchable by sport and name. This is a live prototype — profiles you add below appear here immediately.</p>
+    </div>
+    <div class="dir-controls">
+      <input type="text" id="dir-search" placeholder="Search by name, club, or county…" />
+      <button class="chip active" data-sport="All">All sports</button>
+      <button class="chip" data-sport="Football">Football</button>
+      <button class="chip" data-sport="Rugby">Rugby</button>
+      <button class="chip" data-sport="Basketball">Basketball</button>
+      <button class="chip" data-sport="E-Football">E-Football</button>
+    </div>
+    <div class="card-grid" id="directory-grid"></div>
+  </div>
+</section>
+
+<section id="register">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-eyebrow">Join the registry</span>
+      <h2 class="display">Register your profile</h2>
+      <p>Takes under two minutes. Your profile is free and visible to scouts, clubs, and sponsors using this platform.</p>
+    </div>
+    <div class="form-panel">
+      <div class="helper-note">Your profile is stored in the live registry and appears in the public directory below. Contact details are collected for verified scouts and are not shown publicly.</div>
+      <form id="register-form">
+        <div class="form-grid">
+          <div class="field">
+            <label>Full name <span class="req">*</span></label>
+            <input type="text" id="f-name" required maxlength="60" />
+          </div>
+          <div class="field">
+            <label>Date of birth <span class="req">*</span></label>
+            <input type="date" id="f-dob" required />
+          </div>
+          <div class="field">
+            <label>Sport <span class="req">*</span></label>
+            <select id="f-sport" required>
+              <option value="">Select…</option>
+              <option>Football</option>
+              <option>Rugby</option>
+              <option>Basketball</option>
+              <option>E-Football</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Position / discipline</label>
+            <input type="text" id="f-position" maxlength="40" placeholder="e.g. Winger, Prop, Point Guard" />
+          </div>
+          <div class="field">
+            <label>Club / school / academy</label>
+            <input type="text" id="f-club" maxlength="60" />
+          </div>
+          <div class="field">
+            <label>County</label>
+            <input type="text" id="f-county" maxlength="40" placeholder="e.g. Nairobi" />
+          </div>
+          <div class="field">
+            <label>Division / league level</label>
+            <input type="text" id="f-division" maxlength="50" placeholder="e.g. County League, Division Two, KPL" />
+          </div>
+          <div class="field">
+            <label>Contact (private — for verified scouts only)</label>
+            <input type="text" id="f-contact" maxlength="60" placeholder="Email or phone" />
+          </div>
+          <div class="field full">
+            <label>Short bio</label>
+            <textarea id="f-bio" maxlength="220" placeholder="A couple of lines about your playing style and goals."></textarea>
+          </div>
+        </div>
+        <div class="consent" id="guardian-consent" style="display:none;">
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div class="field">
+              <label>Guardian full name <span class="req">*</span></label>
+              <input type="text" id="f-guardian-name" maxlength="60" />
+            </div>
+            <div class="field">
+              <label>Relationship to player</label>
+              <input type="text" id="f-guardian-rel" maxlength="30" placeholder="e.g. Parent" />
+            </div>
+            <div class="field full">
+              <label>Guardian contact</label>
+              <input type="text" id="f-guardian-contact" maxlength="60" placeholder="Email or phone" />
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <input type="checkbox" id="f-consent" style="margin-top:3px;" />
+            <label for="f-consent">I confirm I am the parent or guardian of this player (under 18) and consent to this profile being registered and, if highlights are added later, being made visible to verified scouts and sponsors.</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold">Submit registration</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="showcase" class="section-alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-eyebrow">Video showcase</span>
+      <h2 class="display">Highlight-worthy moments</h2>
+      <p>Link a highlight clip to a registered profile. In the full platform, video is uploaded directly and moderated before publishing — this prototype accepts a link and description.</p>
+    </div>
+    <div class="showcase-layout">
+      <div>
+        <div class="form-panel" style="padding:24px;">
+          <form id="highlight-form">
+            <div class="field">
+              <label>Player <span class="req">*</span></label>
+              <select id="h-player" required>
+                <option value="">Select a registered player…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Highlight title <span class="req">*</span></label>
+              <input type="text" id="h-title" maxlength="60" required placeholder="e.g. Match-winning try vs Kabras" />
+            </div>
+            <div class="field">
+              <label>Video link</label>
+              <input type="text" id="h-link" maxlength="200" placeholder="YouTube / Vimeo / club upload link" />
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea id="h-desc" maxlength="160" placeholder="What happens in the clip and when it was recorded."></textarea>
+            </div>
+            <button type="submit" class="btn btn-dark">Add to showcase</button>
+          </form>
+        </div>
+      </div>
+      <div>
+        <div class="highlight-list" id="highlight-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="managed">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-eyebrow">Premium representation</span>
+      <h2 class="display">Managed athletes</h2>
+      <p>A small, selectively signed roster receiving full-service representation — contract negotiation, transfer facilitation, sponsorship brokerage, and career management. Illustrative profiles below.</p>
+    </div>
+    <div class="managed-grid" id="managed-grid"></div>
+  </div>
+</section>
+
+<section id="sponsors" class="section-alt">
+  <div class="wrap">
+    <div class="sponsor-panel">
+      <div>
+        <span class="sec-eyebrow" style="color:var(--gold);">For clubs, sponsors &amp; agents</span>
+        <h2 class="display">Scout the verified pool</h2>
+        <p>Search a growing, verified database of Kenyan athletes across every division — with video evidence attached, not just word of mouth.</p>
+        <ul class="sponsor-list">
+          <li>Filter by sport, position, county, and division</li>
+          <li>Video-backed profiles reduce scouting risk</li>
+          <li>Direct introductions routed through Apex Talent Management</li>
+          <li>Data partnerships available for clubs &amp; federations</li>
+        </ul>
+      </div>
+      <div class="lead-form">
+        <form id="lead-form">
+          <div class="field" style="margin-bottom:12px;">
+            <label>Organisation name</label>
+            <input type="text" id="l-org" maxlength="60" />
+          </div>
+          <div class="field" style="margin-bottom:12px;">
+            <label>I am a…</label>
+            <select id="l-type">
+              <option value="club">Club</option>
+              <option value="sponsor">Sponsor / brand</option>
+              <option value="agent">Agent</option>
+              <option value="federation">Federation</option>
+              <option value="media">Media</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label>Contact email</label>
+            <input type="text" id="l-email" maxlength="60" />
+          </div>
+          <button type="submit" class="btn btn-gold" style="width:100%;">Request access</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4 style="color:var(--gold);">Apex Talent Management</h4>
+        <p class="footer-note">Kenya's unified sports talent, data, and representation platform — from grassroots county leagues to the Premier League, and every division in between.</p>
+      </div>
+      <div>
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#directory">Player directory</a></li>
+          <li><a href="#register">Register</a></li>
+          <li><a href="#showcase">Video showcase</a></li>
+          <li><a href="#managed">Managed athletes</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>For organisations</h4>
+        <ul>
+          <li><a href="#sponsors">Sponsors &amp; scouts</a></li>
+          <li><a href="#sponsors">Club partnerships</a></li>
+          <li><a href="#sponsors">Federation data</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Compliance</h4>
+        <ul>
+          <li><a href="#">Privacy &amp; data policy</a></li>
+          <li><a href="#">Child safeguarding policy</a></li>
+          <li><a href="#">Terms of use</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Apex Talent Management Ltd. Nairobi, Kenya.</span>
+      <span>Prototype build — data protection registration and Sports Registrar alignment in progress.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const SPORT_ICON = { "Football":"⚽", "Rugby":"🏉", "Basketball":"🏀", "E-Football":"🎮" };
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 3200);
+  }
+
+  function calcAge(dobStr){
+    if(!dobStr) return null;
+    const dob = new Date(dobStr);
+    const diff = Date.now() - dob.getTime();
+    return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
+  }
+
+  async function api(path, options){
+    const res = await fetch('/api' + path, Object.assign({
+      headers: { 'Content-Type': 'application/json' },
+    }, options));
+    let body = null;
+    try{ body = await res.json(); }catch(e){ /* no body */ }
+    if(!res.ok){
+      const msg = (body && body.error) ? body.error : `Request failed (${res.status})`;
+      throw new Error(msg);
+    }
+    return body;
+  }
+
+  // ---------- Managed athletes (static illustrative content) ----------
+  const MANAGED = [
+    { name:"Brian Otieno", sport:"Football", role:"Winger — Signed 2025", county:"Kisumu",
+      bio:"Broke into the Premier League from a Division One academy pathway; now fielding interest from two regional clubs.",
+      stat1:["12","Assists"], stat2:["3","Sponsor deals"] },
+    { name:"Naliaka Wekesa", sport:"Rugby", role:"Fly-half — Signed 2024", county:"Bungoma",
+      bio:"Kenya Cup standout recruited from a county sevens circuit; represented in national training camp selection.",
+      stat1:["240","Points scored"], stat2:["1","Int'l trial"] },
+    { name:"Kevin Mutiso", sport:"Basketball", role:"Point Guard — Signed 2025", county:"Machakos",
+      bio:"Discovered through a university league highlight reel; now in active transfer discussions with a regional club.",
+      stat1:["18.4","Pts / game"], stat2:["2","Club offers"] },
+  ];
+
+  function renderManaged(){
+    const grid = document.getElementById('managed-grid');
+    grid.innerHTML = MANAGED.map(m => `
+      <div class="managed-card">
+        <div class="managed-ribbon">Signed</div>
+        <div class="managed-body">
+          <div class="cap-sport">${SPORT_ICON[m.sport]} ${m.sport} · ${m.county}</div>
+          <h3>${m.name}</h3>
+          <div class="role">${m.role}</div>
+          <p>${m.bio}</p>
+          <div class="managed-stats">
+            <div><div class="n">${m.stat1[0]}</div><div class="l">${m.stat1[1]}</div></div>
+            <div><div class="n">${m.stat2[0]}</div><div class="l">${m.stat2[1]}</div></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ---------- Directory ----------
+  let allPlayers = [];
+  let activeSport = 'All';
+  let searchTerm = '';
+  let searchDebounce = null;
+
+  function capCard(p){
+    const initials = (p.full_name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const verLabel = p.verification_status === 'federation_verified' ? 'Federation verified'
+      : p.verification_status === 'club_verified' ? 'Club verified' : 'Verified: pending';
+    return `
+      <div class="cap-card">
+        <div class="cap-top">
+          <div class="cap-tab">${verLabel}</div>
+          <div class="cap-num">${initials}</div>
+          <div class="cap-sport">${SPORT_ICON[p.sport]||''} ${p.sport}</div>
+          <div class="cap-name">${p.full_name}</div>
+        </div>
+        <div class="cap-body">
+          <div class="cap-row"><span>Position</span><b>${p.primary_position || '—'}</b></div>
+          <div class="cap-row"><span>Club</span><b>${p.club || '—'}</b></div>
+          <div class="cap-row"><span>County</span><b>${p.county || '—'}</b></div>
+          <div class="cap-row"><span>Division</span><b>${p.division || '—'}</b></div>
+          ${p.bio ? `<div class="cap-bio">${p.bio}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDirectory(){
+    const grid = document.getElementById('directory-grid');
+    if(allPlayers.length === 0){
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <b>No players match yet.</b>
+        Be the first to register for this sport — or adjust your search above.
+      </div>`;
+      return;
+    }
+    grid.innerHTML = allPlayers.map(capCard).join('');
+  }
+
+  async function refreshPlayers(){
+    try{
+      const params = new URLSearchParams();
+      if(activeSport !== 'All') params.set('sport', activeSport);
+      if(searchTerm.trim()) params.set('q', searchTerm.trim());
+      const data = await api('/players?' + params.toString());
+      allPlayers = data.players || [];
+      renderDirectory();
+      populateHighlightPlayerSelect();
+    }catch(err){
+      document.getElementById('directory-grid').innerHTML =
+        `<div class="empty-state" style="grid-column:1/-1;"><b>Couldn't load the directory.</b> ${err.message}</div>`;
+    }
+  }
+
+  async function refreshScoreboard(){
+    try{
+      const data = await api('/stats/summary');
+      document.getElementById('stat-players').textContent = data.players;
+      document.getElementById('stat-highlights').textContent = data.highlights;
+      document.getElementById('stat-counties').textContent = data.counties;
+      document.getElementById('scoreboard-updated').textContent = 'Updated just now';
+    }catch(err){
+      document.getElementById('scoreboard-updated').textContent = 'Unavailable';
+    }
+  }
+
+  function populateHighlightPlayerSelect(){
+    const sel = document.getElementById('h-player');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select a registered player…</option>' +
+      allPlayers.map(p => `<option value="${p.id}">${p.full_name} — ${p.sport}</option>`).join('');
+    if(current) sel.value = current;
+  }
+
+  // ---------- Highlights ----------
+  async function refreshHighlights(){
+    const list = document.getElementById('highlight-list');
+    try{
+      const data = await api('/highlights');
+      const items = data.highlights || [];
+      if(items.length === 0){
+        list.innerHTML = `<div class="empty-state">
+          <b>No highlights logged yet.</b>
+          Register a player, then add their first highlight-worthy moment.
+        </div>`;
+        return;
+      }
+      list.innerHTML = items.map(h => `
+        <div class="highlight-item">
+          <div class="highlight-thumb">▶</div>
+          <div class="highlight-meta">
+            <div class="title">${h.title}</div>
+            <div class="sub">${h.player_name || 'Unknown player'} ${h.description ? '· ' + h.description : ''}
+              ${h.moderation_status === 'pending' ? ' · <span style="color:var(--gold-deep);">pending review</span>' : ''}</div>
+            ${h.video_url ? `<a href="${h.video_url}" target="_blank" rel="noopener noreferrer">View clip →</a>` : '<span style="font-size:12px;color:var(--ink-soft);">No link provided</span>'}
+          </div>
+        </div>
+      `).join('');
+    }catch(err){
+      list.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${err.message}</div>`;
+    }
+  }
+
+  // ---------- Event wiring ----------
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeSport = chip.dataset.sport;
+      refreshPlayers();
+    });
+  });
+
+  document.getElementById('dir-search').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(refreshPlayers, 300);
+  });
+
+  document.getElementById('f-dob').addEventListener('change', (e) => {
+    const box = document.getElementById('guardian-consent');
+    const age = calcAge(e.target.value);
+    box.style.display = (age !== null && age < 18) ? 'block' : 'none';
+  });
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const dob = document.getElementById('f-dob').value;
+    const age = calcAge(dob);
+    const isMinor = age !== null && age < 18;
+
+    if(isMinor && !document.getElementById('f-guardian-name').value.trim()){
+      showToast('Guardian full name is required to register a player under 18.');
+      return;
+    }
+    if(isMinor && !document.getElementById('f-consent').checked){
+      showToast('Guardian consent is required to register a player under 18.');
+      return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    const payload = {
+      fullName: document.getElementById('f-name').value.trim(),
+      dateOfBirth: dob,
+      sport: document.getElementById('f-sport').value,
+      position: document.getElementById('f-position').value.trim(),
+      club: document.getElementById('f-club').value.trim(),
+      county: document.getElementById('f-county').value.trim(),
+      division: document.getElementById('f-division').value.trim(),
+      bio: document.getElementById('f-bio').value.trim(),
+    };
+    if(isMinor){
+      payload.guardianName = document.getElementById('f-guardian-name').value.trim();
+      payload.guardianRelationship = document.getElementById('f-guardian-rel').value.trim();
+      payload.guardianContact = document.getElementById('f-guardian-contact').value.trim();
+      payload.guardianConsent = true;
+    }
+
+    try{
+      const data = await api('/players', { method: 'POST', body: JSON.stringify(payload) });
+      e.target.reset();
+      document.getElementById('guardian-consent').style.display = 'none';
+      showToast(`Registered — welcome to the directory, ${data.player.full_name.split(' ')[0]}.`);
+      await refreshPlayers();
+      await refreshScoreboard();
+      document.getElementById('directory').scrollIntoView({behavior:'smooth'});
+    }catch(err){
+      showToast(err.message || 'Something went wrong saving your profile.');
+    }finally{
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit registration';
+    }
+  });
+
+  document.getElementById('highlight-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const playerId = document.getElementById('h-player').value;
+    if(!playerId){ showToast('Select a registered player first.'); return; }
+
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Adding…';
+
+    const payload = {
+      playerId,
+      title: document.getElementById('h-title').value.trim(),
+      videoUrl: document.getElementById('h-link').value.trim(),
+      description: document.getElementById('h-desc').value.trim(),
+    };
+    try{
+      await api('/highlights', { method: 'POST', body: JSON.stringify(payload) });
+      e.target.reset();
+      showToast('Highlight added — pending review before it appears publicly.');
+      await refreshHighlights();
+      await refreshScoreboard();
+    }catch(err){
+      showToast(err.message || 'Could not save that highlight.');
+    }finally{
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Add to showcase';
+    }
+  });
+
+  document.getElementById('lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      organizationName: document.getElementById('l-org').value.trim(),
+      type: document.getElementById('l-type').value,
+      email: document.getElementById('l-email').value.trim(),
+    };
+    try{
+      await api('/leads', { method: 'POST', body: JSON.stringify(payload) });
+      e.target.reset();
+      showToast('Request received — the Apex team will follow up.');
+    }catch(err){
+      showToast(err.message || 'Could not submit your request.');
+    }
+  });
+
+  document.getElementById('scoreboard-updated').textContent = 'Loading…';
+
+  // ---------- Init ----------
+  renderManaged();
+  refreshPlayers();
+  refreshHighlights();
+  refreshScoreboard();
+})();
+</script>
+
+</body>
+</html>
