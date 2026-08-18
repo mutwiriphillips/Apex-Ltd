@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apex Talent Management — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch:#0E3B2C; --pitch-deep:#092A1F; --paper:#EEF1EA; --paper-alt:#F7F8F4;
+    --ink:#11201A; --ink-soft:#4C5A52; --gold:#C8962B; --gold-deep:#A87A1E;
+    --red:#A32638; --green:#1E6E4C; --line:#D6DBCE; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.5;}
+  .display{font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.5px;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  header{background:var(--pitch); border-bottom:3px solid var(--gold); padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;}
+  header .brand{display:flex; align-items:center; gap:10px; color:var(--white); font-size:19px;}
+  header .brand .mark{width:30px; height:30px; border-radius:50%; background:var(--gold);
+    color:var(--pitch-deep); display:flex; align-items:center; justify-content:center;
+    font-family:'Anton'; font-size:16px;}
+  header .tag{color:var(--gold); font-family:'JetBrains Mono'; font-size:11px; letter-spacing:1px; text-transform:uppercase;}
+  #logout-btn{background:transparent; border:1.5px solid #4E6B5C; color:var(--white); padding:8px 16px;
+    border-radius:2px; font-size:13px; cursor:pointer; display:none;}
+  #logout-btn:hover{border-color:var(--gold); color:var(--gold);}
+
+  .wrap{max-width:1000px; margin:0 auto; padding:32px 24px;}
+
+  /* Login */
+  #login-view{max-width:380px; margin:80px auto;}
+  #login-view h1{font-size:24px; margin-bottom:6px;}
+  #login-view p{color:var(--ink-soft); font-size:14px; margin-bottom:24px;}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .field label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+  .field input{padding:11px 12px; border:1.5px solid var(--line); border-radius:2px; font-size:14px; background:var(--white);}
+  .field input:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; padding:12px 22px; font-weight:700;
+    font-size:14px; border-radius:2px; border:none; cursor:pointer;}
+  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
+  .btn-gold:hover{background:#DBA939;}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-outline:hover{border-color:var(--pitch);}
+  .btn-reject{background:transparent; border:1.5px solid var(--red); color:var(--red);}
+  .btn-reject:hover{background:var(--red); color:var(--white);}
+  .error-msg{background:#FBEAEA; border:1px solid var(--red); color:var(--red); padding:10px 14px;
+    border-radius:2px; font-size:13px; margin-bottom:16px; display:none;}
+
+  /* Dashboard */
+  #dashboard-view{display:none;}
+  .tabs{display:flex; gap:8px; margin-bottom:24px; border-bottom:2px solid var(--line);}
+  .tab{padding:10px 18px; font-weight:700; font-size:13.5px; color:var(--ink-soft); cursor:pointer;
+    border-bottom:3px solid transparent; margin-bottom:-2px;}
+  .tab.active{color:var(--pitch); border-bottom-color:var(--gold);}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .card{background:var(--white); border:1px solid var(--line); border-radius:5px; padding:18px;
+    margin-bottom:14px; display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;}
+  .card-main{flex:1; min-width:220px;}
+  .card-title{font-weight:700; font-size:15px; margin-bottom:4px;}
+  .card-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:6px;}
+  .card-sub a{color:var(--gold-deep); text-decoration:none;}
+  .minor-badge{display:inline-block; background:#FBEAEA; color:var(--red); font-size:10.5px;
+    font-weight:700; padding:2px 8px; border-radius:10px; margin-left:8px; text-transform:uppercase;}
+  .actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .empty-state{border:1.5px dashed var(--line); border-radius:6px; padding:36px 24px; text-align:center;
+    color:var(--ink-soft); background:var(--white);}
+  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
+  select.mini{padding:9px 10px; border:1.5px solid var(--line); border-radius:2px; font-size:13px;}
+  .toast{position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
+    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold); font-size:14px; font-weight:600;
+    z-index:999; transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;}
+  .toast.show{transform:translateY(0); opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><div class="mark">A</div><span class="display" style="font-size:18px;">Apex Talent</span></div>
+  <span class="tag" id="header-tag">Admin</span>
+  <button id="logout-btn">Log out</button>
+</header>
+
+<div class="wrap">
+
+  <div id="login-view">
+    <h1 class="display">Staff sign in</h1>
+    <p>Moderation tools are restricted to staff_admin / superadmin accounts, created via <code>npm run create-admin</code>.</p>
+    <div class="error-msg" id="login-error"></div>
+    <form id="login-form">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;">Sign in</button>
+    </form>
+  </div>
+
+  <div id="dashboard-view">
+    <div class="tabs">
+      <div class="tab active" data-panel="highlights">Pending highlights</div>
+      <div class="tab" data-panel="players">Unverified players</div>
+      <div class="tab" data-panel="leads">Sponsor &amp; scout leads</div>
+    </div>
+
+    <div class="panel active" id="panel-highlights"></div>
+    <div class="panel" id="panel-players"></div>
+    <div class="panel" id="panel-leads"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const TOKEN_KEY = 'apex_admin_token';
+
+  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+  function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+  function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 3000);
+  }
+
+  async function api(path, options){
+    const token = getToken();
+    const res = await fetch('/api' + path, Object.assign({
+      headers: Object.assign(
+        { 'Content-Type': 'application/json' },
+        token ? { 'Authorization': 'Bearer ' + token } : {}
+      ),
+    }, options));
+    let body = null;
+    try{ body = await res.json(); }catch(e){}
+    if(res.status === 401){
+      clearToken();
+      showLogin();
+      throw new Error((body && body.error) || 'Session expired. Please sign in again.');
+    }
+    if(!res.ok){
+      throw new Error((body && body.error) || `Request failed (${res.status})`);
+    }
+    return body;
+  }
+
+  function showLogin(){
+    document.getElementById('login-view').style.display = 'block';
+    document.getElementById('dashboard-view').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+  }
+  function showDashboard(){
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'block';
+    document.getElementById('logout-btn').style.display = 'inline-flex';
+    loadHighlights();
+    loadPlayers();
+    loadLeads();
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errBox = document.getElementById('login-error');
+    errBox.style.display = 'none';
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    try{
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const body = await res.json();
+      if(!res.ok) throw new Error(body.error || 'Login failed.');
+      if(!['staff_admin','superadmin'].includes(body.user.role)){
+        throw new Error('This account does not have admin access.');
+      }
+      setToken(body.token);
+      showDashboard();
+    }catch(err){
+      errBox.textContent = err.message;
+      errBox.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    clearToken();
+    showLogin();
+  });
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ---------- Highlights ----------
+  async function loadHighlights(){
+    const panel = document.getElementById('panel-highlights');
+    try{
+      const data = await api('/admin/highlights/pending');
+      const items = data.highlights || [];
+      if(items.length === 0){
+        panel.innerHTML = `<div class="empty-state"><b>Nothing pending.</b> New highlight submissions will show up here for review.</div>`;
+        return;
+      }
+      panel.innerHTML = items.map(h => `
+        <div class="card" data-id="${h.id}">
+          <div class="card-main">
+            <div class="card-title">${h.title} ${h.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
+            <div class="card-sub">${h.player_name} · submitted ${new Date(h.created_at).toLocaleDateString()}</div>
+            ${h.description ? `<div class="card-sub">${h.description}</div>` : ''}
+            ${h.video_url ? `<div class="card-sub"><a href="${h.video_url}" target="_blank" rel="noopener noreferrer">${h.video_url}</a></div>` : ''}
+          </div>
+          <div class="actions">
+            <button class="btn btn-gold" data-action="approve">Approve</button>
+            <button class="btn btn-reject" data-action="reject">Reject</button>
+          </div>
+        </div>
+      `).join('');
+      panel.querySelectorAll('.card').forEach(card => {
+        const id = card.dataset.id;
+        card.querySelector('[data-action=approve]').addEventListener('click', () => moderateHighlight(id, 'approve'));
+        card.querySelector('[data-action=reject]').addEventListener('click', () => moderateHighlight(id, 'reject'));
+      });
+    }catch(err){
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${err.message}</div>`;
+    }
+  }
+
+  async function moderateHighlight(id, action){
+    try{
+      await api(`/admin/highlights/${id}/${action}`, { method: 'POST' });
+      showToast(action === 'approve' ? 'Highlight approved.' : 'Highlight rejected.');
+      loadHighlights();
+    }catch(err){
+      showToast(err.message);
+    }
+  }
+
+  // ---------- Players ----------
+  async function loadPlayers(){
+    const panel = document.getElementById('panel-players');
+    try{
+      const data = await api('/admin/players/unverified');
+      const items = data.players || [];
+      if(items.length === 0){
+        panel.innerHTML = `<div class="empty-state"><b>All caught up.</b> No unverified players waiting.</div>`;
+        return;
+      }
+      panel.innerHTML = items.map(p => `
+        <div class="card" data-id="${p.id}">
+          <div class="card-main">
+            <div class="card-title">${p.full_name} ${p.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
+            <div class="card-sub">${p.sport} · ${p.county || 'County not set'} · registered ${new Date(p.created_at).toLocaleDateString()}</div>
+          </div>
+          <div class="actions">
+            <select class="mini" data-role="entity-type">
+              <option value="club">Club verify</option>
+              <option value="federation">Federation verify</option>
+            </select>
+            <button class="btn btn-gold" data-action="verify">Verify</button>
+          </div>
+        </div>
+      `).join('');
+      panel.querySelectorAll('.card').forEach(card => {
+        const id = card.dataset.id;
+        card.querySelector('[data-action=verify]').addEventListener('click', () => {
+          const entityType = card.querySelector('[data-role=entity-type]').value;
+          verifyPlayer(id, entityType);
+        });
+      });
+    }catch(err){
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load players.</b> ${err.message}</div>`;
+    }
+  }
+
+  async function verifyPlayer(id, entityType){
+    try{
+      await api(`/admin/players/${id}/verify`, {
+        method: 'POST',
+        body: JSON.stringify({ entityType }),
+      });
+      showToast('Player verified.');
+      loadPlayers();
+    }catch(err){
+      showToast(err.message);
+    }
+  }
+
+  // ---------- Leads ----------
+  async function loadLeads(){
+    const panel = document.getElementById('panel-leads');
+    try{
+      const data = await api('/admin/leads');
+      const items = data.leads || [];
+      if(items.length === 0){
+        panel.innerHTML = `<div class="empty-state"><b>No leads yet.</b> Sponsor/scout portal submissions will appear here.</div>`;
+        return;
+      }
+      panel.innerHTML = items.map(l => `
+        <div class="card">
+          <div class="card-main">
+            <div class="card-title">${l.organization_name} <span class="mono" style="font-size:11px; color:var(--ink-soft);">· ${l.lead_type}</span></div>
+            <div class="card-sub">${l.contact_email} · ${new Date(l.created_at).toLocaleDateString()} · status: ${l.status}</div>
+            ${l.message ? `<div class="card-sub">${l.message}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }catch(err){
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load leads.</b> ${err.message}</div>`;
+    }
+  }
+
+  // ---------- Init ----------
+  if(getToken()){
+    showDashboard();
+  }else{
+    showLogin();
+  }
+})();
+</script>
+
+</body>
+</html>

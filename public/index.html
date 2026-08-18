@@ -80,10 +80,18 @@
   .hero{
     background:linear-gradient(180deg, var(--pitch) 0%, var(--pitch) 55%, var(--paper) 55%);
     padding:64px 0 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-art{
+    position:absolute; top:0; left:0; width:100%;
+    height:clamp(340px, 45vw, 480px);
+    pointer-events:none; z-index:0;
   }
   .hero-grid{
     display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px;
     align-items:start;
+    position:relative; z-index:1;
   }
   .eyebrow{
     display:inline-flex; align-items:center; gap:8px;
@@ -261,6 +269,7 @@
   .managed-body{padding:24px;}
   .managed-body .cap-sport{color:var(--gold);}
   .managed-body h3{font-size:20px; margin:8px 0 4px;}
+  .silhouette{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:2px solid var(--gold);}
   .managed-body .role{color:#B9C9BE; font-size:13px; margin-bottom:14px;}
   .managed-body p{font-size:13.5px; color:#D6E0D8;}
   .managed-stats{display:flex; gap:18px; margin-top:16px; padding-top:16px; border-top:1px solid #24493A;}
@@ -339,12 +348,43 @@
       <a href="#showcase">Showcase</a>
       <a href="#managed">Managed athletes</a>
       <a href="#sponsors">Sponsors &amp; scouts</a>
+      <a href="/account.html">My account</a>
     </nav>
     <a href="#register" class="nav-cta">Register free</a>
   </div>
 </header>
 
 <section class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="floodlight" cx="50%" cy="0%" r="75%">
+        <stop offset="0%" stop-color="#C8962B" stop-opacity="0.28"/>
+        <stop offset="100%" stop-color="#C8962B" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="140" cy="10" r="260" fill="url(#floodlight)"/>
+    <circle cx="1060" cy="10" r="260" fill="url(#floodlight)"/>
+    <g stroke="#1B4C3A" stroke-width="1" opacity="0.55">
+      <line x1="90" y1="0" x2="10" y2="140"/>
+      <line x1="130" y1="0" x2="70" y2="150"/>
+      <line x1="170" y1="0" x2="140" y2="150"/>
+      <line x1="1110" y1="0" x2="1190" y2="140"/>
+      <line x1="1070" y1="0" x2="1130" y2="150"/>
+      <line x1="1030" y1="0" x2="1060" y2="150"/>
+    </g>
+    <g fill="#0A2A1E" opacity="0.9">
+      <rect x="0" y="430" width="1200" height="70"/>
+      <path d="M0,430 Q60,405 120,430 T240,430 T360,430 T480,430 T600,430 T720,430 T840,430 T960,430 T1080,430 T1200,430 V500 H0 Z"/>
+    </g>
+    <g fill="#123A2B" opacity="0.7">
+      <circle cx="60" cy="418" r="9"/><circle cx="90" cy="422" r="7"/><circle cx="118" cy="416" r="8"/>
+      <circle cx="150" cy="420" r="9"/><circle cx="182" cy="415" r="7"/><circle cx="214" cy="421" r="8"/>
+      <circle cx="246" cy="417" r="9"/><circle cx="278" cy="422" r="7"/><circle cx="310" cy="416" r="8"/>
+      <circle cx="900" cy="417" r="8"/><circle cx="932" cy="421" r="9"/><circle cx="964" cy="416" r="7"/>
+      <circle cx="996" cy="420" r="8"/><circle cx="1028" cy="415" r="9"/><circle cx="1060" cy="421" r="7"/>
+      <circle cx="1092" cy="417" r="8"/><circle cx="1124" cy="422" r="9"/><circle cx="1156" cy="416" r="7"/>
+    </g>
+  </svg>
   <div class="wrap hero-grid">
     <div style="padding-bottom:56px;">
       <div class="eyebrow"><span class="dot"></span> Kenya · Football · Rugby · Basketball · E-football</div>
@@ -378,6 +418,7 @@
             <div class="score-num" id="stat-counties">0</div>
             <div class="score-label">Counties reached</div>
           </div>
+
         </div>
       </div>
     </div>
@@ -438,7 +479,7 @@
       <p>Takes under two minutes. Your profile is free and visible to scouts, clubs, and sponsors using this platform.</p>
     </div>
     <div class="form-panel">
-      <div class="helper-note">Your profile is stored in the live registry and appears in the public directory below. Contact details are collected for verified scouts and are not shown publicly.</div>
+      <div class="helper-note">Your profile is stored in the live registry and appears in the public directory below. Contact details are collected for verified scouts and are not shown publicly. Want to edit your profile later or manage a child's profile? <a href="/account.html" style="color:var(--gold-deep); font-weight:600;">Create an account</a> first, then register from there — it links automatically.</div>
       <form id="register-form">
         <div class="form-grid">
           <div class="field">
@@ -629,9 +670,9 @@
       <div>
         <h4>Compliance</h4>
         <ul>
-          <li><a href="#">Privacy &amp; data policy</a></li>
-          <li><a href="#">Child safeguarding policy</a></li>
-          <li><a href="#">Terms of use</a></li>
+          <li><a href="/privacy.html">Privacy &amp; data policy</a></li>
+          <li><a href="/child-safety.html">Child safeguarding policy</a></li>
+          <li><a href="/terms.html">Terms of use</a></li>
         </ul>
       </div>
     </div>
@@ -688,14 +729,26 @@
       stat1:["18.4","Pts / game"], stat2:["2","Club offers"] },
   ];
 
+  const ATHLETE_SILHOUETTE = `
+    <svg viewBox="0 0 80 80" class="silhouette" aria-hidden="true">
+      <circle cx="40" cy="40" r="40" fill="#0C3226"/>
+      <circle cx="40" cy="30" r="12" fill="#C8962B" opacity="0.85"/>
+      <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="#C8962B" opacity="0.85"/>
+    </svg>`;
+
   function renderManaged(){
     const grid = document.getElementById('managed-grid');
     grid.innerHTML = MANAGED.map(m => `
       <div class="managed-card">
         <div class="managed-ribbon">Signed</div>
         <div class="managed-body">
-          <div class="cap-sport">${SPORT_ICON[m.sport]} ${m.sport} · ${m.county}</div>
-          <h3>${m.name}</h3>
+          <div style="display:flex; gap:14px; align-items:center; margin-bottom:6px;">
+            ${ATHLETE_SILHOUETTE}
+            <div>
+              <div class="cap-sport">${SPORT_ICON[m.sport]} ${m.sport} · ${m.county}</div>
+              <h3 style="margin:2px 0 0;">${m.name}</h3>
+            </div>
+          </div>
           <div class="role">${m.role}</div>
           <p>${m.bio}</p>
           <div class="managed-stats">

@@ -9,11 +9,15 @@
   "scripts": {
     "migrate": "node src/migrate.js",
     "start": "node src/migrate.js && node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "pg": "^8.12.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-rate-limit": "^7.4.0"
   }
 }

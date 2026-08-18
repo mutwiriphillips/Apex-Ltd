@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Account — Apex Talent Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch:#0E3B2C; --pitch-deep:#092A1F; --paper:#EEF1EA; --paper-alt:#F7F8F4;
+    --ink:#11201A; --ink-soft:#4C5A52; --gold:#C8962B; --gold-deep:#A87A1E;
+    --red:#A32638; --green:#1E6E4C; --line:#D6DBCE; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.5;}
+  .display{font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.5px;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  header{background:var(--pitch); border-bottom:3px solid var(--gold); padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;}
+  header .brand{display:flex; align-items:center; gap:10px; color:var(--white); font-size:19px; text-decoration:none;}
+  header .brand .mark{width:30px; height:30px; border-radius:50%; background:var(--gold);
+    color:var(--pitch-deep); display:flex; align-items:center; justify-content:center;
+    font-family:'Anton'; font-size:16px;}
+  #logout-btn{background:transparent; border:1.5px solid #4E6B5C; color:var(--white); padding:8px 16px;
+    border-radius:2px; font-size:13px; cursor:pointer; display:none;}
+  #logout-btn:hover{border-color:var(--gold); color:var(--gold);}
+  .wrap{max-width:760px; margin:0 auto; padding:32px 24px 80px;}
+
+  /* Auth panel */
+  #auth-view{max-width:400px; margin:60px auto;}
+  #auth-view h1{font-size:24px; margin-bottom:6px;}
+  #auth-view p{color:var(--ink-soft); font-size:14px; margin-bottom:22px;}
+  .auth-tabs{display:flex; gap:0; margin-bottom:22px; border:1.5px solid var(--line); border-radius:3px; overflow:hidden;}
+  .auth-tab{flex:1; text-align:center; padding:10px; font-size:13.5px; font-weight:700; cursor:pointer; background:var(--white); color:var(--ink-soft);}
+  .auth-tab.active{background:var(--pitch); color:var(--white);}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+  .field label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+  .field input, .field select, .field textarea{padding:11px 12px; border:1.5px solid var(--line); border-radius:2px; font-size:14px; background:var(--white); font-family:'Work Sans';}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .field textarea{resize:vertical; min-height:70px;}
+  .role-note{font-size:12px; color:var(--ink-soft); margin-top:-6px; margin-bottom:14px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; padding:12px 22px; font-weight:700;
+    font-size:14px; border-radius:2px; border:none; cursor:pointer;}
+  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
+  .btn-gold:hover{background:#DBA939;}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-outline:hover{border-color:var(--pitch);}
+  .btn-small{padding:8px 14px; font-size:13px;}
+  .error-msg{background:#FBEAEA; border:1px solid var(--red); color:var(--red); padding:10px 14px;
+    border-radius:2px; font-size:13px; margin-bottom:16px; display:none;}
+
+  /* Dashboard */
+  #dashboard-view{display:none;}
+  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .panel-head h2{font-size:20px;}
+  .badge{display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.4px;}
+  .badge-unverified{background:#F0EDE3; color:var(--ink-soft);}
+  .badge-club{background:#E4F0EA; color:var(--green);}
+  .badge-federation{background:#FBF1DD; color:var(--gold-deep);}
+  .card{background:var(--white); border:1px solid var(--line); border-radius:6px; padding:22px; margin-bottom:18px;}
+  .card h3{font-size:17px; margin-bottom:4px;}
+  .card .meta{font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;}
+  .card .meta span{margin-right:12px;}
+  .consent-row{display:flex; justify-content:space-between; align-items:center; background:var(--paper-alt);
+    border:1px solid var(--line); border-radius:4px; padding:12px 14px; margin-top:14px; font-size:13px;}
+  .consent-row.active{border-color:var(--green);}
+  .consent-row.inactive{border-color:var(--red);}
+  .empty-state{border:1.5px dashed var(--line); border-radius:6px; padding:32px 24px; text-align:center;
+    color:var(--ink-soft); background:var(--white);}
+  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
+  .toast{position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
+    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold); font-size:14px; font-weight:600;
+    z-index:999; transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;}
+  .toast.show{transform:translateY(0); opacity:1;}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:600px){ .form-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="/"><div class="mark">A</div><span class="display" style="font-size:18px;">Apex Talent</span></a>
+  <button id="logout-btn">Log out</button>
+</header>
+
+<div class="wrap">
+
+  <div id="auth-view">
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-mode="login">Log in</div>
+      <div class="auth-tab" data-mode="register">Create account</div>
+    </div>
+
+    <div id="login-panel">
+      <h1 class="display">Welcome back</h1>
+      <p>Log in to manage your player profile.</p>
+      <div class="error-msg" id="login-error"></div>
+      <form id="login-form">
+        <div class="field"><label>Email</label><input type="email" id="login-email" required autocomplete="username" /></div>
+        <div class="field"><label>Password</label><input type="password" id="login-password" required autocomplete="current-password" /></div>
+        <button type="submit" class="btn btn-gold" style="width:100%;">Log in</button>
+      </form>
+    </div>
+
+    <div id="register-panel" style="display:none;">
+      <h1 class="display">Create an account</h1>
+      <p>Manage your own profile, or a child's profile as their guardian.</p>
+      <div class="error-msg" id="register-error"></div>
+      <form id="register-form">
+        <div class="field">
+          <label>I am registering as a…</label>
+          <select id="reg-role">
+            <option value="player">Player (18 or older, managing my own profile)</option>
+            <option value="guardian">Guardian (managing a child's profile)</option>
+          </select>
+        </div>
+        <div class="role-note" id="role-note">You'll be able to create and edit your own player profile after signing up.</div>
+        <div class="field"><label>Email</label><input type="email" id="reg-email" required autocomplete="username" /></div>
+        <div class="field"><label>Password (min. 8 characters)</label><input type="password" id="reg-password" required minlength="8" autocomplete="new-password" /></div>
+        <button type="submit" class="btn btn-gold" style="width:100%;">Create account</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="dashboard-view">
+    <div id="dashboard-content"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const TOKEN_KEY = 'apex_account_token';
+  const SPORT_OPTIONS = ['Football','Rugby','Basketball','E-Football'];
+
+  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+  function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+  function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 3200);
+  }
+
+  async function api(path, options){
+    const token = getToken();
+    const res = await fetch('/api' + path, Object.assign({
+      headers: Object.assign(
+        { 'Content-Type': 'application/json' },
+        token ? { 'Authorization': 'Bearer ' + token } : {}
+      ),
+    }, options));
+    let body = null;
+    try{ body = await res.json(); }catch(e){}
+    if(res.status === 401){
+      clearToken();
+      showAuth();
+      throw new Error((body && body.error) || 'Session expired. Please log in again.');
+    }
+    if(!res.ok){
+      throw new Error((body && body.error) || `Request failed (${res.status})`);
+    }
+    return body;
+  }
+
+  function showAuth(){
+    document.getElementById('auth-view').style.display = 'block';
+    document.getElementById('dashboard-view').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'none';
+  }
+  function showDashboard(){
+    document.getElementById('auth-view').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'block';
+    document.getElementById('logout-btn').style.display = 'inline-flex';
+    loadDashboard();
+  }
+
+  // ---------- Auth tabs ----------
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('login-panel').style.display = tab.dataset.mode === 'login' ? 'block' : 'none';
+      document.getElementById('register-panel').style.display = tab.dataset.mode === 'register' ? 'block' : 'none';
+    });
+  });
+
+  document.getElementById('reg-role').addEventListener('change', (e) => {
+    const note = document.getElementById('role-note');
+    note.textContent = e.target.value === 'guardian'
+      ? "You'll be able to register and manage a child's profile, including consent for public visibility."
+      : "You'll be able to create and edit your own player profile after signing up.";
+  });
+
+  // ---------- Login ----------
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errBox = document.getElementById('login-error');
+    errBox.style.display = 'none';
+    try{
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const res = await fetch('/api/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const body = await res.json();
+      if(!res.ok) throw new Error(body.error || 'Login failed.');
+      if(!['player','guardian'].includes(body.user.role)){
+        throw new Error('This account type does not have a player dashboard. Use /admin.html if you are staff.');
+      }
+      setToken(body.token);
+      showDashboard();
+    }catch(err){
+      errBox.textContent = err.message;
+      errBox.style.display = 'block';
+    }
+  });
+
+  // ---------- Register ----------
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errBox = document.getElementById('register-error');
+    errBox.style.display = 'none';
+    try{
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const role = document.getElementById('reg-role').value;
+      const res = await fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role }),
+      });
+      const body = await res.json();
+      if(!res.ok) throw new Error(body.error || 'Could not create account.');
+      setToken(body.token);
+      showDashboard();
+    }catch(err){
+      errBox.textContent = err.message;
+      errBox.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    clearToken();
+    showAuth();
+  });
+
+  // ---------- Dashboard ----------
+  function verificationBadge(status){
+    if(status === 'federation_verified') return '<span class="badge badge-federation">Federation verified</span>';
+    if(status === 'club_verified') return '<span class="badge badge-club">Club verified</span>';
+    return '<span class="badge badge-unverified">Verification pending</span>';
+  }
+
+  function editForm(player){
+    return `
+      <form class="edit-form" data-id="${player.id}">
+        <div class="form-grid">
+          <div class="field"><label>Position</label><input type="text" name="position" value="${player.primary_position || ''}" maxlength="40" /></div>
+          <div class="field"><label>Club</label><input type="text" name="club" value="${player.club || ''}" maxlength="60" /></div>
+          <div class="field"><label>County</label><input type="text" name="county" value="${player.county || ''}" maxlength="40" /></div>
+          <div class="field"><label>Division</label><input type="text" name="division" value="${player.division || ''}" maxlength="50" /></div>
+        </div>
+        <div class="field"><label>Bio</label><textarea name="bio" maxlength="220">${player.bio || ''}</textarea></div>
+        <button type="submit" class="btn btn-gold btn-small">Save changes</button>
+      </form>
+    `;
+  }
+
+  function wireEditForm(container){
+    const form = container.querySelector('.edit-form');
+    if(!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = form.dataset.id;
+      const payload = {
+        position: form.position.value.trim(),
+        club: form.club.value.trim(),
+        county: form.county.value.trim(),
+        division: form.division.value.trim(),
+        bio: form.bio.value.trim(),
+      };
+      try{
+        await api(`/account/players/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+        showToast('Profile updated.');
+        loadDashboard();
+      }catch(err){
+        showToast(err.message);
+      }
+    });
+  }
+
+  function registerPlayerForm(prefillMinor){
+    return `
+      <div class="card">
+        <h3>${prefillMinor ? "Register your child's profile" : 'Create your player profile'}</h3>
+        <p class="meta">${prefillMinor ? 'Guardian consent is captured automatically for your own account.' : 'Free, and linked to your account automatically.'}</p>
+        <form id="create-profile-form">
+          <div class="form-grid">
+            <div class="field"><label>Full name</label><input type="text" name="fullName" required maxlength="60" /></div>
+            <div class="field"><label>Date of birth</label><input type="date" name="dateOfBirth" required /></div>
+            <div class="field">
+              <label>Sport</label>
+              <select name="sport" required>
+                <option value="">Select…</option>
+                ${SPORT_OPTIONS.map(s => `<option>${s}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label>County</label><input type="text" name="county" maxlength="40" /></div>
+          </div>
+          ${prefillMinor ? `
+          <div class="form-grid">
+            <div class="field"><label>Your name (guardian)</label><input type="text" name="guardianName" required maxlength="60" /></div>
+            <div class="field"><label>Relationship</label><input type="text" name="guardianRelationship" value="Parent" maxlength="30" /></div>
+          </div>` : ''}
+          <button type="submit" class="btn btn-gold btn-small">Create profile</button>
+        </form>
+      </div>
+    `;
+  }
+
+  function wireCreateForm(container, isGuardian){
+    const form = container.querySelector('#create-profile-form');
+    if(!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const dob = fd.get('dateOfBirth');
+      const age = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25*24*3600*1000));
+      const payload = {
+        fullName: fd.get('fullName'),
+        dateOfBirth: dob,
+        sport: fd.get('sport'),
+        county: fd.get('county'),
+      };
+      if(isGuardian){
+        payload.guardianName = fd.get('guardianName');
+        payload.guardianRelationship = fd.get('guardianRelationship');
+        payload.guardianConsent = true;
+      }
+      if(isGuardian && age >= 18){
+        showToast('Guardian accounts register players under 18. For an adult, they should create their own player account.');
+        return;
+      }
+      if(!isGuardian && age < 18){
+        showToast('Players under 18 must be registered from a guardian account, not a player account.');
+        return;
+      }
+      try{
+        await api('/players', { method: 'POST', body: JSON.stringify(payload) });
+        showToast('Profile created.');
+        loadDashboard();
+      }catch(err){
+        showToast(err.message);
+      }
+    });
+  }
+
+  async function loadDashboard(){
+    const el = document.getElementById('dashboard-content');
+    try{
+      const data = await api('/account/me');
+      const user = data.user;
+
+      if(user.role === 'player'){
+        if(!data.player){
+          el.innerHTML = `
+            <div class="panel-head"><h2>Welcome, ${user.email}</h2></div>
+            ${registerPlayerForm(false)}
+          `;
+          wireCreateForm(el, false);
+          return;
+        }
+        const p = data.player;
+        el.innerHTML = `
+          <div class="panel-head"><h2>My profile</h2></div>
+          <div class="card">
+            <h3>${p.full_name} ${verificationBadge(p.verification_status)}</h3>
+            <div class="meta"><span>${p.sport}</span><span>${p.county || 'County not set'}</span><span>${p.club || 'No club set'}</span></div>
+            ${editForm(p)}
+          </div>
+        `;
+        wireEditForm(el);
+        return;
+      }
+
+      if(user.role === 'guardian'){
+        const players = data.players || [];
+        el.innerHTML = `
+          <div class="panel-head"><h2>My children's profiles</h2></div>
+          ${players.map(p => `
+            <div class="card" data-player-card="${p.id}">
+              <h3>${p.full_name} ${verificationBadge(p.verification_status)}</h3>
+              <div class="meta"><span>${p.sport}</span><span>${p.county || 'County not set'}</span><span>${p.club || 'No club set'}</span></div>
+              ${editForm(p)}
+              <div class="consent-row ${p.public_consent_active ? 'active' : 'inactive'}">
+                <span>${p.public_consent_active ? 'Visible in the public directory' : 'Hidden from the public directory'}</span>
+                <button class="btn btn-outline btn-small" data-consent-action="${p.public_consent_active ? 'revoke' : 'restore'}" data-player-id="${p.id}">
+                  ${p.public_consent_active ? 'Hide profile' : 'Make visible'}
+                </button>
+              </div>
+            </div>
+          `).join('') || '<div class="empty-state"><b>No children registered yet.</b> Add your first profile below.</div>'}
+          ${registerPlayerForm(true)}
+        `;
+        el.querySelectorAll('.edit-form').forEach(form => {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = form.dataset.id;
+            const payload = {
+              position: form.position.value.trim(),
+              club: form.club.value.trim(),
+              county: form.county.value.trim(),
+              division: form.division.value.trim(),
+              bio: form.bio.value.trim(),
+            };
+            try{
+              await api(`/account/players/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+              showToast('Profile updated.');
+              loadDashboard();
+            }catch(err){ showToast(err.message); }
+          });
+        });
+        el.querySelectorAll('[data-consent-action]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const action = btn.dataset.consentAction;
+            const id = btn.dataset.playerId;
+            try{
+              await api(`/account/players/${id}/consent/${action}`, { method: 'POST' });
+              showToast(action === 'revoke' ? 'Profile hidden from the public directory.' : 'Profile is now publicly visible.');
+              loadDashboard();
+            }catch(err){ showToast(err.message); }
+          });
+        });
+        wireCreateForm(el, true);
+        return;
+      }
+
+      el.innerHTML = `<div class="empty-state"><b>No dashboard for this account type.</b></div>`;
+    }catch(err){
+      el.innerHTML = `<div class="empty-state"><b>Couldn't load your account.</b> ${err.message}</div>`;
+    }
+  }
+
+  // ---------- Init ----------
+  if(getToken()){
+    showDashboard();
+  }else{
+    showAuth();
+  }
+})();
+</script>
+
+</body>
+</html>

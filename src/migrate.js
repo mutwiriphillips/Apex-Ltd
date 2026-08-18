@@ -1,12 +1,13 @@
 // src/migrate.js
-// Idempotent migration runner. Runs once on every deploy (via `npm start`,
-// see package.json) and is safe to run repeatedly: it checks whether the
-// schema has already been applied before doing anything.
+// Migration runner with per-file tracking via a schema_migrations table.
+// Runs on every deploy (via `npm start`, see package.json) and is safe to
+// run repeatedly: each migration file is applied at most once, tracked by
+// filename, wrapped in its own transaction.
 //
 // This intentionally does NOT use a full migration framework (Flyway,
 // Sqitch, etc.) to keep the initial deployable footprint small. Before this
-// project outgrows a single schema file, replace this with a proper
-// migration tool — see the Database Design Document, Section 7.
+// project outgrows a handful of migration files, replace this with a
+// proper migration tool — see the Database Design Document, Section 7.
 
 const fs = require('fs');
 const path = require('path');
@@ -15,11 +16,6 @@ const { pool } = require('./db');
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'migrations');
 const MAX_CONNECT_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 3000;
-
-async function alreadyApplied(client) {
-  const res = await client.query(`SELECT to_regclass('public.players') AS exists`);
-  return res.rows[0].exists !== null;
-}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -73,15 +69,38 @@ async function connectWithRetry() {
   throw lastErr;
 }
 
+async function ensureTrackingTable(client) {
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      filename TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
+}
+
+async function getAppliedFilenames(client) {
+  const res = await client.query('SELECT filename FROM schema_migrations');
+  return new Set(res.rows.map((r) => r.filename));
+}
+
+// Databases deployed before schema_migrations existed (i.e. anyone who
+// deployed Phase 1 already) will have the full schema from 001_init.sql
+// applied but no tracking row for it. Detect that case via a proxy check
+// (does the `players` table exist?) and backfill the record instead of
+// re-running 001_init.sql, which would fail with "relation already exists".
+async function legacySchemaAlreadyPresent(client) {
+  const res = await client.query(`SELECT to_regclass('public.players') AS exists`);
+  return res.rows[0].exists !== null;
+}
+
 async function run() {
   let client;
   try {
     client = await connectWithRetry();
-    console.log('[migrate] Connected. Checking schema state...');
-    if (await alreadyApplied(client)) {
-      console.log('[migrate] Schema already present — skipping migration.');
-      return;
-    }
+    console.log('[migrate] Connected.');
+
+    await ensureTrackingTable(client);
+    const applied = await getAppliedFilenames(client);
 
     const files = fs
       .readdirSync(MIGRATIONS_DIR)
@@ -94,11 +113,35 @@ async function run() {
     }
 
     for (const file of files) {
+      if (applied.has(file)) {
+        console.log(`[migrate] ${file} already applied — skipping.`);
+        continue;
+      }
+
+      // Backfill path: this specific file's effects already exist in the
+      // database from before per-file tracking was introduced.
+      if (file === files[0] && (await legacySchemaAlreadyPresent(client))) {
+        console.log(
+          `[migrate] Detected pre-existing schema (from before migration tracking). ` +
+          `Recording ${file} as already applied without re-running it.`
+        );
+        await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [file]);
+        continue;
+      }
+
       const full = path.join(MIGRATIONS_DIR, file);
       const sql = fs.readFileSync(full, 'utf8');
       console.log(`[migrate] Applying ${file}...`);
-      await client.query(sql);
-      console.log(`[migrate] Applied ${file}.`);
+      try {
+        await client.query('BEGIN');
+        await client.query(sql);
+        await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [file]);
+        await client.query('COMMIT');
+        console.log(`[migrate] Applied ${file}.`);
+      } catch (fileErr) {
+        await client.query('ROLLBACK');
+        throw new Error(`Migration ${file} failed: ${fileErr.message}`);
+      }
     }
 
     console.log('[migrate] Migration complete.');

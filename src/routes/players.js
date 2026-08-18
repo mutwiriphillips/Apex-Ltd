@@ -72,6 +72,17 @@ router.get('/:id', async (req, res, next) => {
 // guardianConsent=true are required; a guardian record and two consent
 // records (registration, highlight_publication) are created in the same
 // transaction so a minor is never left half-registered.
+//
+// This route is intentionally open/unauthenticated — anonymous, frictionless
+// registration is a deliberate product decision (Business Plan, Section 6.1).
+// If the caller happens to be logged in (optionalAuth populates req.user
+// when a valid token is present, but never blocks the request otherwise),
+// the new profile is opportunistically linked to their account:
+//   - an adult registering themselves (role 'player') becomes the owner
+//     of the new players row (players.user_id)
+//   - a guardian registering a minor (role 'guardian') becomes the owner
+//     of the guardians row (guardians.user_id), so they can log in later
+//     and manage that child's profile — see src/routes/account.js
 router.post('/', async (req, res, next) => {
   const {
     fullName, dateOfBirth, sport, position, club, county, division, bio,
@@ -96,6 +107,20 @@ router.post('/', async (req, res, next) => {
     });
   }
 
+  // An adult who's logged in as a player account can only ever own one
+  // profile. Check this up front, before creating anything, so we never
+  // leave an orphaned/unowned players row behind after a 409.
+  const linkingAsPlayer = req.user && req.user.role === 'player' && !isMinor;
+  if (linkingAsPlayer) {
+    const existing = await pool.query('SELECT id FROM players WHERE user_id = $1', [req.user.sub]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({
+        error: 'You already have a player profile linked to this account. Log in and edit it instead of creating a new one.',
+      });
+    }
+  }
+  const linkingAsGuardian = req.user && req.user.role === 'guardian' && isMinor;
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -108,20 +133,20 @@ router.post('/', async (req, res, next) => {
     const playerRes = await client.query(
       `INSERT INTO players
          (full_name, date_of_birth, sport_id, primary_position, county_id,
-          current_club_id, current_division_id, bio, profile_visibility)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8, 'public')
+          current_club_id, current_division_id, bio, profile_visibility, user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8, 'public', $9)
        RETURNING id, full_name, is_minor, verification_status, created_at`,
       [fullName.trim(), dateOfBirth, sportId, (position || '').trim(), countyId,
-       clubId, divisionId, (bio || '').trim()]
+       clubId, divisionId, (bio || '').trim(), linkingAsPlayer ? req.user.sub : null]
     );
     const player = playerRes.rows[0];
 
     if (isMinor) {
       await client.query(
-        `INSERT INTO guardians (player_id, full_name, relationship, phone)
-         VALUES ($1,$2,$3,$4)`,
+        `INSERT INTO guardians (player_id, full_name, relationship, phone, user_id)
+         VALUES ($1,$2,$3,$4,$5)`,
         [player.id, guardianName.trim(), (guardianRelationship || 'Parent/Guardian').trim(),
-         (guardianContact || '').trim()]
+         (guardianContact || '').trim(), linkingAsGuardian ? req.user.sub : null]
       );
       await client.query(
         `INSERT INTO consents (player_id, consent_type, granted_by)
@@ -131,7 +156,10 @@ router.post('/', async (req, res, next) => {
     }
 
     await client.query('COMMIT');
-    res.status(201).json({ player });
+    res.status(201).json({
+      player,
+      linkedToAccount: linkingAsPlayer || linkingAsGuardian || false,
+    });
   } catch (err) {
     await client.query('ROLLBACK');
     next(err);
