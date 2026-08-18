@@ -4,6 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Apex Talent Management — Kenya's Sports Talent Platform</title>
+<script>
+  // Runs before first paint to avoid a flash of the wrong theme.
+  (function(){
+    try{
+      var saved = localStorage.getItem('apex_theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,6 +23,7 @@
     --pitch-deep:#092A1F;
     --paper:#EEF1EA;
     --paper-alt:#F7F8F4;
+    --surface:#FFFFFF;
     --ink:#11201A;
     --ink-soft:#4C5A52;
     --gold:#C8962B;
@@ -20,6 +31,29 @@
     --red:#A32638;
     --line:#D6DBCE;
     --white:#FFFFFF;
+    --glow-1: rgba(200,150,43,0.16);
+    --glow-2: rgba(14,59,44,0.14);
+    --shadow-card: 0 1px 2px rgba(17,32,26,0.04), 0 8px 24px rgba(17,32,26,0.06);
+    --shadow-card-hover: 0 4px 10px rgba(17,32,26,0.06), 0 20px 40px rgba(17,32,26,0.14);
+    --theme-transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
+  }
+  html[data-theme="dark"]{
+    --pitch:#123E2F;
+    --pitch-deep:#050D0A;
+    --paper:#0B120F;
+    --paper-alt:#0F1815;
+    --surface:#141F1B;
+    --ink:#EAF0EA;
+    --ink-soft:#9FB6A6;
+    --gold:#E0AC44;
+    --gold-deep:#F0C169;
+    --red:#E0596E;
+    --line:rgba(255,255,255,0.09);
+    --white:#F5F8F5;
+    --glow-1: rgba(224,172,68,0.20);
+    --glow-2: rgba(30,110,140,0.16);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.4), 0 24px 48px rgba(224,172,68,0.10);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -29,6 +63,7 @@
     font-family:'Work Sans', sans-serif;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    transition:var(--theme-transition);
   }
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
@@ -41,12 +76,33 @@
   button{font-family:inherit; cursor:pointer;}
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
 
+  /* ---------- Reveal-on-scroll ---------- */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none; transition:none;}
+  }
+
+  /* ---------- Theme toggle ---------- */
+  .theme-toggle{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:38px; height:38px; border-radius:50%; border:1.5px solid #4E6B5C;
+    background:transparent; color:var(--white); flex-shrink:0; position:relative;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .theme-toggle:hover{border-color:var(--gold);}
+  .theme-toggle svg{width:18px; height:18px;}
+  .theme-toggle .icon-sun{display:none;}
+  html[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
+  html[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
+
   /* ---------- NAV ---------- */
   header.nav{
     position:sticky; top:0; z-index:100;
     background:var(--pitch);
     border-bottom:3px solid var(--gold);
   }
+  .nav-inner{position:relative;}
   .nav-inner{
     display:flex; align-items:center; justify-content:space-between;
     padding:14px 24px; max-width:1180px; margin:0 auto;
@@ -71,15 +127,16 @@
   .nav-cta{
     background:var(--gold); color:var(--pitch-deep); border:none;
     padding:10px 18px; font-weight:700; font-size:13.5px; border-radius:2px;
-    text-transform:uppercase; letter-spacing:0.4px;
+    text-transform:uppercase; letter-spacing:0.4px; text-decoration:none;
+    display:inline-block; transition:background .15s ease;
   }
   .nav-cta:hover{background:#DBA939;}
   .burger{display:none; background:none; border:none; color:var(--white); font-size:26px;}
 
   /* ---------- HERO ---------- */
   .hero{
-    background:linear-gradient(180deg, var(--pitch) 0%, var(--pitch) 55%, var(--paper) 55%);
-    padding:64px 0 0;
+    background:var(--pitch);
+    padding:64px 0 72px;
     position:relative;
     overflow:hidden;
   }
@@ -158,12 +215,12 @@
   /* How it works */
   .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
   .step{
-    background:var(--white); border:1px solid var(--line); border-radius:4px;
+    background:var(--surface); border:1px solid var(--line); border-radius:4px;
     padding:28px 24px; position:relative;
   }
   .step .num{
-    font-family:'Anton', sans-serif; font-size:44px; color:var(--paper);
-    -webkit-text-stroke:1.5px var(--pitch); text-stroke:1.5px var(--pitch);
+    font-family:'Anton', sans-serif; font-size:44px; color:var(--surface);
+    -webkit-text-stroke:1.5px var(--gold); text-stroke:1.5px var(--gold);
     position:absolute; top:16px; right:20px; opacity:.9;
   }
   .step h3{font-size:18px; margin-bottom:10px; padding-right:40px;}
@@ -175,18 +232,18 @@
   }
   .dir-controls input[type=text]{
     flex:1; min-width:220px; padding:12px 14px; border:1.5px solid var(--line);
-    border-radius:2px; font-family:'Work Sans'; font-size:14px; background:var(--white);
+    border-radius:2px; font-family:'Work Sans'; font-size:14px; background:var(--surface);
   }
   .chip{
     padding:9px 16px; border:1.5px solid var(--line); border-radius:20px;
-    background:var(--white); font-size:13px; font-weight:600; color:var(--ink-soft);
+    background:var(--surface); font-size:13px; font-weight:600; color:var(--ink-soft);
   }
   .chip.active{background:var(--pitch); color:var(--white); border-color:var(--pitch);}
   .chip:hover{border-color:var(--pitch);}
 
   .card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;}
   .cap-card{
-    background:var(--white); border:1px solid var(--line); border-radius:6px;
+    background:var(--surface); border:1px solid var(--line); border-radius:6px;
     overflow:hidden; transition:transform .15s ease, box-shadow .15s ease;
     display:flex; flex-direction:column;
   }
@@ -216,13 +273,13 @@
   .cap-bio{font-size:12.5px; color:var(--ink-soft); margin-top:4px; flex:1;}
   .empty-state{
     border:1.5px dashed var(--line); border-radius:6px; padding:40px 24px;
-    text-align:center; color:var(--ink-soft); background:var(--white);
+    text-align:center; color:var(--ink-soft); background:var(--surface);
   }
   .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
 
   /* Register form */
   .form-panel{
-    background:var(--white); border:1px solid var(--line); border-radius:6px;
+    background:var(--surface); border:1px solid var(--line); border-radius:6px;
     padding:32px; max-width:680px;
   }
   .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
@@ -235,7 +292,7 @@
     font-family:'Work Sans'; font-size:14px; background:var(--paper-alt);
   }
   .field input:focus, .field select:focus, .field textarea:focus{
-    outline:2px solid var(--gold); outline-offset:1px; background:var(--white);
+    outline:2px solid var(--gold); outline-offset:1px; background:var(--surface);
   }
   .field textarea{resize:vertical; min-height:80px;}
   .consent{
@@ -281,7 +338,7 @@
   .showcase-layout{display:grid; grid-template-columns:0.9fr 1.1fr; gap:36px;}
   .highlight-list{display:flex; flex-direction:column; gap:14px;}
   .highlight-item{
-    background:var(--white); border:1px solid var(--line); border-radius:5px;
+    background:var(--surface); border:1px solid var(--line); border-radius:5px;
     padding:16px; display:flex; gap:14px; align-items:flex-start;
   }
   .highlight-thumb{
@@ -326,7 +383,13 @@
   }
 
   @media (max-width:860px){
-    nav.links{display:none;}
+    nav.links{
+      display:none; position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; gap:0; background:var(--pitch); border-bottom:3px solid var(--gold);
+      padding:8px 24px 16px; z-index:99;
+    }
+    nav.links.open{display:flex;}
+    nav.links a{padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.08);}
     .burger{display:block;}
     .hero-grid, .showcase-layout, .sponsor-panel, .footer-grid{grid-template-columns:1fr;}
     .steps{grid-template-columns:1fr;}
@@ -342,7 +405,7 @@
       <div class="mark">A</div>
       <span class="display" style="font-size:20px;">Apex Talent</span>
     </div>
-    <nav class="links">
+    <nav class="links" id="nav-links">
       <a href="#how">How it works</a>
       <a href="#directory">Directory</a>
       <a href="#showcase">Showcase</a>
@@ -350,39 +413,39 @@
       <a href="#sponsors">Sponsors &amp; scouts</a>
       <a href="/account.html">My account</a>
     </nav>
-    <a href="#register" class="nav-cta">Register free</a>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="#register" class="nav-cta">Register free</a>
+      <button class="burger" id="mobile-menu-btn" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
   </div>
 </header>
 
 <section class="hero">
-  <svg class="hero-art" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <svg class="hero-art" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
     <defs>
       <radialGradient id="floodlight" cx="50%" cy="0%" r="75%">
-        <stop offset="0%" stop-color="#C8962B" stop-opacity="0.28"/>
-        <stop offset="100%" stop-color="#C8962B" stop-opacity="0"/>
+        <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.30"/>
+        <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="ambientGreen" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--glow-2)" stop-opacity="1"/>
+        <stop offset="100%" stop-color="var(--glow-2)" stop-opacity="0"/>
       </radialGradient>
     </defs>
     <circle cx="140" cy="10" r="260" fill="url(#floodlight)"/>
     <circle cx="1060" cy="10" r="260" fill="url(#floodlight)"/>
-    <g stroke="#1B4C3A" stroke-width="1" opacity="0.55">
+    <circle cx="620" cy="260" r="340" fill="url(#ambientGreen)"/>
+    <g stroke="var(--gold)" stroke-width="1" opacity="0.28">
       <line x1="90" y1="0" x2="10" y2="140"/>
       <line x1="130" y1="0" x2="70" y2="150"/>
       <line x1="170" y1="0" x2="140" y2="150"/>
       <line x1="1110" y1="0" x2="1190" y2="140"/>
       <line x1="1070" y1="0" x2="1130" y2="150"/>
       <line x1="1030" y1="0" x2="1060" y2="150"/>
-    </g>
-    <g fill="#0A2A1E" opacity="0.9">
-      <rect x="0" y="430" width="1200" height="70"/>
-      <path d="M0,430 Q60,405 120,430 T240,430 T360,430 T480,430 T600,430 T720,430 T840,430 T960,430 T1080,430 T1200,430 V500 H0 Z"/>
-    </g>
-    <g fill="#123A2B" opacity="0.7">
-      <circle cx="60" cy="418" r="9"/><circle cx="90" cy="422" r="7"/><circle cx="118" cy="416" r="8"/>
-      <circle cx="150" cy="420" r="9"/><circle cx="182" cy="415" r="7"/><circle cx="214" cy="421" r="8"/>
-      <circle cx="246" cy="417" r="9"/><circle cx="278" cy="422" r="7"/><circle cx="310" cy="416" r="8"/>
-      <circle cx="900" cy="417" r="8"/><circle cx="932" cy="421" r="9"/><circle cx="964" cy="416" r="7"/>
-      <circle cx="996" cy="420" r="8"/><circle cx="1028" cy="415" r="9"/><circle cx="1060" cy="421" r="7"/>
-      <circle cx="1092" cy="417" r="8"/><circle cx="1124" cy="422" r="9"/><circle cx="1156" cy="416" r="7"/>
     </g>
   </svg>
   <div class="wrap hero-grid">
@@ -427,23 +490,23 @@
 
 <section id="how">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="sec-eyebrow">The process</span>
       <h2 class="display">Three steps from unseen to scouted</h2>
       <p>The same path for every athlete, whether you play for a top-flight club or a county-division side.</p>
     </div>
     <div class="steps">
-      <div class="step">
+      <div class="step reveal">
         <div class="num">01</div>
         <h3>Register your profile</h3>
         <p>Add your bio-data, sport, club or division, and playing history. Free, permanently, for every athlete.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <div class="num">02</div>
         <h3>Get verified &amp; add highlights</h3>
         <p>Upload or link match highlights and let your club co-sign your record. Verified profiles get priority in scout searches.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <div class="num">03</div>
         <h3>Get scouted, sponsored, signed</h3>
         <p>Clubs and sponsors search the registry directly. Standout athletes may be offered a Managed Athlete package.</p>
@@ -454,7 +517,7 @@
 
 <section id="directory" class="section-alt">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="sec-eyebrow">Player registry</span>
       <h2 class="display">The open directory</h2>
       <p>Every registered athlete, searchable by sport and name. This is a live prototype — profiles you add below appear here immediately.</p>
@@ -473,7 +536,7 @@
 
 <section id="register">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="sec-eyebrow">Join the registry</span>
       <h2 class="display">Register your profile</h2>
       <p>Takes under two minutes. Your profile is free and visible to scouts, clubs, and sponsors using this platform.</p>
@@ -553,7 +616,7 @@
 
 <section id="showcase" class="section-alt">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="sec-eyebrow">Video showcase</span>
       <h2 class="display">Highlight-worthy moments</h2>
       <p>Link a highlight clip to a registered profile. In the full platform, video is uploaded directly and moderated before publishing — this prototype accepts a link and description.</p>
@@ -593,18 +656,18 @@
 
 <section id="managed">
   <div class="wrap">
-    <div class="sec-head">
+    <div class="sec-head reveal">
       <span class="sec-eyebrow">Premium representation</span>
       <h2 class="display">Managed athletes</h2>
       <p>A small, selectively signed roster receiving full-service representation — contract negotiation, transfer facilitation, sponsorship brokerage, and career management. Illustrative profiles below.</p>
     </div>
-    <div class="managed-grid" id="managed-grid"></div>
+    <div class="managed-grid reveal" id="managed-grid"></div>
   </div>
 </section>
 
 <section id="sponsors" class="section-alt">
   <div class="wrap">
-    <div class="sponsor-panel">
+    <div class="sponsor-panel reveal">
       <div>
         <span class="sec-eyebrow" style="color:var(--gold);">For clubs, sponsors &amp; agents</span>
         <h2 class="display">Scout the verified pool</h2>
@@ -816,12 +879,29 @@
     }
   }
 
+  function animateCount(el, target){
+    const duration = 700;
+    const start = performance.now();
+    const from = parseInt(el.textContent, 10) || 0;
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      el.textContent = target;
+      return;
+    }
+    function tick(now){
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(from + (target - from) * eased);
+      if(progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
   async function refreshScoreboard(){
     try{
       const data = await api('/stats/summary');
-      document.getElementById('stat-players').textContent = data.players;
-      document.getElementById('stat-highlights').textContent = data.highlights;
-      document.getElementById('stat-counties').textContent = data.counties;
+      animateCount(document.getElementById('stat-players'), data.players);
+      animateCount(document.getElementById('stat-highlights'), data.highlights);
+      animateCount(document.getElementById('stat-counties'), data.counties);
       document.getElementById('scoreboard-updated').textContent = 'Updated just now';
     }catch(err){
       document.getElementById('scoreboard-updated').textContent = 'Unavailable';
@@ -985,6 +1065,47 @@
   });
 
   document.getElementById('scoreboard-updated').textContent = 'Loading…';
+
+  // ---------- Theme toggle ----------
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  themeToggleBtn.addEventListener('click', () => {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    try{ localStorage.setItem('apex_theme', next); }catch(e){}
+  });
+
+  // ---------- Mobile menu ----------
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const navLinks = document.getElementById('nav-links');
+  mobileMenuBtn.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    mobileMenuBtn.textContent = isOpen ? '✕' : '☰';
+    mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      mobileMenuBtn.textContent = '☰';
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // ---------- Scroll-reveal ----------
+  const revealTargets = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && revealTargets.length){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealTargets.forEach(el => io.observe(el));
+  }else{
+    revealTargets.forEach(el => el.classList.add('in-view'));
+  }
 
   // ---------- Init ----------
   renderManaged();

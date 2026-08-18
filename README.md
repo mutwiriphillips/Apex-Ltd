@@ -35,8 +35,9 @@ apex-talent-management/
 │       ├── highlights.js     # GET/POST /api/highlights
 │       ├── leads.js          # POST /api/leads (sponsor/scout portal)
 │       ├── stats.js          # GET /api/stats/summary (homepage scoreboard)
-│       ├── auth.js            # POST /api/auth/register, /api/auth/login
-│       └── admin.js           # Highlight moderation + player verification (staff-only)
+│       ├── auth.js            # POST /api/auth/register, /api/auth/login, /api/auth/bootstrap-admin
+│       ├── admin.js           # Highlight moderation + player verification (staff-only)
+│       └── account.js         # Player/guardian self-service profile & consent management
 ├── migrations/
 │   ├── 001_init.sql          # Full schema (copy of the Database Design Document's schema.sql)
 │   └── 002_player_accounts.sql  # Adds guardians.user_id for account linkage
@@ -73,6 +74,55 @@ and the new column to simulate a pre-upgrade database, then confirmed the
 runner backfills correctly and still applies `002_player_accounts.sql`.
 You don't need to do anything manually — just deploy this version and the
 migration runner sorts it out on boot.
+
+---
+
+## Design system: dark mode & visual refresh
+
+All three pages (`index.html`, `admin.html`, `account.html`) share a CSS
+custom-property theme system with a working light/dark toggle (persisted
+to `localStorage`, defaulting to the browser's `prefers-color-scheme` on
+first visit). A small inline script in `<head>` sets the theme before
+first paint, so there's no flash of the wrong theme on load.
+
+The palette keeps the same pitch-green/gold brand identity, but variables
+are split into two intentional categories:
+- **Surface colors** (`--surface`, `--paper`, `--paper-alt`, `--ink`,
+  `--ink-soft`, `--line`) — these flip between light and dark mode. Cards,
+  inputs, and page backgrounds use these.
+- **Brand panel colors** (`--pitch`, `--pitch-deep`, `--gold`) — these stay
+  a dark, branded green/gold in both themes. Nav, hero, footer, the
+  scoreboard, and Managed Athlete cards intentionally look the same
+  regardless of theme, the way a stadium floodlight scene would.
+
+This was verified with real rendered screenshots (via Playwright/Chromium)
+in both themes, across the homepage, admin dashboard, and account
+dashboard — not just written and assumed to work. Screenshotting caught
+and fixed several real bugs along the way:
+- A missing `text-decoration:none` was putting a visible underline through
+  the "Register Free" button.
+- The original hero background used a hard percentage split
+  (`linear-gradient(..., 55%, 55%)`) between the dark and light zones,
+  which depended on the hero's content landing at exactly that height.
+  Real paragraph text didn't cooperate, and the split cut straight through
+  the lead paragraph, making part of it unreadable. Fixed by making the
+  hero a single solid color instead of a height-dependent split.
+- Verification badges (`club_verified`, `federation_verified`, etc.) used
+  hardcoded light-mode-only background colors, making them nearly
+  unreadable in dark mode. Fixed with theme-aware, translucent
+  backgrounds instead.
+- The mobile nav had a `.burger` CSS class from the original build with no
+  actual button or JavaScript behind it — on a phone, the nav links were
+  simply unreachable below 860px width. Built a working hamburger menu
+  (toggle button, slide-down panel, closes on link click) to fix this
+  properly rather than leave it as dead CSS.
+
+Also added: scroll-reveal animations (`IntersectionObserver`-based, with
+a `prefers-reduced-motion` fallback that skips straight to visible), an
+eased count-up animation for the homepage scoreboard stats, and an
+ambient floodlight/gradient SVG backdrop in the hero using only
+CSS-variable-driven colors (so it re-themes automatically in dark mode)
+rather than any external images.
 
 ---
 
@@ -118,26 +168,55 @@ Moderation (`/admin.html`) and player verification are restricted to
 `staff_admin`/`superadmin` accounts. There is deliberately **no way to
 create one through the public API** — `POST /api/auth/register` silently
 downgrades any requested `staff_admin`/`superadmin` role to `player`, so
-privilege can never be self-granted. Admins are created only via a CLI
-script that talks to the database directly:
+privilege can never be self-granted through normal registration.
 
-**Locally:**
+There are two ways to create the first admin account. Which one you need
+depends on whether you have shell access to your deployment.
+
+### Option A — bootstrap endpoint (works on Render's free tier)
+
+Render's free-tier web services don't support Shell access at all
+(confirmed directly against [Render's own docs](https://render.com/docs/free):
+free services don't get "Shell access via SSH or the Render Dashboard") —
+so `npm run create-admin` isn't reachable unless you're on a paid plan.
+`POST /api/auth/bootstrap-admin` exists specifically for this case, and is
+safe to leave in the codebase permanently because it's gated two ways:
+
+1. It requires a secret (`ADMIN_BOOTSTRAP_SECRET`) that only you can see —
+   auto-generated by Render into your web service's Environment tab via
+   `generateValue: true` in `render.yaml`.
+2. It only works while **zero** `staff_admin`/`superadmin` accounts exist.
+   The moment one is created — by this route or by `create-admin.js` — the
+   route permanently refuses to do anything again, forever, even with the
+   correct secret. It cannot be used to create a second admin.
+
+**To use it:**
+1. In the Render dashboard, open your web service → **Environment** tab →
+   copy the value of `ADMIN_BOOTSTRAP_SECRET`.
+2. From your own machine, run:
+   ```bash
+   curl -X POST https://<your-service>.onrender.com/api/auth/bootstrap-admin \
+     -H "Content-Type: application/json" \
+     -d '{"secret":"<paste the secret>","email":"admin@apextalent.co.ke","password":"a-strong-password"}'
+   ```
+3. Log in at `https://<your-service>.onrender.com/admin.html` with that
+   email and password.
+
+This was tested directly: wrong secret → 401; correct secret → account
+created; trying again afterward, even with the correct secret → 409
+(permanently refused); secret unset entirely → 404 (cleanly disabled).
+
+### Option B — CLI script (requires shell access / paid Render plan, or local dev)
+
 ```bash
 npm run create-admin -- admin@apextalent.co.ke "a-strong-password"
 ```
 
-**On Render**, after your first deploy:
-1. Open your web service in the Render dashboard.
-2. Go to the **Shell** tab (gives you a terminal in the running service).
-3. Run:
-   ```bash
-   node scripts/create-admin.js admin@apextalent.co.ke "a-strong-password"
-   ```
-4. Log in at `https://<your-service>.onrender.com/admin.html` with that
-   email and password.
+On a paid Render instance type, run the same command via the web
+service's **Shell** tab in the dashboard.
 
-Use a real password here — this account can approve public content and
-view guardian/lead data.
+Use a real password either way — this account can approve public content
+and view guardian/lead data.
 
 ---
 
@@ -223,7 +302,8 @@ Requires Node.js 18+ and a local PostgreSQL instance.
 ```bash
 cp .env.example .env
 # edit .env: set your local Postgres user/password/db name, and replace
-# JWT_SECRET with a real random value (e.g. `openssl rand -hex 32`)
+# JWT_SECRET and ADMIN_BOOTSTRAP_SECRET with real random values
+# (e.g. `openssl rand -hex 32` for each)
 
 npm install
 npm run migrate     # applies all files in migrations/, in order
@@ -279,6 +359,19 @@ curl -X POST http://localhost:3000/api/players \
 - **Draft policy pages** (`/privacy.html`, `/terms.html`, `/child-safety.html`),
   linked from the site footer — clearly marked as drafts pending legal review,
   not yet final
+- **Free-tier-compatible admin bootstrap** (`POST /api/auth/bootstrap-admin`):
+  create the first admin account without shell/SSH access, which Render's
+  free web services don't support — tested all four states (wrong secret,
+  success, permanently locked out after first use, disabled when unset)
+- **Dark/light theme system** across all three pages, with a working toggle,
+  verified via real rendered screenshots rather than just written — this
+  process caught and fixed four real bugs: a missing underline reset on
+  the primary CTA, a structural hero-background bug that made text
+  unreadable at certain content heights, unreadable dark-mode verification
+  badges, and a completely non-functional mobile nav (dead CSS class, no
+  button, no JS) that's now a working hamburger menu
+- Scroll-reveal animations and an eased scoreboard count-up, both with
+  `prefers-reduced-motion` fallbacks
 
 **Not yet implemented — flagged here rather than left silently missing:**
 - **Claiming a pre-existing anonymous profile.** If someone registered a
