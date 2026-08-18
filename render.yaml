@@ -18,5 +18,6 @@ services:
 databases:
   - name: apex-talent-db
     plan: free
+    region: frankfurt
     databaseName: apex_talent
     user: apex_admin

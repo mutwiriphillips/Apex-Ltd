@@ -157,3 +157,25 @@ curl -X POST http://localhost:3000/api/players \
 
 None of these block a working demo deploy — they're the honest list of
 what a production launch still needs on top of this.
+
+---
+
+## Troubleshooting
+
+**`Error: getaddrinfo ENOTFOUND dpg-...` during migration/boot**
+
+This means the web service can't resolve the database's internal hostname.
+On Render, internal database hostnames only resolve within the same
+region's private network — so this almost always means the web service and
+the database ended up in **different regions**. `render.yaml` pins both to
+`frankfurt`; if you changed the region for one but not the other (or
+created the database manually before applying the Blueprint), move them
+back in sync in the Render dashboard (Database → Settings, or recreate it
+in the matching region) and redeploy.
+
+`src/migrate.js` also retries the initial connection several times with a
+delay before giving up, since a database that was *just* provisioned can
+take a few seconds for its internal DNS to propagate on the very first
+deploy — if it fails after all retries with this error, region mismatch is
+the most likely cause rather than a transient timing issue.
+
