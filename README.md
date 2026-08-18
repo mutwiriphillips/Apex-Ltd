@@ -62,6 +62,13 @@ apex-talent-management/
    deploys the web service with `DATABASE_URL` already wired in as an
    environment variable — you don't need to copy/paste any connection string.
 
+   > **If you had a previous, broken deploy attempt of this project** (e.g.
+   > you saw an `ENOTFOUND dpg-...` error before pulling this version):
+   > delete that old web service **and** database first, then Apply the
+   > Blueprint fresh. Render can't move an existing resource to a new
+   > region, so reusing them would carry the same mismatch forward. See
+   > **Troubleshooting** below if you'd rather not delete anything.
+
 4. **First boot runs the migration automatically.** The `npm start` script
    runs `node src/migrate.js` before starting the server (see
    `package.json`). The migration checks whether the schema already exists
@@ -164,18 +171,39 @@ what a production launch still needs on top of this.
 
 **`Error: getaddrinfo ENOTFOUND dpg-...` during migration/boot**
 
-This means the web service can't resolve the database's internal hostname.
-On Render, internal database hostnames only resolve within the same
-region's private network — so this almost always means the web service and
-the database ended up in **different regions**. `render.yaml` pins both to
-`frankfurt`; if you changed the region for one but not the other (or
-created the database manually before applying the Blueprint), move them
-back in sync in the Render dashboard (Database → Settings, or recreate it
-in the matching region) and redeploy.
+This means the web service can't resolve the database's *internal* hostname.
+Render's internal hostnames (the `dpg-...` form used in the auto-injected
+`DATABASE_URL`) only resolve within the same region's private network — so
+this means the web service and database are in **different regions**.
 
-`src/migrate.js` also retries the initial connection several times with a
-delay before giving up, since a database that was *just* provisioned can
-take a few seconds for its internal DNS to propagate on the very first
-deploy — if it fails after all retries with this error, region mismatch is
-the most likely cause rather than a transient timing issue.
+Critically: **Render does not support changing a service or database's
+region after it's created** ([docs.render.com/regions](https://docs.render.com/regions)).
+If you already had a broken deploy before pulling this fix, simply pushing
+an updated `render.yaml` will **not** retroactively move those existing
+resources into the same region — Render's Blueprint sync reuses
+already-created resources by name rather than recreating them. You need to
+do one of the following:
+
+**Option A — fastest, no deletion required:**
+1. In the Render dashboard, open your database → **Connections** tab.
+2. Copy the **External Database URL** (not the internal one).
+3. Open your web service → **Environment** tab → set `DATABASE_URL` to
+   that external URL, overriding the auto-injected value.
+4. Redeploy. The external URL is a public hostname reachable from any
+   region, so this works regardless of the region mismatch (traffic is
+   still SSL-encrypted — `src/db.js` already handles this).
+
+**Option B — proper long-term fix:**
+1. In the Render dashboard, delete the existing web service **and** the
+   existing database entirely.
+2. Run **New → Blueprint** again against your repo. Render creates both
+   resources together in one pass, in the same region (as pinned by
+   `render.yaml`), so they'll share a private network from the start.
+
+`src/migrate.js` retries the initial connection a few times before giving
+up, in case a database that was *just* provisioned needs a moment for its
+internal DNS to propagate — but this only helps that specific timing case.
+A genuine region mismatch will fail every retry, since the hostname simply
+doesn't exist in that network; when that happens, the migration log prints
+this same explanation directly.
 

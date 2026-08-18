@@ -13,8 +13,8 @@ const path = require('path');
 const { pool } = require('./db');
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'migrations');
-const MAX_CONNECT_ATTEMPTS = 8;
-const RETRY_DELAY_MS = 4000;
+const MAX_CONNECT_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 3000;
 
 async function alreadyApplied(client) {
   const res = await client.query(`SELECT to_regclass('public.players') AS exists`);
@@ -25,10 +25,36 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Retry connecting a few times before giving up. This covers the case where
-// a database was just provisioned (e.g. the very first Blueprint deploy) and
-// its internal DNS hostname hasn't finished propagating yet, which otherwise
-// surfaces as a transient ENOTFOUND/ECONNREFUSED on the first deploy only.
+function printRegionMismatchHelp(hostname) {
+  console.error('');
+  console.error('[migrate] ─────────────────────────────────────────────────────────────');
+  console.error(`[migrate] Could not resolve database host "${hostname}".`);
+  console.error('[migrate] This is almost always a REGION MISMATCH between your web');
+  console.error('[migrate] service and database. Render internal hostnames (dpg-...)');
+  console.error('[migrate] only resolve to services in the SAME region — and Render');
+  console.error('[migrate] does not support changing a resource\'s region after it is');
+  console.error('[migrate] created (docs.render.com/regions). Updating render.yaml alone');
+  console.error('[migrate] will NOT fix an already-created service or database.');
+  console.error('[migrate]');
+  console.error('[migrate] Fix option A (fastest, no deletion): in the Render dashboard,');
+  console.error('[migrate] open your database → Connections tab → copy the "External');
+  console.error('[migrate] Database URL" → set it as your web service\'s DATABASE_URL');
+  console.error('[migrate] env var (overriding the auto-injected internal one) → redeploy.');
+  console.error('[migrate]');
+  console.error('[migrate] Fix option B (proper long-term fix): delete BOTH the existing');
+  console.error('[migrate] web service and database in the Render dashboard, then run');
+  console.error('[migrate] New → Blueprint again from your repo so both are created');
+  console.error('[migrate] together, fresh, in the same region.');
+  console.error('[migrate] See README.md → Troubleshooting for full steps.');
+  console.error('[migrate] ─────────────────────────────────────────────────────────────');
+  console.error('');
+}
+
+// Retry connecting a few times before giving up. This covers only the case
+// where a database was just provisioned moments ago and its DNS hasn't
+// finished propagating yet. It will NOT help a genuine region mismatch —
+// that hostname simply never resolves, retries or not — so we cap retries
+// low and print explicit remediation steps once they're exhausted.
 async function connectWithRetry() {
   let lastErr;
   for (let attempt = 1; attempt <= MAX_CONNECT_ATTEMPTS; attempt++) {
@@ -78,10 +104,9 @@ async function run() {
     console.log('[migrate] Migration complete.');
   } catch (err) {
     console.error('[migrate] Migration failed:', err.message);
-    console.error(
-      '[migrate] If this is ENOTFOUND on a dpg-... hostname, check that the ' +
-      'web service and database are in the SAME Render region (see render.yaml).'
-    );
+    if (err.code === 'ENOTFOUND') {
+      printRegionMismatchHelp(err.hostname || 'unknown host');
+    }
     process.exitCode = 1;
   } finally {
     if (client) client.release();
