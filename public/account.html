@@ -18,16 +18,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pitch:#0E3B2C; --pitch-deep:#092A1F; --paper:#EEF1EA; --paper-alt:#F7F8F4;
+    --pitch:#1B1B3D; --pitch-deep:#0F0F26; --paper:#F5F3F9; --paper-alt:#FAF9FC;
     --surface:#FFFFFF;
-    --ink:#11201A; --ink-soft:#4C5A52; --gold:#C8962B; --gold-deep:#A87A1E;
-    --red:#A32638; --green:#1E6E4C; --line:#D6DBCE; --white:#FFFFFF;
+    --ink:#191933; --ink-soft:#5D5C79; --gold:#FF6B35; --gold-deep:#E8551F;
+    --red:#FF3D68; --green:#0EA5B8; --line:#E2DFEC; --white:#FFFFFF;
   }
   html[data-theme="dark"]{
-    --pitch:#123E2F; --pitch-deep:#050D0A; --paper:#0B120F; --paper-alt:#0F1815;
-    --surface:#141F1B;
-    --ink:#EAF0EA; --ink-soft:#9FB6A6; --gold:#E0AC44; --gold-deep:#F0C169;
-    --red:#E0596E; --green:#37A374; --line:rgba(255,255,255,0.09); --white:#F5F8F5;
+    --pitch:#17172E; --pitch-deep:#0A0A1C; --paper:#0D0D1F; --paper-alt:#131327;
+    --surface:#191A33;
+    --ink:#EDEBF7; --ink-soft:#A6A4C4; --gold:#FF8557; --gold-deep:#FFA36E;
+    --red:#FF6E8C; --green:#34C6D9; --line:rgba(255,255,255,0.09); --white:#F6F5FC;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:var(--paper); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.5;
@@ -72,7 +72,7 @@
   .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
   .btn-outline:hover{border-color:var(--pitch);}
   .btn-small{padding:8px 14px; font-size:13px;}
-  .error-msg{background:#FBEAEA; border:1px solid var(--red); color:var(--red); padding:10px 14px;
+  .error-msg{background:rgba(255,61,104,0.10); border:1px solid var(--red); color:var(--red); padding:10px 14px;
     border-radius:2px; font-size:13px; margin-bottom:16px; display:none;}
 
   /* Dashboard */
@@ -81,7 +81,7 @@
   .panel-head h2{font-size:20px;}
   .badge{display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;
     text-transform:uppercase; letter-spacing:.4px;}
-  .badge-unverified{background:rgba(76,90,82,0.14); color:var(--ink-soft);}
+  .badge-unverified{background:rgba(93,92,121,0.14); color:var(--ink-soft);}
   .badge-club{background:rgba(30,110,140,0.16); color:var(--green);}
   .badge-federation{background:rgba(200,150,43,0.18); color:var(--gold-deep);}
   .card{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:22px; margin-bottom:18px;}

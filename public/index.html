@@ -19,41 +19,41 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pitch:#0E3B2C;
-    --pitch-deep:#092A1F;
-    --paper:#EEF1EA;
-    --paper-alt:#F7F8F4;
+    --pitch:#1B1B3D;
+    --pitch-deep:#0F0F26;
+    --paper:#F5F3F9;
+    --paper-alt:#FAF9FC;
     --surface:#FFFFFF;
-    --ink:#11201A;
-    --ink-soft:#4C5A52;
-    --gold:#C8962B;
-    --gold-deep:#A87A1E;
-    --red:#A32638;
-    --line:#D6DBCE;
+    --ink:#191933;
+    --ink-soft:#5D5C79;
+    --gold:#FF6B35;
+    --gold-deep:#E8551F;
+    --red:#FF3D68;
+    --line:#E2DFEC;
     --white:#FFFFFF;
-    --glow-1: rgba(200,150,43,0.16);
-    --glow-2: rgba(14,59,44,0.14);
-    --shadow-card: 0 1px 2px rgba(17,32,26,0.04), 0 8px 24px rgba(17,32,26,0.06);
-    --shadow-card-hover: 0 4px 10px rgba(17,32,26,0.06), 0 20px 40px rgba(17,32,26,0.14);
+    --glow-1: rgba(255,107,53,0.20);
+    --glow-2: rgba(255,61,104,0.14);
+    --shadow-card: 0 1px 2px rgba(15,15,38,0.05), 0 8px 24px rgba(15,15,38,0.07);
+    --shadow-card-hover: 0 4px 10px rgba(15,15,38,0.07), 0 20px 40px rgba(255,107,53,0.12);
     --theme-transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
   }
   html[data-theme="dark"]{
-    --pitch:#123E2F;
-    --pitch-deep:#050D0A;
-    --paper:#0B120F;
-    --paper-alt:#0F1815;
-    --surface:#141F1B;
-    --ink:#EAF0EA;
-    --ink-soft:#9FB6A6;
-    --gold:#E0AC44;
-    --gold-deep:#F0C169;
-    --red:#E0596E;
+    --pitch:#17172E;
+    --pitch-deep:#0A0A1C;
+    --paper:#0D0D1F;
+    --paper-alt:#131327;
+    --surface:#191A33;
+    --ink:#EDEBF7;
+    --ink-soft:#A6A4C4;
+    --gold:#FF8557;
+    --gold-deep:#FFA36E;
+    --red:#FF6E8C;
     --line:rgba(255,255,255,0.09);
-    --white:#F5F8F5;
-    --glow-1: rgba(224,172,68,0.20);
-    --glow-2: rgba(30,110,140,0.16);
+    --white:#F6F5FC;
+    --glow-1: rgba(255,133,87,0.22);
+    --glow-2: rgba(255,110,140,0.16);
     --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
-    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.4), 0 24px 48px rgba(224,172,68,0.10);
+    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.4), 0 24px 48px rgba(255,133,87,0.12);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -163,7 +163,7 @@
   }
   .hero h1 span{color:var(--gold);}
   .hero p.lead{
-    color:#D6E0D8; font-size:17px; max-width:520px; margin-bottom:28px;
+    color:#D9D7EE; font-size:17px; max-width:520px; margin-bottom:28px;
   }
   .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:56px;}
   .btn{
@@ -187,7 +187,7 @@
   }
   .scoreboard-head{
     display:flex; justify-content:space-between; align-items:center;
-    border-bottom:1px solid #24493A; padding-bottom:12px; margin-bottom:14px;
+    border-bottom:1px solid #2E2E52; padding-bottom:12px; margin-bottom:14px;
   }
   .scoreboard-head span{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;}
   .score-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
@@ -197,7 +197,7 @@
     color:var(--white); line-height:1;
   }
   .score-label{
-    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#9FB6A6;
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#A8A6C6;
     text-transform:uppercase; letter-spacing:0.8px; margin-top:6px;
   }
 
@@ -249,7 +249,7 @@
   }
   .cap-card:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(14,59,44,0.12);}
   .cap-top{
-    background:var(--pitch); color:var(--white); padding:16px 16px 34px;
+    background:var(--pitch); color:var(--white); padding:40px 16px 34px;
     position:relative;
   }
   .cap-num{
@@ -327,12 +327,31 @@
   .managed-body .cap-sport{color:var(--gold);}
   .managed-body h3{font-size:20px; margin:8px 0 4px;}
   .silhouette{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:2px solid var(--gold);}
-  .managed-body .role{color:#B9C9BE; font-size:13px; margin-bottom:14px;}
-  .managed-body p{font-size:13.5px; color:#D6E0D8;}
-  .managed-stats{display:flex; gap:18px; margin-top:16px; padding-top:16px; border-top:1px solid #24493A;}
+
+  /* ---------- Icon system ---------- */
+  .icon{width:16px; height:16px; flex-shrink:0; vertical-align:-3px;}
+  .icon-lg{width:28px; height:28px;}
+
+  /* ---------- Sport picker ---------- */
+  .sport-picker{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;}
+  .sport-option{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:16px 8px; border:1.5px solid var(--line); border-radius:6px;
+    background:var(--surface); cursor:pointer; transition:border-color .15s ease, transform .12s ease, background .15s ease;
+    color:var(--ink-soft);
+  }
+  .sport-option:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .sport-option .icon-lg{color:var(--ink-soft); transition:color .15s ease;}
+  .sport-option span{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+  .sport-option.selected{border-color:var(--gold); background:var(--pitch); color:var(--white);}
+  .sport-option.selected .icon-lg{color:var(--gold);}
+  @media (max-width:500px){ .sport-picker{grid-template-columns:repeat(2,1fr);} }
+  .managed-body .role{color:#C4C2DC; font-size:13px; margin-bottom:14px;}
+  .managed-body p{font-size:13.5px; color:#D9D7EE;}
+  .managed-stats{display:flex; gap:18px; margin-top:16px; padding-top:16px; border-top:1px solid #2E2E52;}
   .managed-stats div{font-family:'JetBrains Mono', monospace;}
   .managed-stats .n{font-size:18px; font-weight:700; color:var(--gold);}
-  .managed-stats .l{font-size:10px; color:#9FB6A6; text-transform:uppercase; letter-spacing:.5px;}
+  .managed-stats .l{font-size:10px; color:#A8A6C6; text-transform:uppercase; letter-spacing:.5px;}
 
   /* Showcase */
   .showcase-layout{display:grid; grid-template-columns:0.9fr 1.1fr; gap:36px;}
@@ -358,28 +377,28 @@
     padding:44px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:36px; align-items:center;
   }
   .sponsor-panel h2{color:var(--white);}
-  .sponsor-panel p{color:#D6E0D8; font-size:15px; margin-bottom:22px;}
+  .sponsor-panel p{color:#D9D7EE; font-size:15px; margin-bottom:22px;}
   .sponsor-list{list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:24px;}
-  .sponsor-list li{font-size:14px; color:#E4ECE5; padding-left:22px; position:relative;}
+  .sponsor-list li{font-size:14px; color:#ECEAF7; padding-left:22px; position:relative;}
   .sponsor-list li::before{content:"✓"; position:absolute; left:0; color:var(--gold); font-weight:700;}
-  .lead-form{background:var(--pitch-deep); border-radius:6px; padding:24px; border:1px solid #24493A;}
+  .lead-form{background:var(--pitch-deep); border-radius:6px; padding:24px; border:1px solid #2E2E52;}
   .lead-form input, .lead-form select{
-    width:100%; margin-bottom:12px; padding:11px 12px; border-radius:2px; border:1px solid #2E5744;
-    background:#0C3226; color:var(--white); font-size:13.5px;
+    width:100%; margin-bottom:12px; padding:11px 12px; border-radius:2px; border:1px solid #33325C;
+    background:#14142C; color:var(--white); font-size:13.5px;
   }
-  .lead-form label{font-size:11.5px; color:#9FB6A6; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
+  .lead-form label{font-size:11.5px; color:#A8A6C6; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
 
   /* Footer */
-  footer{background:var(--pitch-deep); color:#B9C9BE; padding:48px 0 24px;}
+  footer{background:var(--pitch-deep); color:#C4C2DC; padding:48px 0 24px;}
   .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; margin-bottom:32px;}
   .footer-grid h4{color:var(--white); font-size:13px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:14px;}
   .footer-grid ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
-  .footer-grid a{color:#9FB6A6; font-size:13px; text-decoration:none;}
+  .footer-grid a{color:#A8A6C6; font-size:13px; text-decoration:none;}
   .footer-grid a:hover{color:var(--gold);}
-  .footer-note{font-size:12.5px; color:#7E9587; max-width:420px; line-height:1.6;}
+  .footer-note{font-size:12.5px; color:#8785A8; max-width:420px; line-height:1.6;}
   .footer-bottom{
-    border-top:1px solid #1D3F31; padding-top:20px; display:flex; justify-content:space-between;
-    flex-wrap:wrap; gap:10px; font-size:12px; color:#7E9587;
+    border-top:1px solid #201F42; padding-top:20px; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; font-size:12px; color:#8785A8;
   }
 
   @media (max-width:860px){
@@ -398,6 +417,49 @@
 </style>
 </head>
 <body>
+
+<!-- Reusable line-art sports-equipment icons — original artwork, no photos.
+     Referenced via <svg class="icon"><use href="#icon-NAME"/></svg>. -->
+<svg style="display:none" aria-hidden="true">
+  <defs>
+    <symbol id="icon-goal" viewBox="0 0 48 48">
+      <path d="M6 8 L6 40 M42 8 L42 40 M6 8 L42 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M6 8 L14 16 M6 16 L14 24 M6 24 L14 32 M6 32 L14 38" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
+      <path d="M42 8 L34 16 M42 16 L34 24 M42 24 L34 32 M42 32 L34 38" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
+      <path d="M6 8 L34 16 M6 16 L34 24 M6 24 L34 32" stroke="currentColor" stroke-width="0.75" opacity="0.3" fill="none"/>
+      <circle cx="24" cy="41" r="2.4" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-posts" viewBox="0 0 48 48">
+      <path d="M14 4 L14 40 M34 4 L34 40 M14 16 L34 16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="24" cy="41" rx="10" ry="2.6" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.6"/>
+    </symbol>
+    <symbol id="icon-hoop" viewBox="0 0 48 48">
+      <rect x="8" y="6" width="16" height="12" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+      <ellipse cx="24" cy="18" rx="10" ry="2.4" stroke="currentColor" stroke-width="2" fill="none"/>
+      <path d="M16 19 L14 32 M20 19.6 L19 33 M24 20 L24 34 M28 19.6 L29 33 M32 19 L34 32" stroke="currentColor" stroke-width="1" opacity="0.55" fill="none"/>
+      <path d="M14 32 L34 32" stroke="currentColor" stroke-width="0.75" opacity="0.4" fill="none"/>
+    </symbol>
+    <symbol id="icon-controller" viewBox="0 0 48 48">
+      <path d="M12 18 h24 a8 8 0 0 1 8 8 v6 a6 6 0 0 1-6 6 c-2.4 0-4-1-6-4 l-1.5-3 h-13 L16 38 c-2 3-3.6 4-6 4 a6 6 0 0 1-6-6 v-6 a8 8 0 0 1 8-8z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+      <path d="M17 24 v6 M14 27 h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="33" cy="25" r="1.6" fill="currentColor"/>
+      <circle cx="37" cy="29" r="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-net" viewBox="0 0 48 48">
+      <path d="M4 12 L4 30 M44 12 L44 30 M4 12 L44 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M4 12 L44 30 M4 16 L40 30 M4 20 L36 30 M4 24 L32 30 M4 28 L28 30" stroke="currentColor" stroke-width="0.6" opacity="0.4" fill="none"/>
+      <path d="M44 12 L4 30 M44 16 L8 30 M44 20 L12 30 M44 24 L16 30 M44 28 L20 30" stroke="currentColor" stroke-width="0.6" opacity="0.4" fill="none"/>
+    </symbol>
+    <symbol id="icon-field" viewBox="0 0 64 40">
+      <rect x="2" y="2" width="60" height="36" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/>
+      <line x1="32" y1="2" x2="32" y2="38" stroke="currentColor" stroke-width="1.2"/>
+      <circle cx="32" cy="20" r="7" stroke="currentColor" stroke-width="1.2" fill="none"/>
+      <circle cx="32" cy="20" r="0.9" fill="currentColor"/>
+      <rect x="2" y="11" width="8" height="18" stroke="currentColor" stroke-width="1.2" fill="none"/>
+      <rect x="54" y="11" width="8" height="18" stroke="currentColor" stroke-width="1.2" fill="none"/>
+    </symbol>
+  </defs>
+</svg>
 
 <header class="nav">
   <div class="nav-inner">
@@ -431,14 +493,14 @@
         <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.30"/>
         <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/>
       </radialGradient>
-      <radialGradient id="ambientGreen" cx="50%" cy="50%" r="50%">
+      <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
         <stop offset="0%" stop-color="var(--glow-2)" stop-opacity="1"/>
         <stop offset="100%" stop-color="var(--glow-2)" stop-opacity="0"/>
       </radialGradient>
     </defs>
     <circle cx="140" cy="10" r="260" fill="url(#floodlight)"/>
     <circle cx="1060" cy="10" r="260" fill="url(#floodlight)"/>
-    <circle cx="620" cy="260" r="340" fill="url(#ambientGreen)"/>
+    <circle cx="620" cy="260" r="340" fill="url(#ambientGlow)"/>
     <g stroke="var(--gold)" stroke-width="1" opacity="0.28">
       <line x1="90" y1="0" x2="10" y2="140"/>
       <line x1="130" y1="0" x2="70" y2="150"/>
@@ -446,6 +508,77 @@
       <line x1="1110" y1="0" x2="1190" y2="140"/>
       <line x1="1070" y1="0" x2="1130" y2="150"/>
       <line x1="1030" y1="0" x2="1060" y2="150"/>
+    </g>
+
+    <!-- Scattered sports-equipment line-art: original vector icons, not photos -->
+    <g fill="none" stroke-linecap="round">
+      <!-- soccer ball, top-left -->
+      <g transform="translate(95,55)" opacity="0.32">
+        <circle r="22" stroke="var(--gold)" stroke-width="2"/>
+        <path d="M0,-22 L13,-7 L7,13 L-7,13 L-13,-7 Z" stroke="var(--gold)" stroke-width="1.4"/>
+      </g>
+      <!-- basketball, top-right -->
+      <g transform="translate(1105,50)" opacity="0.32">
+        <circle r="24" stroke="var(--red)" stroke-width="2"/>
+        <line x1="-24" y1="0" x2="24" y2="0" stroke="var(--red)" stroke-width="1.4"/>
+        <line x1="0" y1="-24" x2="0" y2="24" stroke="var(--red)" stroke-width="1.4"/>
+        <path d="M-17,-17 Q0,-5 17,-17" stroke="var(--red)" stroke-width="1.4"/>
+        <path d="M-17,17 Q0,5 17,17" stroke="var(--red)" stroke-width="1.4"/>
+      </g>
+      <!-- rugby ball, gap between headline and scoreboard -->
+      <g transform="translate(672,215) rotate(-24)" opacity="0.26">
+        <ellipse rx="28" ry="15" stroke="var(--gold)" stroke-width="2"/>
+        <line x1="-22" y1="0" x2="22" y2="0" stroke="var(--gold)" stroke-width="1.4"/>
+        <line x1="-6" y1="-4" x2="-6" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
+        <line x1="0" y1="-4" x2="0" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
+        <line x1="6" y1="-4" x2="6" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
+      </g>
+      <!-- game controller, bottom-left -->
+      <g transform="translate(55,465)" opacity="0.28">
+        <rect x="-24" y="-11" width="48" height="22" rx="11" stroke="var(--red)" stroke-width="2"/>
+        <circle cx="13" cy="-3" r="2.4" fill="var(--red)" stroke="none"/>
+        <circle cx="19" cy="4" r="2.4" fill="var(--red)" stroke="none"/>
+        <line x1="-15" y1="0" x2="-9" y2="0" stroke="var(--red)" stroke-width="1.4"/>
+        <line x1="-12" y1="-3" x2="-12" y2="3" stroke="var(--red)" stroke-width="1.4"/>
+      </g>
+      <!-- small soccer ball, bottom-right -->
+      <g transform="translate(1150,475)" opacity="0.26">
+        <circle r="16" stroke="var(--gold)" stroke-width="1.6"/>
+        <path d="M0,-16 L9,-5 L5,9 L-5,9 L-9,-5 Z" stroke="var(--gold)" stroke-width="1.2"/>
+      </g>
+      <!-- small basketball, far left edge -->
+      <g transform="translate(24,255)" opacity="0.22">
+        <circle r="15" stroke="var(--red)" stroke-width="1.6"/>
+        <line x1="-15" y1="0" x2="15" y2="0" stroke="var(--red)" stroke-width="1.2"/>
+        <line x1="0" y1="-15" x2="0" y2="15" stroke="var(--red)" stroke-width="1.2"/>
+      </g>
+      <!-- whistle, top-center -->
+      <g transform="translate(600,32)" opacity="0.24">
+        <circle r="9" stroke="var(--gold)" stroke-width="1.8"/>
+        <rect x="7" y="-4" width="15" height="8" rx="3" stroke="var(--gold)" stroke-width="1.8"/>
+      </g>
+      <!-- goal post with net, upper-right of scoreboard -->
+      <g transform="translate(1000,90)" opacity="0.22">
+        <path d="M0,0 L0,46 M52,0 L52,46 M0,0 L52,0" stroke="var(--red)" stroke-width="2"/>
+        <path d="M0,0 L17,16 M0,16 L17,30 M0,30 L17,44" stroke="var(--red)" stroke-width="0.9"/>
+        <path d="M52,0 L35,16 M52,16 L35,30 M52,30 L35,44" stroke="var(--red)" stroke-width="0.9"/>
+      </g>
+      <!-- tennis net, lower-center, wide and low -->
+      <g transform="translate(430,410)" opacity="0.18">
+        <path d="M0,0 L0,22 M170,0 L170,22 M0,0 L170,0" stroke="var(--gold)" stroke-width="1.6"/>
+        <path d="M0,0 L85,22 M0,5 L100,22 M0,10 L120,22 M0,15 L145,22" stroke="var(--gold)" stroke-width="0.5"/>
+        <path d="M170,0 L85,22 M170,5 L70,22 M170,10 L50,22 M170,15 L25,22" stroke="var(--gold)" stroke-width="0.5"/>
+      </g>
+      <!-- marked field diagram, upper far-right corner -->
+      <g transform="translate(1140,190)" opacity="0.20">
+        <rect x="-30" y="-18" width="60" height="36" rx="1.5" stroke="var(--white)" stroke-width="1.2"/>
+        <line x1="0" y1="-18" x2="0" y2="18" stroke="var(--white)" stroke-width="1"/>
+        <circle r="7" stroke="var(--white)" stroke-width="1"/>
+      </g>
+      <!-- rugby posts, far left, mid-height -->
+      <g transform="translate(30,340)" opacity="0.2">
+        <path d="M0,0 L0,34 M26,0 L26,34 M0,13 L26,13" stroke="var(--white)" stroke-width="1.6"/>
+      </g>
     </g>
   </svg>
   <div class="wrap hero-grid">
@@ -544,6 +677,34 @@
     <div class="form-panel">
       <div class="helper-note">Your profile is stored in the live registry and appears in the public directory below. Contact details are collected for verified scouts and are not shown publicly. Want to edit your profile later or manage a child's profile? <a href="/account.html" style="color:var(--gold-deep); font-weight:600;">Create an account</a> first, then register from there — it links automatically.</div>
       <form id="register-form">
+        <div class="field full" style="margin-bottom:20px;">
+          <label>Sport <span class="req">*</span></label>
+          <div class="sport-picker" id="sport-picker" role="radiogroup" aria-label="Select a sport">
+            <div class="sport-option" data-sport="Football" role="radio" aria-checked="false" tabindex="0">
+              <svg class="icon icon-lg"><use href="#icon-goal"/></svg>
+              <span>Football</span>
+            </div>
+            <div class="sport-option" data-sport="Rugby" role="radio" aria-checked="false" tabindex="0">
+              <svg class="icon icon-lg"><use href="#icon-posts"/></svg>
+              <span>Rugby</span>
+            </div>
+            <div class="sport-option" data-sport="Basketball" role="radio" aria-checked="false" tabindex="0">
+              <svg class="icon icon-lg"><use href="#icon-hoop"/></svg>
+              <span>Basketball</span>
+            </div>
+            <div class="sport-option" data-sport="E-Football" role="radio" aria-checked="false" tabindex="0">
+              <svg class="icon icon-lg"><use href="#icon-controller"/></svg>
+              <span>E-Football</span>
+            </div>
+          </div>
+          <select id="f-sport" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true" tabindex="-1">
+            <option value="">Select…</option>
+            <option>Football</option>
+            <option>Rugby</option>
+            <option>Basketball</option>
+            <option>E-Football</option>
+          </select>
+        </div>
         <div class="form-grid">
           <div class="field">
             <label>Full name <span class="req">*</span></label>
@@ -552,16 +713,6 @@
           <div class="field">
             <label>Date of birth <span class="req">*</span></label>
             <input type="date" id="f-dob" required />
-          </div>
-          <div class="field">
-            <label>Sport <span class="req">*</span></label>
-            <select id="f-sport" required>
-              <option value="">Select…</option>
-              <option>Football</option>
-              <option>Rugby</option>
-              <option>Basketball</option>
-              <option>E-Football</option>
-            </select>
           </div>
           <div class="field">
             <label>Position / discipline</label>
@@ -750,7 +901,11 @@
 
 <script>
 (function(){
-  const SPORT_ICON = { "Football":"⚽", "Rugby":"🏉", "Basketball":"🏀", "E-Football":"🎮" };
+  const SPORT_ICON_ID = { "Football":"icon-goal", "Rugby":"icon-posts", "Basketball":"icon-hoop", "E-Football":"icon-controller" };
+  function sportIcon(sport){
+    const id = SPORT_ICON_ID[sport];
+    return id ? `<svg class="icon"><use href="#${id}"/></svg>` : '';
+  }
 
   function showToast(msg){
     const t = document.getElementById('toast');
@@ -794,9 +949,9 @@
 
   const ATHLETE_SILHOUETTE = `
     <svg viewBox="0 0 80 80" class="silhouette" aria-hidden="true">
-      <circle cx="40" cy="40" r="40" fill="#0C3226"/>
-      <circle cx="40" cy="30" r="12" fill="#C8962B" opacity="0.85"/>
-      <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="#C8962B" opacity="0.85"/>
+      <circle cx="40" cy="40" r="40" fill="var(--pitch-deep)"/>
+      <circle cx="40" cy="30" r="12" fill="var(--gold)" opacity="0.85"/>
+      <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="var(--gold)" opacity="0.85"/>
     </svg>`;
 
   function renderManaged(){
@@ -808,7 +963,7 @@
           <div style="display:flex; gap:14px; align-items:center; margin-bottom:6px;">
             ${ATHLETE_SILHOUETTE}
             <div>
-              <div class="cap-sport">${SPORT_ICON[m.sport]} ${m.sport} · ${m.county}</div>
+              <div class="cap-sport">${sportIcon(m.sport)} ${m.sport} · ${m.county}</div>
               <h3 style="margin:2px 0 0;">${m.name}</h3>
             </div>
           </div>
@@ -838,7 +993,7 @@
         <div class="cap-top">
           <div class="cap-tab">${verLabel}</div>
           <div class="cap-num">${initials}</div>
-          <div class="cap-sport">${SPORT_ICON[p.sport]||''} ${p.sport}</div>
+          <div class="cap-sport">${sportIcon(p.sport)} ${p.sport}</div>
           <div class="cap-name">${p.full_name}</div>
         </div>
         <div class="cap-body">
@@ -967,12 +1122,37 @@
     box.style.display = (age !== null && age < 18) ? 'block' : 'none';
   });
 
+  // ---------- Sport picker (icon-based, syncs with hidden <select>) ----------
+  const sportPicker = document.getElementById('sport-picker');
+  const sportSelect = document.getElementById('f-sport');
+  function selectSport(sport){
+    sportSelect.value = sport;
+    sportPicker.querySelectorAll('.sport-option').forEach(opt => {
+      const isSelected = opt.dataset.sport === sport;
+      opt.classList.toggle('selected', isSelected);
+      opt.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+    });
+  }
+  sportPicker.querySelectorAll('.sport-option').forEach(opt => {
+    opt.addEventListener('click', () => selectSport(opt.dataset.sport));
+    opt.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        selectSport(opt.dataset.sport);
+      }
+    });
+  });
+
   document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const dob = document.getElementById('f-dob').value;
     const age = calcAge(dob);
     const isMinor = age !== null && age < 18;
 
+    if(!document.getElementById('f-sport').value){
+      showToast('Select a sport to continue.');
+      return;
+    }
     if(isMinor && !document.getElementById('f-guardian-name').value.trim()){
       showToast('Guardian full name is required to register a player under 18.');
       return;
@@ -1006,6 +1186,10 @@
     try{
       const data = await api('/players', { method: 'POST', body: JSON.stringify(payload) });
       e.target.reset();
+      sportPicker.querySelectorAll('.sport-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.setAttribute('aria-checked', 'false');
+      });
       document.getElementById('guardian-consent').style.display = 'none';
       showToast(`Registered — welcome to the directory, ${data.player.full_name.split(' ')[0]}.`);
       await refreshPlayers();

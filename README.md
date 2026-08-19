@@ -85,20 +85,42 @@ to `localStorage`, defaulting to the browser's `prefers-color-scheme` on
 first visit). A small inline script in `<head>` sets the theme before
 first paint, so there's no flash of the wrong theme on load.
 
-The palette keeps the same pitch-green/gold brand identity, but variables
-are split into two intentional categories:
+The palette moved away from the original pitch-green identity to a deep
+indigo/violet base with a vibrant coral-orange accent (`--pitch: #1B1B3D`,
+`--gold: #FF6B35` — the variable is still named `--gold` for backward
+compatibility across the stylesheet, but it no longer holds a literal gold
+color). Variables are split into two intentional categories:
 - **Surface colors** (`--surface`, `--paper`, `--paper-alt`, `--ink`,
   `--ink-soft`, `--line`) — these flip between light and dark mode. Cards,
   inputs, and page backgrounds use these.
 - **Brand panel colors** (`--pitch`, `--pitch-deep`, `--gold`) — these stay
-  a dark, branded green/gold in both themes. Nav, hero, footer, the
-  scoreboard, and Managed Athlete cards intentionally look the same
-  regardless of theme, the way a stadium floodlight scene would.
+  a dark indigo/violet with coral accents in both themes. Nav, hero,
+  footer, the scoreboard, and Managed Athlete cards intentionally look the
+  same regardless of theme.
+
+No real photographs are used anywhere in the design. An earlier version of
+this redesign considered pulling sports-equipment photos from a general
+web image search, but the actual search results returned branded product
+marketing photography (Nike/Adidas boot photography) — clearly copyrighted
+professional photography, and using it would risk implying a sponsorship
+relationship with those brands that doesn't exist. Instead, the hero
+background is built entirely from original assets: a multi-color gradient
+mesh in the new palette, plus hand-drawn line-art SVG icons (a football,
+basketball, rugby ball, and whistle) scattered at low opacity as texture.
+If you have your own licensed sports-equipment photography, drop files
+into `/public/images/` and swap them into the `.hero-art` section of
+`index.html` — the CSS is built to support a photo backdrop underneath the
+gradient mesh if you want one later.
 
 This was verified with real rendered screenshots (via Playwright/Chromium)
-in both themes, across the homepage, admin dashboard, and account
-dashboard — not just written and assumed to work. Screenshotting caught
-and fixed several real bugs along the way:
+in both themes, across the homepage, admin dashboard, account dashboard,
+and — after initially being missed in the first pass — the three policy
+pages (`privacy.html`, `terms.html`, `child-safety.html`), which still had
+the old green palette hardcoded until a follow-up check caught it. All six
+pages now share one consistent palette; there's no lingering green
+anywhere in the codebase (verified by grepping for the old hex values).
+
+Screenshotting caught and fixed several other real bugs along the way:
 - A missing `text-decoration:none` was putting a visible underline through
   the "Register Free" button.
 - The original hero background used a hard percentage split
@@ -118,11 +140,55 @@ and fixed several real bugs along the way:
   properly rather than leave it as dead CSS.
 
 Also added: scroll-reveal animations (`IntersectionObserver`-based, with
-a `prefers-reduced-motion` fallback that skips straight to visible), an
-eased count-up animation for the homepage scoreboard stats, and an
-ambient floodlight/gradient SVG backdrop in the hero using only
-CSS-variable-driven colors (so it re-themes automatically in dark mode)
-rather than any external images.
+a `prefers-reduced-motion` fallback that skips straight to visible), and
+an eased count-up animation for the homepage scoreboard stats.
+
+---
+
+## Sports-equipment iconography & the interactive sport picker
+
+A follow-up request asked for goal posts, tennis nets, marked-field lines,
+and similar unbranded equipment as background texture, plus a selectable
+icon-based way to choose a sport. Before building this, actual image
+searches were run for generic equipment photography ("empty football goal
+post field", "tennis net court lines", "basketball hoop net") — every
+result was either paid stock-marketplace listings (VectorStock/iStock),
+e-commerce product pages, or, in one case, green soccer-pitch photography
+that would have quietly reintroduced the color this redesign explicitly
+moved away from. None of it was safe to embed. So the equipment is
+original line-art instead: six reusable SVG icons defined once in a
+`<symbol>` library near the top of `<body>` in `index.html`
+(`#icon-goal`, `#icon-posts`, `#icon-hoop`, `#icon-controller`,
+`#icon-net`, `#icon-field`), referenced everywhere via
+`<svg class="icon"><use href="#icon-NAME"/></svg>`. They're used as
+scattered low-opacity hero background texture, as the sport labels on
+directory/Managed Athlete cards (replacing the old OS-emoji icons, which
+render inconsistently across platforms), and as the sport picker below.
+
+The registration form's sport field is no longer a plain `<select>` —
+it's four clickable icon tiles (`#sport-picker`), each syncing to a
+visually-hidden `<select id="f-sport">` that's kept for form semantics.
+Testing this caught two real bugs before shipping:
+- The first test used an ambiguous CSS selector and clicked the wrong
+  element, because a pre-existing directory filter chip happens to share
+  the same `data-sport` attribute value as the new picker tiles. Scoping
+  the selector to `#sport-picker [data-sport="..."]` fixed the test; this
+  wasn't an application bug.
+- A real one: the hidden `<select>` still had the native HTML `required`
+  attribute. Because the element is invisible (1×1px, `opacity:0`), the
+  browser's built-in form validation was silently blocking the form's
+  `submit` event from firing *at all* when no sport was selected — the
+  custom "Select a sport to continue" error message never ran, and
+  submitting with no sport chosen failed with no feedback whatsoever.
+  Fixed by removing `required` from the hidden select and relying on the
+  existing custom JS validation instead (which was already there but
+  unreachable). Verified directly: before the fix, submitting with no
+  sport produced no toast and no registration; after the fix, it shows
+  the correct message and still doesn't register.
+
+The full real-user path — click an icon, fill the rest, submit — was
+re-tested after the fix and completes correctly, including the visual
+selection state correctly resetting after a successful submission.
 
 ---
 
