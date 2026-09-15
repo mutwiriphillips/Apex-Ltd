@@ -1,7 +1,7 @@
 {
-  "name": "apex-talent-management",
+  "name": "josriri",
   "version": "1.0.0",
-  "description": "Apex Talent Management Ltd — Kenya sports talent registry, video showcase, and representation platform API.",
+  "description": "Josriri Sports Management Ltd — Kenya sports talent registry, video showcase, and representation platform API.",
   "private": true,
   "engines": {
     "node": ">=18.0.0"
@@ -18,6 +18,7 @@
     "dotenv": "^16.4.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "express-rate-limit": "^7.4.0"
+    "express-rate-limit": "^7.4.0",
+    "nodemailer": "^6.9.14"
   }
 }

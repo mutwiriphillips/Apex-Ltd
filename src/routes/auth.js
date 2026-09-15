@@ -2,6 +2,7 @@
 const express = require('express');
 const { pool } = require('../db');
 const { hashPassword, verifyPassword, signToken } = require('../auth');
+const { notifyAdmin } = require('../mailer');
 
 const router = express.Router();
 
@@ -38,6 +39,14 @@ router.post('/register', async (req, res, next) => {
     );
     const user = result.rows[0];
     const token = signToken(user);
+
+    // Best-effort admin notification — never blocks or fails the response.
+    notifyAdmin(`New account sign-up: ${user.email}`, [
+      `A new <strong>${user.role}</strong> account was created on Josriri Sports Management.`,
+      `Email: ${user.email}`,
+      `Created: ${new Date(user.created_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}`,
+    ]);
+
     res.status(201).json({ user, token });
   } catch (err) {
     next(err);

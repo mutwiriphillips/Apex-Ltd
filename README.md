@@ -1,4 +1,4 @@
-# Apex Talent Management — Deployable Platform
+# Josriri Sports Management — Deployable Platform
 
 Kenya's multi-sport player registry, video showcase, and representation platform.
 This is the working backend + frontend for the platform, wired to the PostgreSQL
@@ -19,7 +19,7 @@ being handed off.
 ## What's in this package
 
 ```
-apex-talent-management/
+josriri/
 ├── render.yaml            # Render Blueprint: web service + Postgres database
 ├── package.json
 ├── server.js               # Express app entry point
@@ -228,6 +228,42 @@ anonymously-registered profile stays anonymous; only profiles created
 
 ---
 
+## Email notifications (new player sign-ups, new accounts)
+
+The admin (`skywalkerstalents@gmail.com` by default) gets an email whenever:
+- a new player profile is registered (`POST /api/players` — the "Register as a player" flow on the homepage), or
+- a new login account is created (`POST /api/auth/register` — used by scouts, sponsors, guardians, club admins).
+
+This is **off by default** and fails silently (with a one-time console
+warning) if unconfigured — a broken mail setup must never block someone
+from registering. To turn it on, set these in your `.env` (or as Render
+environment variables):
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=skywalkerstalents@gmail.com
+SMTP_PASS=<a Gmail App Password — not your normal Gmail password>
+ADMIN_NOTIFICATION_EMAIL=skywalkerstalents@gmail.com
+```
+
+**Getting a Gmail App Password** (required — Gmail blocks plain-password
+SMTP login):
+1. Turn on 2-Step Verification on the Gmail account, if it isn't already: [myaccount.google.com/security](https://myaccount.google.com/security)
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+3. Create an app password (name it something like "Josriri platform")
+4. Copy the 16-character password Google gives you — that's your `SMTP_PASS`, not your real Gmail password
+
+On Render, `SMTP_USER` and `SMTP_PASS` are marked `sync: false` in
+`render.yaml`, meaning Render won't auto-generate them — set them once in
+the service's Environment tab in the Render dashboard.
+
+To notify a different address, or send from a non-Gmail SMTP provider
+(SendGrid, Mailgun, etc.), just change the `SMTP_*` values — the code
+doesn't assume Gmail specifically.
+
+---
+
 ## Setting up your first admin account
 
 Moderation (`/admin.html`) and player verification are restricted to
@@ -263,7 +299,7 @@ safe to leave in the codebase permanently because it's gated two ways:
    ```bash
    curl -X POST https://<your-service>.onrender.com/api/auth/bootstrap-admin \
      -H "Content-Type: application/json" \
-     -d '{"secret":"<paste the secret>","email":"admin@apextalent.co.ke","password":"a-strong-password"}'
+     -d '{"secret":"<paste the secret>","email":"admin@josriri.co.ke","password":"a-strong-password"}'
    ```
 3. Log in at `https://<your-service>.onrender.com/admin.html` with that
    email and password.
@@ -275,7 +311,7 @@ created; trying again afterward, even with the correct secret → 409
 ### Option B — CLI script (requires shell access / paid Render plan, or local dev)
 
 ```bash
-npm run create-admin -- admin@apextalent.co.ke "a-strong-password"
+npm run create-admin -- admin@josriri.co.ke "a-strong-password"
 ```
 
 On a paid Render instance type, run the same command via the web
@@ -290,20 +326,20 @@ and view guardian/lead data.
 
 1. **Push this folder to a new GitHub repository.**
    ```bash
-   cd apex-talent-management
+   cd josriri
    git init
    git add .
-   git commit -m "Initial Apex Talent Management platform"
+   git commit -m "Initial Josriri platform"
    git branch -M main
-   git remote add origin https://github.com/<your-username>/apex-talent-management.git
+   git remote add origin https://github.com/<your-username>/josriri.git
    git push -u origin main
    ```
 
 2. **In the Render dashboard:** click **New → Blueprint**, and select the
    GitHub repository you just pushed. Render will read `render.yaml`
    automatically and show you a plan to create:
-   - a **web service** (`apex-talent-management`, Node runtime, free plan)
-   - a **PostgreSQL database** (`apex-talent-db`, free plan)
+   - a **web service** (`josriri`, Node runtime, free plan)
+   - a **PostgreSQL database** (`josriri-db`, free plan)
    - a securely random `JWT_SECRET`, generated automatically by Render
      (`generateValue: true` in `render.yaml`) — you never need to invent
      or copy one yourself.
@@ -373,7 +409,7 @@ cp .env.example .env
 
 npm install
 npm run migrate     # applies all files in migrations/, in order
-npm run create-admin -- admin@apextalent.co.ke "a-strong-password"
+npm run create-admin -- admin@josriri.co.ke "a-strong-password"
 npm run dev          # starts the server without re-running migrate each time
 ```
 

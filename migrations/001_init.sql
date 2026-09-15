@@ -1,5 +1,5 @@
 -- =====================================================================
---  APEX TALENT MANAGEMENT LTD — PLATFORM DATABASE SCHEMA
+--  JOSRIRI SPORTS MANAGEMENT LTD — PLATFORM DATABASE SCHEMA
 --  PostgreSQL 15+
 --  Covers: multi-sport player registry, video showcase, verification,
 --  representation/agent management, deals & commissions, sponsors,

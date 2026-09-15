@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Apex Talent Management — Kenya's Sports Talent Platform</title>
+<link rel="icon" type="image/svg+xml" href="/assets/jsm-emblem-icon.svg" />
+<title>Josriri Sports Management — Kenya's Sports Talent Platform</title>
 <script>
   // Runs before first paint to avoid a flash of the wrong theme.
   (function(){
     try{
-      var saved = localStorage.getItem('apex_theme');
+      var saved = localStorage.getItem('josriri_theme');
       var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
     }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
@@ -16,44 +17,44 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pitch:#1B1B3D;
-    --pitch-deep:#0F0F26;
-    --paper:#F5F3F9;
-    --paper-alt:#FAF9FC;
-    --surface:#FFFFFF;
-    --ink:#191933;
-    --ink-soft:#5D5C79;
-    --gold:#FF6B35;
-    --gold-deep:#E8551F;
+    --pitch:#15171B;
+    --pitch-deep:#0C0D0F;
+    --paper:#101113;
+    --paper-alt:#17181C;
+    --surface:#1B1D22;
+    --ink:#F2F3F5;
+    --ink-soft:#9BA0A8;
+    --gold:#C6FF3D;
+    --gold-deep:#9FE01B;
     --red:#FF3D68;
-    --line:#E2DFEC;
+    --line:rgba(255,255,255,0.08);
     --white:#FFFFFF;
-    --glow-1: rgba(255,107,53,0.20);
-    --glow-2: rgba(255,61,104,0.14);
-    --shadow-card: 0 1px 2px rgba(15,15,38,0.05), 0 8px 24px rgba(15,15,38,0.07);
-    --shadow-card-hover: 0 4px 10px rgba(15,15,38,0.07), 0 20px 40px rgba(255,107,53,0.12);
+    --glow-1: rgba(198,255,61,0.18);
+    --glow-2: rgba(198,255,61,0.10);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.40);
+    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.45), 0 20px 44px rgba(198,255,61,0.14);
     --theme-transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
   }
   html[data-theme="dark"]{
-    --pitch:#17172E;
-    --pitch-deep:#0A0A1C;
-    --paper:#0D0D1F;
-    --paper-alt:#131327;
-    --surface:#191A33;
-    --ink:#EDEBF7;
-    --ink-soft:#A6A4C4;
-    --gold:#FF8557;
-    --gold-deep:#FFA36E;
+    --pitch:#0A0A0A;
+    --pitch-deep:#000000;
+    --paper:#000000;
+    --paper-alt:#0A0A0A;
+    --surface:#141518;
+    --ink:#F5F5F5;
+    --ink-soft:#8A8F98;
+    --gold:#D4FF5C;
+    --gold-deep:#B8FF3B;
     --red:#FF6E8C;
-    --line:rgba(255,255,255,0.09);
+    --line:rgba(255,255,255,0.10);
     --white:#F6F5FC;
-    --glow-1: rgba(255,133,87,0.22);
-    --glow-2: rgba(255,110,140,0.16);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
-    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.4), 0 24px 48px rgba(255,133,87,0.12);
+    --glow-1: rgba(212,255,92,0.22);
+    --glow-2: rgba(212,255,92,0.10);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.45);
+    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.5), 0 24px 48px rgba(212,255,92,0.14);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -69,7 +70,7 @@
     html{scroll-behavior:auto;}
     *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
   }
-  .display{font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.5px;}
+  .display{font-family:'Exo 2', sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;}
   .mono{font-family:'JetBrains Mono', monospace;}
   a{color:inherit;}
   img{max-width:100%; display:block;}
@@ -96,12 +97,40 @@
   html[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
   html[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
 
+  /* ---------- Back to top ---------- */
+  .to-top{
+    position:fixed; right:22px; bottom:22px; z-index:90;
+    width:44px; height:44px; border-radius:50%;
+    background:var(--pitch); color:var(--gold); border:1.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transform:translateY(10px);
+    transition:opacity .25s ease, transform .25s ease, background .2s ease;
+    box-shadow:var(--shadow-card);
+  }
+  .to-top.show{opacity:1; pointer-events:auto; transform:translateY(0);}
+  .to-top:hover{background:var(--gold-deep); color:var(--pitch-deep); border-color:var(--gold-deep);}
+  .to-top svg{width:18px; height:18px;}
+  @media (max-width:640px){ .to-top{right:14px; bottom:14px;} }
+
+  /* ---------- Card tilt (mouse-follow) ---------- */
+  .cap-card, .managed-card{ transform-style:preserve-3d; will-change:transform; }
+  @media (hover:none){ .cap-card, .managed-card{ transform:none !important; } }
+  @media (prefers-reduced-motion: reduce){ .cap-card, .managed-card{ transform:none !important; } }
+
   /* ---------- NAV ---------- */
   header.nav{
     position:sticky; top:0; z-index:100;
     background:var(--pitch);
-    border-bottom:3px solid var(--gold);
   }
+  header.nav::before{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:3px;
+    background:var(--gold); opacity:0.32;
+  }
+  #scroll-progress{
+    position:absolute; left:0; bottom:0; height:3px; width:0%;
+    background:var(--red); transition:width .08s linear;
+  }
+  @media (prefers-reduced-motion: reduce){ #scroll-progress{transition:none;} }
   .nav-inner{position:relative;}
   .nav-inner{
     display:flex; align-items:center; justify-content:space-between;
@@ -115,7 +144,7 @@
     width:34px; height:34px; border-radius:50%;
     background:var(--gold); color:var(--pitch-deep);
     display:flex; align-items:center; justify-content:center;
-    font-family:'Anton', sans-serif; font-size:18px;
+    font-family:'Exo 2', sans-serif; font-weight:800; font-size:11px; letter-spacing:-0.3px;
     flex-shrink:0;
   }
   nav.links{display:flex; gap:28px; list-style:none;}
@@ -124,13 +153,14 @@
     letter-spacing:0.3px; transition:color .15s ease;
   }
   nav.links a:hover, nav.links a:focus-visible{color:var(--gold);}
+  nav.links a.active{color:var(--gold);}
   .nav-cta{
     background:var(--gold); color:var(--pitch-deep); border:none;
     padding:10px 18px; font-weight:700; font-size:13.5px; border-radius:2px;
     text-transform:uppercase; letter-spacing:0.4px; text-decoration:none;
     display:inline-block; transition:background .15s ease;
   }
-  .nav-cta:hover{background:#DBA939;}
+  .nav-cta:hover{background:#9FE01B;}
   .burger{display:none; background:none; border:none; color:var(--white); font-size:26px;}
 
   /* ---------- HERO ---------- */
@@ -174,7 +204,7 @@
   }
   .btn:active{transform:translateY(1px);}
   .btn-gold{background:var(--gold); color:var(--pitch-deep);}
-  .btn-gold:hover{background:#DBA939;}
+  .btn-gold:hover{background:#9FE01B;}
   .btn-outline{background:transparent; border-color:#4E6B5C; color:var(--white);}
   .btn-outline:hover{border-color:var(--gold); color:var(--gold);}
   .btn-dark{background:var(--pitch); color:var(--white);}
@@ -219,7 +249,7 @@
     padding:28px 24px; position:relative;
   }
   .step .num{
-    font-family:'Anton', sans-serif; font-size:44px; color:var(--surface);
+    font-family:'Exo 2', sans-serif; font-weight:800; font-size:44px; color:var(--surface);
     -webkit-text-stroke:1.5px var(--gold); text-stroke:1.5px var(--gold);
     position:absolute; top:16px; right:20px; opacity:.9;
   }
@@ -253,7 +283,7 @@
     position:relative;
   }
   .cap-num{
-    font-family:'Anton', sans-serif; font-size:38px; color:rgba(255,255,255,0.18);
+    font-family:'Exo 2', sans-serif; font-weight:800; font-size:38px; color:rgba(255,255,255,0.18);
     position:absolute; top:8px; right:14px;
   }
   .cap-sport{
@@ -328,6 +358,42 @@
   .managed-body h3{font-size:20px; margin:8px 0 4px;}
   .silhouette{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:2px solid var(--gold);}
 
+  /* ---------- Featured athlete spotlight ---------- */
+  .spotlight-card{
+    display:flex; align-items:center; gap:28px;
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:32px; position:relative; overflow:hidden;
+  }
+  .spot-nav{
+    flex-shrink:0; width:44px; height:44px; border-radius:50%;
+    background:transparent; border:1.5px solid var(--line); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .spot-nav:hover{border-color:var(--gold); color:var(--gold); background:var(--glow-2);}
+  .spot-nav svg{width:20px; height:20px;}
+  .spot-body{flex:1; display:flex; align-items:center; gap:24px; min-width:0;}
+  .spot-silhouette{width:88px; height:88px; flex-shrink:0; border-radius:16px; background:var(--pitch-deep); border:2px solid var(--gold); overflow:hidden; display:flex; align-items:center; justify-content:center;}
+  .spot-silhouette svg{width:72%; height:72%;}
+  .spot-info{min-width:0;}
+  .spot-info .cap-sport{color:var(--gold); font-size:12.5px; text-transform:uppercase; letter-spacing:.5px; font-weight:700;}
+  .spot-info h3{font-size:24px; margin:6px 0 4px;}
+  .spot-info .role{color:var(--ink-soft); font-size:13.5px; margin-bottom:10px;}
+  .spot-info p{font-size:14.5px; color:var(--ink); max-width:520px; line-height:1.55;}
+  .spot-stats{display:flex; gap:22px; margin-top:14px;}
+  .spot-stats div{font-family:'JetBrains Mono', monospace;}
+  .spot-stats .n{font-size:17px; font-weight:700; color:var(--gold);}
+  .spot-stats .l{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px;}
+  .spot-dots{display:flex; justify-content:center; gap:8px; margin-top:20px;}
+  .spot-dot{width:8px; height:8px; border-radius:50%; background:var(--line); border:none; padding:0; cursor:pointer; transition:background .15s ease, transform .15s ease;}
+  .spot-dot.active{background:var(--gold); transform:scale(1.25);}
+  @media (max-width:680px){
+    .spotlight-card{flex-direction:column; padding:24px;}
+    .spot-body{flex-direction:column; text-align:center;}
+    .spot-stats{justify-content:center;}
+    .spot-nav{position:absolute; top:50%; transform:translateY(-50%); z-index:2;}
+    .spot-nav.prev{left:10px;} .spot-nav.next{right:10px;}
+  }
+
   /* ---------- Icon system ---------- */
   .icon{width:16px; height:16px; flex-shrink:0; vertical-align:-3px;}
   .icon-lg{width:28px; height:28px;}
@@ -363,7 +429,7 @@
   .highlight-thumb{
     width:60px; height:60px; flex-shrink:0; border-radius:4px;
     background:var(--pitch); display:flex; align-items:center; justify-content:center;
-    color:var(--gold); font-family:'Anton'; font-size:20px;
+    color:var(--gold); font-family:'Exo 2'; font-weight:800; font-size:20px;
   }
   .highlight-meta{flex:1;}
   .highlight-meta .title{font-weight:700; font-size:14.5px; margin-bottom:2px;}
@@ -387,6 +453,58 @@
     background:#14142C; color:var(--white); font-size:13.5px;
   }
   .lead-form label{font-size:11.5px; color:#A8A6C6; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
+
+  /* ---------- Founder / why-this-exists ---------- */
+  .founder-panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:44px; display:grid; grid-template-columns:0.65fr 1.35fr; gap:40px; align-items:start;
+  }
+  .founder-portrait{
+    width:100%; aspect-ratio:1; border-radius:10px; background:var(--pitch-deep);
+    border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .founder-portrait svg{width:56%; height:56%;}
+  .founder-name{font-size:15px; font-weight:700; margin-top:14px;}
+  .founder-role{font-size:12.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px;}
+  .founder-copy p{font-size:15px; color:var(--ink); line-height:1.7; margin-bottom:16px;}
+  .founder-copy p:first-of-type{font-size:17px; font-weight:600;}
+  .founder-stats{display:flex; gap:28px; margin-top:24px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap;}
+  .founder-stats div{font-family:'JetBrains Mono', monospace;}
+  .founder-stats .n{font-size:20px; font-weight:700; color:var(--gold);}
+  .founder-stats .l{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; max-width:170px; line-height:1.4;}
+  @media (max-width:760px){
+    .founder-panel{grid-template-columns:1fr; padding:28px;}
+    .founder-portrait{max-width:180px; margin:0 auto;}
+  }
+
+  /* ---------- Contact ---------- */
+  .contact-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .contact-tile{
+    background:var(--surface); border:1px solid var(--line); border-radius:8px;
+    padding:26px; text-align:center; text-decoration:none; color:var(--ink);
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .contact-tile:hover{border-color:var(--gold); transform:translateY(-3px); background:var(--glow-2);}
+  .contact-tile .icon-circle{
+    width:48px; height:48px; border-radius:50%; background:var(--pitch-deep); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
+  }
+  .contact-tile .icon-circle svg{width:22px; height:22px;}
+  .contact-tile h3{font-size:16px; margin-bottom:4px;}
+  .contact-tile p{font-size:13.5px; color:var(--ink-soft);}
+  @media (max-width:640px){ .contact-grid{grid-template-columns:1fr;} }
+
+  /* ---------- Floating WhatsApp button ---------- */
+  .whatsapp-float{
+    position:fixed; left:22px; bottom:22px; z-index:90;
+    width:56px; height:56px; border-radius:50%;
+    background:#25D366; color:#FFFFFF; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,0.35), 0 2px 6px rgba(37,211,102,0.4);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .whatsapp-float:hover{transform:translateY(-3px) scale(1.05); box-shadow:0 8px 22px rgba(0,0,0,0.4), 0 4px 10px rgba(37,211,102,0.5);}
+  .whatsapp-float svg{width:28px; height:28px;}
+  @media (max-width:640px){ .whatsapp-float{left:14px; bottom:14px; width:52px; height:52px;} }
 
   /* Footer */
   footer{background:var(--pitch-deep); color:#C4C2DC; padding:48px 0 24px;}
@@ -464,8 +582,8 @@
 <header class="nav">
   <div class="nav-inner">
     <div class="logo">
-      <div class="mark">A</div>
-      <span class="display" style="font-size:20px;">Apex Talent</span>
+      <div class="mark">JSM</div>
+      <span class="display" style="font-size:20px;">Josriri</span>
     </div>
     <nav class="links" id="nav-links">
       <a href="#how">How it works</a>
@@ -473,6 +591,7 @@
       <a href="#showcase">Showcase</a>
       <a href="#managed">Managed athletes</a>
       <a href="#sponsors">Sponsors &amp; scouts</a>
+      <a href="#contact">Contact</a>
       <a href="/account.html">My account</a>
     </nav>
     <div style="display:flex; align-items:center; gap:14px;">
@@ -484,7 +603,12 @@
       <button class="burger" id="mobile-menu-btn" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
     </div>
   </div>
+  <div id="scroll-progress"></div>
 </header>
+
+<button class="to-top" id="to-top-btn" type="button" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 
 <section class="hero">
   <svg class="hero-art" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
@@ -585,7 +709,7 @@
     <div style="padding-bottom:56px;">
       <div class="eyebrow"><span class="dot"></span> Kenya · Football · Rugby · Basketball · E-football</div>
       <h1 class="display">Talent isn't<br>the problem.<br><span>Visibility</span> is.</h1>
-      <p class="lead">Apex Talent Management is the verified registry and showcase for Kenyan athletes at every level — from county leagues to the Premier League. Register free, build a scoutable record, and get discovered by clubs, sponsors, and agents.</p>
+      <p class="lead">Josriri Sports Management is the verified registry and showcase for Kenyan athletes at every level — from county leagues to the Premier League. Register free, build a scoutable record, and get discovered by clubs, sponsors, and agents.</p>
       <div class="hero-actions">
         <a href="#register" class="btn btn-gold">Register as a player</a>
         <a href="#sponsors" class="btn btn-outline">I'm a scout or sponsor</a>
@@ -645,6 +769,26 @@
         <p>Clubs and sponsors search the registry directly. Standout athletes may be offered a Managed Athlete package.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="spotlight">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Featured athlete</span>
+      <h2 class="display">On the way up</h2>
+      <p>A rotating look at athletes building a scoutable record right now.</p>
+    </div>
+    <div class="spotlight-card reveal">
+      <button class="spot-nav prev" id="spot-prev" type="button" aria-label="Previous athlete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="spot-body" id="spotlight-body"></div>
+      <button class="spot-nav next" id="spot-next" type="button" aria-label="Next athlete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="spot-dots" id="spotlight-dots"></div>
   </div>
 </section>
 
@@ -816,6 +960,39 @@
   </div>
 </section>
 
+<section id="founder">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Why Josriri exists</span>
+      <h2 class="display">Talent doesn't fail. Visibility does.</h2>
+    </div>
+    <div class="founder-panel reveal">
+      <div>
+        <div class="founder-portrait">
+          <svg viewBox="0 0 80 80" aria-hidden="true">
+            <circle cx="40" cy="40" r="40" fill="var(--pitch-deep)"/>
+            <circle cx="40" cy="30" r="12" fill="var(--gold)" opacity="0.85"/>
+            <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="var(--gold)" opacity="0.85"/>
+          </svg>
+        </div>
+        <div class="founder-name">Ray Phillips Mutwiri</div>
+        <div class="founder-role">Founder &amp; CEO, Josriri Sports Management</div>
+      </div>
+      <div class="founder-copy">
+        <p>I played football because I loved it. What I didn't expect was how far ability alone would fail to take me — not because it wasn't good enough, but because there was no structure connecting a county-league talent to the scout, sponsor, or club that could do something about it.</p>
+        <p>That gap isn't a personal misfortune. It's a national one. Thousands of young footballers, rugby players, and athletes across Kenya train hard every week with real ability and no path to the people who could change their trajectory. Their opportunity never meets the right eyes — and Kenya, and Africa more broadly, loses talent to that gap every single year.</p>
+        <p>The timing makes this urgent. In 2027, Kenya co-hosts the Africa Cup of Nations with Uganda and Tanzania — the first three-nation AFCON in history, and the first time the tournament returns to East Africa since 1976. In 2029, Nairobi will host the World Athletics Championships, the first time that event has ever been held on African soil, on the back of a team that finished 2nd in the world at the 2025 Championships in Tokyo with seven gold medals. Home advantage on this scale comes once in a generation — but a tournament on your soil only becomes opportunity for your athletes if there's a system built to see them, verify them, and put them in front of the people who can sign, sponsor, or select them.</p>
+        <p>That system doesn't exist at scale in Kenya today. That's not a marketing problem — it's the reason this platform has to exist. Josriri is a verified, searchable registry built for the athletes nobody is watching yet: county-league players, rising rugby sevens talent, e-football competitors, and track athletes training without a scout in sight. With Kenya about to host the continent's biggest football tournament and the world's biggest athletics championship back to back, software like this isn't a convenience. It's necessary infrastructure.</p>
+        <div class="founder-stats">
+          <div><div class="n">2027</div><div class="l">AFCON co-hosted by Kenya, Uganda &amp; Tanzania</div></div>
+          <div><div class="n">2029</div><div class="l">World Athletics Championships in Nairobi — first ever on African soil</div></div>
+          <div><div class="n">7 gold</div><div class="l">Kenya's medal haul at the 2025 World Championships in Tokyo</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="sponsors" class="section-alt">
   <div class="wrap">
     <div class="sponsor-panel reveal">
@@ -826,7 +1003,7 @@
         <ul class="sponsor-list">
           <li>Filter by sport, position, county, and division</li>
           <li>Video-backed profiles reduce scouting risk</li>
-          <li>Direct introductions routed through Apex Talent Management</li>
+          <li>Direct introductions routed through Josriri Sports Management</li>
           <li>Data partnerships available for clubs &amp; federations</li>
         </ul>
       </div>
@@ -857,12 +1034,54 @@
   </div>
 </section>
 
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Get in touch</span>
+      <h2 class="display">Talk to us directly</h2>
+      <p>Questions about registering, verification, or a partnership — reach us however's easiest for you.</p>
+    </div>
+    <div class="contact-grid reveal">
+      <a class="contact-tile" href="tel:+254771648205">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <h3>Call us</h3>
+        <p>+254 771 648 205</p>
+      </a>
+      <a class="contact-tile" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <h3>WhatsApp</h3>
+        <p>Chat with us instantly</p>
+      </a>
+      <a class="contact-tile" href="mailto:skywalkerstalents@gmail.com">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3>Email</h3>
+        <p>skywalkerstalents@gmail.com</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<a class="whatsapp-float" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" title="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.39-.24.65-.14.27.1 1.69.8 1.98.94.29.15.48.22.55.34.07.13.07.72-.17 1.4z"/></svg>
+</a>
+
 <footer>
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <h4 style="color:var(--gold);">Apex Talent Management</h4>
+        <h4 style="color:var(--gold);">Josriri Sports Management</h4>
         <p class="footer-note">Kenya's unified sports talent, data, and representation platform — from grassroots county leagues to the Premier League, and every division in between.</p>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+          <li><a href="tel:+254771648205">📞 +254 771 648 205</a></li>
+          <li><a href="mailto:skywalkerstalents@gmail.com">✉️ skywalkerstalents@gmail.com</a></li>
+          <li><a href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer">💬 Chat on WhatsApp</a></li>
+        </ul>
       </div>
       <div>
         <h4>Platform</h4>
@@ -891,7 +1110,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Apex Talent Management Ltd. Nairobi, Kenya.</span>
+      <span>© 2026 Josriri Sports Management Ltd. Nairobi, Kenya.</span>
       <span>Prototype build — data protection registration and Sports Registrar alignment in progress.</span>
     </div>
   </div>
@@ -976,6 +1195,35 @@
         </div>
       </div>
     `).join('');
+  }
+
+  // ---------- Featured athlete spotlight ----------
+  let spotlightIndex = 0;
+  function renderSpotlight(){
+    const body = document.getElementById('spotlight-body');
+    const dotsWrap = document.getElementById('spotlight-dots');
+    if(!body || !dotsWrap) return;
+    const m = MANAGED[spotlightIndex];
+    body.innerHTML = `
+      <div class="spot-silhouette">${ATHLETE_SILHOUETTE.replace('class="silhouette"', '')}</div>
+      <div class="spot-info">
+        <div class="cap-sport">${sportIcon(m.sport)} ${m.sport} · ${m.county}</div>
+        <h3>${m.name}</h3>
+        <div class="role">${m.role}</div>
+        <p>${m.bio}</p>
+        <div class="spot-stats">
+          <div><div class="n">${m.stat1[0]}</div><div class="l">${m.stat1[1]}</div></div>
+          <div><div class="n">${m.stat2[0]}</div><div class="l">${m.stat2[1]}</div></div>
+        </div>
+      </div>
+    `;
+    dotsWrap.innerHTML = MANAGED.map((_, i) =>
+      `<button class="spot-dot${i === spotlightIndex ? ' active' : ''}" data-idx="${i}" aria-label="Show athlete ${i + 1}"></button>`
+    ).join('');
+  }
+  function spotlightGo(delta){
+    spotlightIndex = (spotlightIndex + delta + MANAGED.length) % MANAGED.length;
+    renderSpotlight();
   }
 
   // ---------- Directory ----------
@@ -1101,6 +1349,15 @@
   }
 
   // ---------- Event wiring ----------
+  document.getElementById('spot-prev').addEventListener('click', () => spotlightGo(-1));
+  document.getElementById('spot-next').addEventListener('click', () => spotlightGo(1));
+  document.getElementById('spotlight-dots').addEventListener('click', (e) => {
+    const dot = e.target.closest('.spot-dot');
+    if(!dot) return;
+    spotlightIndex = parseInt(dot.dataset.idx, 10);
+    renderSpotlight();
+  });
+
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -1242,7 +1499,7 @@
     try{
       await api('/leads', { method: 'POST', body: JSON.stringify(payload) });
       e.target.reset();
-      showToast('Request received — the Apex team will follow up.');
+      showToast('Request received — the Josriri team will follow up.');
     }catch(err){
       showToast(err.message || 'Could not submit your request.');
     }
@@ -1256,7 +1513,7 @@
     const html = document.documentElement;
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
-    try{ localStorage.setItem('apex_theme', next); }catch(e){}
+    try{ localStorage.setItem('josriri_theme', next); }catch(e){}
   });
 
   // ---------- Mobile menu ----------
@@ -1291,8 +1548,58 @@
     revealTargets.forEach(el => el.classList.add('in-view'));
   }
 
+  // ---------- Scroll progress + scrollspy + back-to-top ----------
+  const progressBar = document.getElementById('scroll-progress');
+  const toTopBtn = document.getElementById('to-top-btn');
+  const spySections = Array.from(document.querySelectorAll('main section[id], section[id]'))
+    .filter(el => document.querySelector(`nav.links a[href="#${el.id}"]`));
+  const spyLinks = document.querySelectorAll('nav.links a[href^="#"]');
+
+  function onScroll(){
+    const doc = document.documentElement;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
+    const scrollHeight = (doc.scrollHeight - doc.clientHeight) || 1;
+    const pct = Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100));
+    progressBar.style.width = pct + '%';
+
+    toTopBtn.classList.toggle('show', scrollTop > 480);
+
+    let current = null;
+    const probe = scrollTop + 140;
+    spySections.forEach(sec => {
+      if(sec.offsetTop <= probe) current = sec.id;
+    });
+    spyLinks.forEach(link => {
+      link.classList.toggle('active', current && link.getAttribute('href') === `#${current}`);
+    });
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  toTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+
+  // ---------- Card tilt (subtle mouse-follow, pointer devices only) ----------
+  if(window.matchMedia('(hover:hover)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.addEventListener('mousemove', (e) => {
+      const card = e.target.closest('.cap-card, .managed-card');
+      if(!card) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(700px) rotateX(${(py * -6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-2px)`;
+    });
+    document.addEventListener('mouseout', (e) => {
+      const card = e.target.closest('.cap-card, .managed-card');
+      if(card && !card.contains(e.relatedTarget)) card.style.transform = '';
+    });
+  }
+
   // ---------- Init ----------
   renderManaged();
+  renderSpotlight();
   refreshPlayers();
   refreshHighlights();
   refreshScoreboard();

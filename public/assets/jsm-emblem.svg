@@ -1,0 +1,28 @@
+<svg viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="460" fill="#0A1116"/>
+
+  <g stroke="#29D3F0" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Crossed diagonals -->
+    <line x1="108" y1="58" x2="292" y2="242"/>
+    <line x1="292" y1="58" x2="108" y2="242"/>
+
+    <!-- Arrowhead chevrons at all four tips -->
+    <polyline points="116.5,76.1 108,58 126.1,66.5"/>
+    <polyline points="283.5,76.1 292,58 273.9,66.5"/>
+    <polyline points="116.5,223.9 108,242 126.1,233.5"/>
+    <polyline points="283.5,223.9 292,242 273.9,233.5"/>
+
+    <!-- Diamonds, left and right -->
+    <polygon points="60,124 80,150 60,176 40,150"/>
+    <polygon points="340,124 360,150 340,176 320,150"/>
+
+    <!-- Triangle, below the crossing point -->
+    <polygon points="200,182 228,222 172,222"/>
+
+    <!-- Stylized J, above the crossing point -->
+    <path d="M201,22 L201,48 Q201,60 190,60 Q181,60 178,52"/>
+  </g>
+
+  <text x="200" y="330" text-anchor="middle" font-family="'Exo 2','Arial Narrow',sans-serif" font-weight="800" font-size="62" letter-spacing="2" fill="#29D3F0">JSM</text>
+  <text x="200" y="368" text-anchor="middle" font-family="'Work Sans',Arial,sans-serif" font-weight="600" font-size="17" letter-spacing="6" fill="#7DE6F5">SPORTS MANAGEMENT</text>
+</svg>

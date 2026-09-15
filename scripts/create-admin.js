@@ -6,11 +6,11 @@
 // can never be granted through the API itself.
 //
 // Usage (local):
-//   npm run create-admin -- admin@apextalent.co.ke "a-strong-password"
+//   npm run create-admin -- admin@josriri.co.ke "a-strong-password"
 //
 // Usage (on Render):
 //   Open your web service in the Render dashboard → Shell tab → run:
-//   node scripts/create-admin.js admin@apextalent.co.ke "a-strong-password"
+//   node scripts/create-admin.js admin@josriri.co.ke "a-strong-password"
 
 require('dotenv').config();
 const bcrypt = require('bcryptjs');

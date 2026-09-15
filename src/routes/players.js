@@ -4,6 +4,7 @@ const { pool } = require('../db');
 const {
   getSportId, findOrCreateCounty, findOrCreateClub, findOrCreateDivision, HttpError,
 } = require('../helpers');
+const { notifyAdmin } = require('../mailer');
 
 const router = express.Router();
 
@@ -156,6 +157,16 @@ router.post('/', async (req, res, next) => {
     }
 
     await client.query('COMMIT');
+
+    // Best-effort admin notification — never blocks or fails the response.
+    notifyAdmin(`New player sign-up: ${player.full_name}`, [
+      `<strong>${player.full_name}</strong> just registered on Josriri Sports Management.`,
+      `Sport: ${sport}${position ? ` (${position})` : ''}`,
+      `Club: ${club || '—'} &middot; County: ${county || '—'} &middot; Division: ${division || '—'}`,
+      isMinor ? 'This is a minor profile — guardian consent was captured at registration.' : 'Adult profile.',
+      `Registered: ${new Date(player.created_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}`,
+    ]);
+
     res.status(201).json({
       player,
       linkedToAccount: linkingAsPlayer || linkingAsGuardian || false,

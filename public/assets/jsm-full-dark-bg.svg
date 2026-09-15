@@ -1,0 +1,7 @@
+<svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="160" fill="#0C0D0F"/>
+  <rect x="24" y="30" width="100" height="100" rx="18" fill="none" stroke="#C6FF3D" stroke-width="3"/>
+  <text x="74" y="98" text-anchor="middle" font-family="'Exo 2', 'Arial Narrow', sans-serif" font-weight="800" font-size="46" letter-spacing="0.5" fill="#C6FF3D">JSM</text>
+  <text x="150" y="88" font-family="'Exo 2','Arial Narrow',sans-serif" font-weight="800" font-size="34" letter-spacing="0.5" fill="#F2F3F5">JOSRIRI SPORTS</text>
+  <text x="152" y="112" font-family="'Work Sans',Arial,sans-serif" font-weight="600" font-size="13" letter-spacing="5" fill="#9BA0A8">MANAGEMENT</text>
+</svg>
