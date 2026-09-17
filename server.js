@@ -1,5 +1,5 @@
 // server.js
-// Josriri Sports Management — API + static site entry point.
+// Apex Talent Management — API + static site entry point.
 // On Render this is started via `npm start`, which runs the migration
 // (src/migrate.js) first and then boots this server. See render.yaml.
 
@@ -83,6 +83,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Josriri API listening on port ${PORT}`);
+  console.log(`Apex Talent Management API listening on port ${PORT}`);
 });
 

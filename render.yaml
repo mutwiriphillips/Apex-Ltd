@@ -1,51 +1,27 @@
-# Render Blueprint — Embu Coop Management & Governance System (pilot/test run)
-#
-# Deploy: push this repo to GitHub, then in Render choose
-# "New +" -> "Blueprint" and point it at the repo. Render reads this file
-# and provisions all three services together.
-#
-# After the first deploy, run the pilot seed once via the backend service's
-# Shell tab: node prisma/seed-pilot.js  (see RENDER_DEPLOYMENT.md)
-
-databases:
-  - name: embu-coop-db
-    plan: free
-    databaseName: embu_coop_system
-    user: embu_admin
-
 services:
   - type: web
-    name: embu-coop-backend
+    name: apex-talent-management
     runtime: node
     plan: free
-    rootDir: backend
-    buildCommand: npm install && npx prisma generate && npx prisma db push --accept-data-loss
+    region: frankfurt
+    buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: embu-coop-db
-          property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: JWT_EXPIRES_IN
-        value: 8h
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_ORIGIN
-        value: https://embu-coop-frontend.onrender.com
-      # TEST-RUN ONLY. Set back to "false" (or remove) once the pilot ends.
-      - key: ALLOW_OPEN_SIGNUP
-        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_BOOTSTRAP_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: apex-talent-db
+          property: connectionString
 
-  - type: web
-    name: embu-coop-frontend
-    runtime: node
+databases:
+  - name: apex-talent-db
     plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NEXT_PUBLIC_API_BASE_URL
-        value: https://embu-coop-backend.onrender.com/api
+    region: frankfurt
+    databaseName: apex_talent
+    user: apex_admin
