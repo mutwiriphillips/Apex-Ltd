@@ -1,0 +1,631 @@
+// Embu County Cooperative Management & Governance System
+// Prisma schema — covers Modules 1-5 from the Engineering Scope document.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// County reference data (all 47 Kenyan counties — see prisma/seed-counties.js)
+// ---------------------------------------------------------------------------
+
+model County {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique // official county code, e.g. "014" for Embu
+  region    String   // former province grouping, for dashboard sub-filters
+  createdAt DateTime @default(now())
+
+  staff        User[]
+  cooperatives Cooperative[]
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 1: County Staff & Access Management (RBAC)
+// ---------------------------------------------------------------------------
+
+enum StaffRole {
+  NATIONAL_ADMIN       // cross-county oversight (State Dept. of Cooperatives)
+  DIRECTOR             // County Director of Co-operative Development
+  SUBCOUNTY_OFFICER
+  FIELD_OFFICER
+  COOPERATIVE_MANAGER
+}
+
+model User {
+  id             String    @id @default(uuid())
+  fullName       String
+  jobGroup       String?
+  designation    String?
+  phoneNumber    String?
+  email          String    @unique
+  passwordHash   String
+  role           StaffRole
+  countyId       String?
+  county         County?   @relation(fields: [countyId], references: [id])
+  subCounty      String?
+  ward           String?
+  reportsToId    String?
+  reportsTo      User?     @relation("ReportingLine", fields: [reportsToId], references: [id])
+  reports        User[]    @relation("ReportingLine")
+  active         Boolean   @default(true)
+  permissions    Permission[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  fieldVisits      FieldVisit[]      @relation("VisitOfficer")
+  approvedVisits   FieldVisit[]      @relation("VisitApprover")
+  leaveRequests    LeaveRequest[]    @relation("LeaveApplicant")
+  approvedLeaves   LeaveRequest[]    @relation("LeaveApprover")
+  uploadedDocs     Document[]        @relation("DocUploader")
+  reviewedDocs     Document[]        @relation("DocReviewer")
+  approvedDocs     Document[]        @relation("DocApprover")
+  managedCoops     Cooperative[]     @relation("CoopManager")
+  auditLogs        AuditLog[]
+  recordedContributions Contribution[]     @relation("ContributionRecordedBy")
+  creditAssessmentsRun  CreditAssessment[] @relation("CreditAssessmentComputedBy")
+  recordedProduce       ProduceDelivery[]  @relation("ProduceRecordedBy")
+  recordedPayouts       Payout[]           @relation("PayoutRecordedBy")
+  recordedAssets        Asset[]            @relation("AssetRecordedBy")
+  recordedAssetEvents   AssetEvent[]       @relation("AssetEventRecordedBy")
+
+  @@index([countyId])
+}
+
+// Granular module/tab access rights, assignable by the Director.
+model Permission {
+  id       String @id @default(uuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module   String // e.g. "cooperatives", "documents", "governance", "field_ops", "staff"
+  canView  Boolean @default(true)
+  canEdit  Boolean @default(false)
+  canApprove Boolean @default(false)
+
+  @@unique([userId, module])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 2: Field Operations & Leave Tracking
+// ---------------------------------------------------------------------------
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRequest {
+  id            String      @id @default(uuid())
+  applicantId   String
+  applicant     User        @relation("LeaveApplicant", fields: [applicantId], references: [id])
+  leaveType     String      // annual, sick, compassionate, etc.
+  startDate     DateTime
+  endDate       DateTime
+  reason        String?
+  status        LeaveStatus @default(PENDING)
+  approverId    String?
+  approver      User?       @relation("LeaveApprover", fields: [approverId], references: [id])
+  decisionNote  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum VisitStatus {
+  PLANNED
+  AUTHORIZED
+  REJECTED
+  COMPLETED
+}
+
+model FieldVisit {
+  id             String      @id @default(uuid())
+  officerId      String
+  officer        User        @relation("VisitOfficer", fields: [officerId], references: [id])
+  cooperativeId  String
+  cooperative    Cooperative @relation(fields: [cooperativeId], references: [id])
+  plannedDate    DateTime
+  purpose        String
+  status         VisitStatus @default(PLANNED)
+  approverId     String?
+  approver       User?       @relation("VisitApprover", fields: [approverId], references: [id])
+  report         VisitReport?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model VisitReport {
+  id             String     @id @default(uuid())
+  visitId        String     @unique
+  visit          FieldVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  narrative      String
+  achievements   String?
+  dataPoints     Json?
+  nextActions    String?
+  submittedAt    DateTime   @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 3: Cooperative Registry & Member Database
+// ---------------------------------------------------------------------------
+
+enum ValueChain {
+  COFFEE
+  DAIRY
+  MIRAA
+  IRRIGATION
+  TEA
+  SUGARCANE
+  COTTON
+  CASHEWNUT
+  FISHERIES
+  LIVESTOCK
+  POULTRY
+  SACCO          // savings & credit co-operative societies
+  HOUSING
+  TRANSPORT      // matatu/boda-boda transport SACCOs
+  HANDICRAFTS
+  OTHER
+}
+
+model Cooperative {
+  id                 String      @id @default(uuid())
+  name               String
+  registrationNumber String      @unique
+  valueChain         ValueChain
+  countyId           String
+  county             County      @relation(fields: [countyId], references: [id])
+  subCounty          String
+  ward               String
+  managerId          String?
+  manager            User?       @relation("CoopManager", fields: [managerId], references: [id])
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  members         Member[]
+  documents       Document[]
+  fieldVisits     FieldVisit[]
+  committees      Committee[]
+  agms            AGM[]
+  candidates      ElectionCandidate[]
+  contributions   Contribution[]
+  creditAssessments CreditAssessment[]
+  produceDeliveries ProduceDelivery[]
+  payouts         Payout[]
+  assets          Asset[]
+
+  @@index([valueChain])
+  @@index([countyId, subCounty, ward])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Member {
+  id             String      @id @default(uuid())
+  cooperativeId  String
+  cooperative    Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  legalName      String
+  nationalId     String
+  phoneNumber    String?
+  gender         Gender
+  shareCapital   Decimal     @db.Decimal(14, 2) @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  contributions  Contribution[]
+  produceDeliveries ProduceDelivery[]
+  payouts        Payout[]
+  account        MemberAccount?
+  assets         Asset[]
+
+  @@unique([cooperativeId, nationalId])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 8: Asset & Livestock Generalization (Phase 2)
+// ---------------------------------------------------------------------------
+// One model covers every "discrete tracked asset" value chain rather than a
+// bespoke table per chain — a dairy cow, a boda boda, and a housing unit are
+// structurally the same thing: something a member owns, with a status and a
+// lifecycle of events. This is the same "shape, not chain" reduction applied
+// to ProduceDelivery for the 9 consumable-produce chains. Applies to exactly
+// the value chains named in ASSET_TRACKED_VALUE_CHAINS in utils/creditScore.js
+// (LIVESTOCK, POULTRY, HOUSING, TRANSPORT) — every other cooperative simply
+// never has Asset rows, and the credit engine renormalizes around that
+// factor's absence rather than scoring it as a failure.
+
+enum AssetType {
+  LIVESTOCK      // e.g. dairy cattle, goats
+  POULTRY        // e.g. layer/broiler flocks
+  VEHICLE        // Transport SACCOs — boda boda, matatu
+  PROPERTY_UNIT  // Housing cooperatives — a unit/plot
+  OTHER
+}
+
+enum AssetStatus {
+  ACTIVE
+  TRANSFERRED
+  SOLD
+  DECEASED       // livestock/poultry only, in practice
+  WRITTEN_OFF
+}
+
+model Asset {
+  id               String      @id @default(uuid())
+  memberId         String
+  member           Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  cooperativeId    String
+  cooperative      Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  assetType        AssetType
+  identifier       String      // ear tag, plate number, unit number — whatever traces this specific asset
+  description      String?     // breed, make/model, unit details
+  acquisitionDate  DateTime
+  acquisitionValue Decimal?    @db.Decimal(14, 2)
+  currentValue     Decimal?    @db.Decimal(14, 2) // updated by VALUATION_UPDATE events
+  status           AssetStatus @default(ACTIVE)
+  recordedById     String?
+  recordedBy       User?       @relation("AssetRecordedBy", fields: [recordedById], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  events           AssetEvent[]
+
+  @@unique([cooperativeId, identifier])
+  @@index([memberId])
+  @@index([cooperativeId, assetType])
+}
+
+enum AssetEventType {
+  ACQUIRED
+  TRANSFERRED
+  SOLD
+  DECEASED
+  WRITTEN_OFF
+  VALUATION_UPDATE
+  HEALTH_CHECK      // livestock/poultry: a vet or field-officer wellness record
+}
+
+// Every lifecycle moment for an asset — this is the audit trail a lender (or
+// a Director) can actually trust, and what "dead-cow swap" style fraud looks
+// like when it's a logged event chain instead of a self-report.
+model AssetEvent {
+  id            String         @id @default(uuid())
+  assetId       String
+  asset         Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  eventType     AssetEventType
+  eventDate     DateTime
+  notes         String?
+  valueAtEvent  Decimal?       @db.Decimal(14, 2)
+  recordedById  String?
+  recordedBy    User?          @relation("AssetEventRecordedBy", fields: [recordedById], references: [id])
+  createdAt     DateTime       @default(now())
+
+  @@index([assetId, eventDate])
+}
+
+// ---------------------------------------------------------------------------
+// Member self-service auth tier — deliberately a SEPARATE identity from
+// User (staff). A member never becomes a staff account and vice versa; the
+// two token types are not interchangeable (see authenticateMember vs
+// authenticate in middleware/auth.js). Registration is gated by matching a
+// submitted National ID against an existing Member record that staff
+// already created — this system does not verify National IDs against any
+// external government registry, it verifies against the cooperative's own
+// records, which is the ground truth this platform actually has access to.
+// ---------------------------------------------------------------------------
+
+model MemberAccount {
+  id           String    @id @default(uuid())
+  memberId     String    @unique
+  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  // Denormalized from Member.nationalId at registration time so login can do
+  // a single unique lookup. National IDs are unique per Kenyan citizen, so
+  // this is a reasonable global-uniqueness assumption even though Member's
+  // own uniqueness is only per-cooperative.
+  nationalId   String    @unique
+  phoneNumber  String
+  email        String?
+  passwordHash String
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 6: Financial Ledger & Credit Readiness (trust layer, not a lender —
+// this system scores creditworthiness for third-party lenders; it never
+// disburses funds itself)
+// ---------------------------------------------------------------------------
+
+enum ContributionType {
+  MONTHLY_CONTRIBUTION
+  SHARE_CAPITAL_TOPUP
+  LOAN_REPAYMENT
+  OTHER
+}
+
+// Shared by Contribution (money IN from members) and Payout (money OUT to
+// members) so both ledgers use one consistent set of payment rails.
+enum PaymentMethod {
+  MPESA
+  CASH
+  BANK_TRANSFER
+  OTHER
+}
+
+model Contribution {
+  id               String              @id @default(uuid())
+  memberId         String
+  member           Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  cooperativeId    String
+  cooperative      Cooperative         @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  amount           Decimal             @db.Decimal(14, 2)
+  type             ContributionType    @default(MONTHLY_CONTRIBUTION)
+  method           PaymentMethod       @default(CASH)
+  externalRef      String?             // e.g. M-Pesa receipt number, for future Daraja reconciliation
+  contributionDate DateTime
+  recordedById     String?
+  recordedBy       User?               @relation("ContributionRecordedBy", fields: [recordedById], references: [id])
+  createdAt        DateTime            @default(now())
+
+  @@index([memberId, contributionDate])
+  @@index([cooperativeId, contributionDate])
+}
+
+// ---------------------------------------------------------------------------
+// Produce deliveries (what a member physically delivers — coffee cherries,
+// milk, tea leaf, etc.) and Payouts (money OUT to members, typically to
+// compensate delivered produce). Together these are the other half of the
+// financial ledger — Contribution/CreditAssessment above track money and
+// trust coming IN; these track goods and money going OUT to the farmer.
+// ---------------------------------------------------------------------------
+
+enum ProduceUnit {
+  KG
+  LITERS
+  BAGS
+  CRATES
+  OTHER
+}
+
+model ProduceDelivery {
+  id            String       @id @default(uuid())
+  memberId      String
+  member        Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  cooperativeId String
+  cooperative   Cooperative  @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  produceType   String       // e.g. "Coffee Cherries", "Whole Milk" — free text, suggested from the cooperative's value chain
+  quantity      Decimal      @db.Decimal(12, 2)
+  unit          ProduceUnit  @default(KG)
+  qualityGrade  String?      // e.g. "AA", "AB", "PB" for coffee
+  ratePerUnit   Decimal?     @db.Decimal(10, 2) // KES per unit, may be set later once the buyer's price is known
+  totalValue    Decimal?     @db.Decimal(14, 2) // quantity * ratePerUnit, snapshotted when set
+  deliveryDate  DateTime
+  paid          Boolean      @default(false)
+  payoutId      String?
+  payout        Payout?      @relation(fields: [payoutId], references: [id])
+  recordedById  String?
+  recordedBy    User?        @relation("ProduceRecordedBy", fields: [recordedById], references: [id])
+  createdAt     DateTime     @default(now())
+
+  @@index([memberId, deliveryDate])
+  @@index([cooperativeId, deliveryDate])
+}
+
+enum PayoutType {
+  PRODUCE_PAYMENT
+  DIVIDEND
+  BONUS
+  OTHER
+}
+
+// Money the cooperative pays OUT to a member — this is the "trickle-down"
+// data the Director's compliance dashboard reports on: exactly how much
+// each farmer was compensated, and when.
+model Payout {
+  id            String      @id @default(uuid())
+  memberId      String
+  member        Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  amount        Decimal     @db.Decimal(14, 2)
+  type          PayoutType  @default(PRODUCE_PAYMENT)
+  method        PaymentMethod @default(CASH)
+  externalRef   String?
+  periodLabel   String?     // e.g. "July 2026" — free text grouping for reporting
+  payoutDate    DateTime
+  recordedById  String?
+  recordedBy    User?       @relation("PayoutRecordedBy", fields: [recordedById], references: [id])
+  createdAt     DateTime    @default(now())
+
+  produceDeliveries ProduceDelivery[]
+
+  @@index([memberId, payoutDate])
+  @@index([cooperativeId, payoutDate])
+}
+
+// A point-in-time credit-readiness assessment for a cooperative. Stored
+// (not just computed on the fly) so a report can be exported/shared with a
+// third-party lender and its inputs stay auditable after the fact.
+model CreditAssessment {
+  id            String      @id @default(uuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  score         Int         // 0-100 composite
+  band          String      // AA / A / B / C / D — see utils/creditScore.js
+  breakdown     Json        // per-factor scores + raw inputs, for transparency
+  computedById  String?
+  computedBy    User?       @relation("CreditAssessmentComputedBy", fields: [computedById], references: [id])
+  createdAt     DateTime    @default(now())
+
+  @@index([cooperativeId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 4: Secure Document Management System (DMS)
+// ---------------------------------------------------------------------------
+
+enum DocumentType {
+  BY_LAWS
+  MEETING_MINUTES
+  CODE_OF_CONDUCT
+  AUDIT_REPORT
+  SPOT_CHECK_REPORT
+  OTHER
+}
+
+enum ApprovalStatus {
+  PENDING
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+model Document {
+  id             String         @id @default(uuid())
+  cooperativeId  String
+  cooperative    Cooperative    @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  docType        DocumentType
+  title          String
+  storageKey     String         // key/path in object storage; pre-signed URL generated on demand
+  fileSizeBytes  Int
+  status         ApprovalStatus @default(PENDING)
+  uploadedById   String
+  uploadedBy     User           @relation("DocUploader", fields: [uploadedById], references: [id])
+  reviewedById   String?
+  reviewedBy     User?          @relation("DocReviewer", fields: [reviewedById], references: [id])
+  reviewedAt     DateTime?
+  approvedById   String?
+  approvedBy     User?          @relation("DocApprover", fields: [approvedById], references: [id])
+  approvedAt     DateTime?
+  rejectionNote  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([cooperativeId, docType])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// MODULE 5: Governance, Election & AGM Tracking
+// ---------------------------------------------------------------------------
+
+enum CommitteeType {
+  MANAGEMENT
+  SUPERVISORY
+}
+
+enum CommitteeRole {
+  CHAIRPERSON
+  VICE_CHAIRPERSON
+  SECRETARY
+  TREASURER
+  BOARD_MEMBER
+  EXECUTIVE_MANAGER   // non-elected, excluded from 1/3 rule calc
+  SUPERVISORY_CHAIR
+  SUPERVISORY_SECRETARY
+}
+
+enum CommitteeStatus {
+  UPCOMING
+  TERM_EXPIRING
+  TERM_EXPIRED
+  COMPLIANT
+  NON_COMPLIANT
+}
+
+model Committee {
+  id                 String          @id @default(uuid())
+  cooperativeId      String
+  cooperative        Cooperative     @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  committeeType      CommitteeType
+  termLengthYears     Int             @default(3)
+  status             CommitteeStatus @default(UPCOMING)
+  complianceOverride Boolean         @default(false)
+  overrideJustification String?
+  members            CommitteeMember[]
+  signatories        Signatory[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model CommitteeMember {
+  id                  String        @id @default(uuid())
+  committeeId         String
+  committee           Committee     @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  fullName            String
+  gender              Gender
+  role                CommitteeRole
+  electionDate        DateTime
+  reelectionDueDate   DateTime
+  createdAt           DateTime      @default(now())
+}
+
+// Highly restricted, auditable bank account signatories.
+model Signatory {
+  id           String    @id @default(uuid())
+  committeeId  String
+  committee    Committee @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  fullName     String
+  role         String
+  bankAccount  String
+  approvedAt   DateTime  @default(now())
+}
+
+enum CandidateStatus {
+  APPLIED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model ElectionCandidate {
+  id             String          @id @default(uuid())
+  cooperativeId  String
+  cooperative    Cooperative     @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  fullName       String
+  gender         Gender
+  roleAppliedFor CommitteeRole
+  status         CandidateStatus @default(APPLIED)
+  enteredByStaff Boolean         @default(false) // assisted entry by manager/field staff
+  createdAt      DateTime        @default(now())
+}
+
+enum AGMType {
+  ANNUAL
+  EXTRAORDINARY
+}
+
+model AGM {
+  id             String      @id @default(uuid())
+  cooperativeId  String
+  cooperative    Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  agmType        AGMType
+  meetingDate    DateTime
+  noticeStorageKey  String?  // Letter Calling for the AGM
+  minutesStorageKey String?  // Signed minutes
+  createdAt      DateTime    @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Cross-cutting: Audit log for sensitive actions
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}

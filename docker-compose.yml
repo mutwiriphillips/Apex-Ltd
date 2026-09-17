@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: embu_admin
+      POSTGRES_PASSWORD: embu_password
+      POSTGRES_DB: embu_coop_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - embu_pg_data:/var/lib/postgresql/data
+
+volumes:
+  embu_pg_data:
