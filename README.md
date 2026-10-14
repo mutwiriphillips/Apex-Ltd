@@ -584,25 +584,52 @@ text is HTML-escaped on render.
 
 ## Homepage redesign (Oct 2026)
 
-`public/index.html` was rebuilt: dark charcoal/navy hero, nav and footer with
-off-white content sections, electric-lime accents (tokens at the top of the
-stylesheet), Manrope + Exo 2, a typing headline that is readable with JS off
-or reduced motion, sport cards that jump into the directory, a filterable and
-paginated directory (name, sport, county, club, position, level, sort), athlete
-profile dialogs with shareable `#p=<id>` links, a highlight showcase with safe
-YouTube/Vimeo embeds, grouped registration with inline validation, a trust
-section, and a scout-access form.
+`public/index.html` was rebuilt to the "Josriri final redesign" brief: midnight
+ink / porcelain / electric violet / lilac / powder blue / coral palette (no green
+or gold; tokens at the top of the stylesheet), a serif wordmark with a small
+"SPORTS MANAGEMENT" descriptor, serif headlines with Manrope-style UI text, a few
+hand-drawn violet strokes, and a typing line ("Be seen by scouts.", "Unlock your
+next opportunity.", "Take your talent further.") with reserved space and a static
+fallback for reduced motion or JS off. Sections: hero, sport cards (link into the
+directory), how it works, showcase, managed athletes, scouts and sponsors,
+filterable/paginated directory, registration, mission/founder, trust, contact.
+All existing routes, APIs, forms, auth, search and minors' protections are unchanged.
 
-- **Photography:** 13 illustrative (AI-generated) images are wired in via
-  `public/assets/img/manifest.json` (see the README there); the founder section
-  shows initials until a real portrait is added. Fallback sport panels cover any
-  missing image. The site discloses that photography is illustrative.
-- **Backend changes:** `GET /api/players` now supports `club`, `position`,
-  `division`, `sort`, `limit`, `offset` and returns `total`;
-  `GET /api/highlights` returns only *approved* highlights for players visible
-  in the public directory view, and accepts `?playerId=`.
-- **Removed:** the registration "contact" field. The API never stored it, so
-  it collected data it didn't keep. Re-add it once a private contact column
-  and access rules exist.
-- **Still needed (backend):** athlete photo upload/storage, direct video
-  upload, and a stored private-contact pathway for scouts.
+- **Imagery:** venue and equipment only (stadium, boots and ball, rugby ball,
+  basketball court, e-football setup, running track, floodlight tower, arena
+  roof). All 9 images are AI-generated crops of the supplied design board
+  (none externally sourced, no third-party licences involved). They are
+  board-resolution and upscaled, so they look soft; regenerate at 1600 px+ wide.
+  Wired through `public/assets/img/manifest.json`; missing images fall back to a
+  designed panel. There is no founder portrait and no people imagery.
+- **Backend changes (earlier):** `GET /api/players` supports `club`, `position`,
+  `division`, `sort`, `limit`, `offset` and returns `total`; `GET /api/highlights`
+  returns only approved highlights for players visible in the public view.
+- **Removed:** the registration "contact" field (the API never stored it).
+- **Restyled:** `account.html`, `admin.html`, `privacy.html`, `terms.html` and
+  `child-safety.html` now share `public/assets/site.css` (same palette, type and
+  footer as the homepage). Every page footer links to the staff login (`/admin.html`).
+
+## Media uploads, private contact and introductions (migration 003)
+
+- **Photos:** a player (or the guardian, for a minor) uploads one JPEG/PNG/WebP
+  (default max 3 MB, `MAX_PHOTO_MB`) from `/account.html`. Type is checked from the
+  file's bytes (no SVG). It starts *pending*; staff approve it under Admin > Photos.
+- **Videos:** MP4/MOV/WebM (default max 30 MB, `MAX_VIDEO_MB`, up to 10 per player),
+  also pending until approved under Admin > Highlights. Served with HTTP Range support.
+- **Visibility:** `/api/media/photo/:playerId` and `/api/media/video/:highlightId` serve
+  only approved media for players in `v_public_player_directory`, so revoking a
+  guardian's consent hides the media within ~60 s.
+- **Private contact:** `player_contacts` (email/phone) is set by the owner, never
+  returned by any public endpoint. Staff can view it via
+  `GET /api/admin/players/:id/contact`; each view is written to `data_processing_log`.
+- **Introductions:** `POST /api/introductions` (public, rate limited, honeypot) stores a
+  request; scouts never receive athlete contact. Staff approve or decline under
+  Admin > Introductions; only approved requests are shown to the athlete/guardian,
+  who can accept or decline. Staff and uploads trigger admin emails if SMTP is set.
+- **Storage caveat:** files live in Postgres (BYTEA) because Render's filesystem is
+  ephemeral. This is fine for early volumes; move to object storage (S3/R2) before
+  many large videos accumulate or on a small database plan.
+- **Verified:** 49 API checks and 49 browser checks passed locally (Chromium via
+  Playwright, WebM playback). H.264 MP4 decoding could not be tested in that browser.
+  Not tested: real SMTP delivery, production Render deploy.

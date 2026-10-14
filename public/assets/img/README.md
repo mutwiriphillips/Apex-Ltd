@@ -1,12 +1,12 @@
-# Photography
+# Imagery
 
-Images here are listed in `manifest.json` (key -> src, alt, optional `pos` focal point).
-Replace a file (same name) or edit the manifest to swap a photo; delete a key to fall back
-to the designed sport panel. Keys: hero, rugby, basketball, efootball, football, scout,
-management, community, track, p1-p4. Founder: add a `founder` key with a real photo; until
-then the page shows initials.
+Images are listed in `manifest.json` (key -> src, alt, optional `pos` focal point).
+Keys: hero, football, rugby, basketball, efootball, track, tower, stadium, roof.
+Replace a file (same name) or edit the manifest to swap an image; delete a key to
+fall back to the designed panel. Add a `founder` key only with a real, consented photo.
 
-The current set is AI-generated and illustrative: it must never be presented as a real
-registered athlete, and the site says so. Source images are small (~250-760 px wide) so
-they were upscaled 2x; regenerate at 1600 px+ wide (WebP/AVIF, under ~250 KB) for final
-launch. Athlete profile photos need a backend upload feature (see README).
+All current images are AI-generated crops of the project design board (venue and
+equipment only, no people). None are sourced from third parties. They are low
+resolution and upscaled; regenerate at 1600 px+ wide (WebP/AVIF, under ~250 KB) before
+launch. Never use generated images to represent real registered athletes. Athlete
+profile photos need a backend upload feature (see main README).

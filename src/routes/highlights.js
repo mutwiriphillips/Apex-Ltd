@@ -19,7 +19,7 @@ router.get('/', async (req, res, next) => {
     // visible in the public directory view (so minors without guardian
     // publication consent never surface here).
     const result = await pool.query(
-      `SELECT h.id, h.title, h.description, h.video_url, h.created_at,
+      `SELECT h.id, h.title, h.description, h.video_url, h.source, h.created_at,
               p.id AS player_id, p.full_name AS player_name, d.sport
        FROM highlights h
        JOIN players p ON p.id = h.player_id

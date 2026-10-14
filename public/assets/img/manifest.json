@@ -1,67 +1,47 @@
 {
   "hero": {
     "src": "/assets/img/hero.webp",
-    "alt": "Footballer in a green number 10 kit sprinting with the ball in a floodlit stadium",
-    "pos": "50% 50%"
-  },
-  "rugby": {
-    "src": "/assets/img/rugby.webp",
-    "alt": "Rugby player carrying the ball during a match",
-    "pos": "50% 30%"
-  },
-  "basketball": {
-    "src": "/assets/img/basketball.webp",
-    "alt": "Basketball player jumping for a shot on an indoor court",
-    "pos": "50% 30%"
-  },
-  "efootball": {
-    "src": "/assets/img/efootball.webp",
-    "alt": "E-football competitor wearing a headset at a gaming setup",
-    "pos": "50% 30%"
+    "alt": "Empty stadium at golden hour with a football, boots and a training cone in the foreground",
+    "pos": "60% 50%"
   },
   "football": {
     "src": "/assets/img/football.webp",
-    "alt": "Footballers running agility drills at an academy training session",
-    "pos": "50% 40%"
+    "alt": "Football on a floodlit grass pitch",
+    "pos": "50% 55%"
   },
-  "scout": {
-    "src": "/assets/img/scout.webp",
-    "alt": "Scout and coach reviewing player performance on a laptop at the training ground",
+  "rugby": {
+    "src": "/assets/img/rugby.webp",
+    "alt": "Rugby ball on the grass beside the touchline",
     "pos": "50% 50%"
   },
-  "management": {
-    "src": "/assets/img/management.webp",
-    "alt": "Sports manager and athlete discussing a career plan across a table",
-    "pos": "50% 40%"
+  "basketball": {
+    "src": "/assets/img/basketball.webp",
+    "alt": "Basketball resting on a hardwood court",
+    "pos": "50% 55%"
   },
-  "community": {
-    "src": "/assets/img/community.webp",
-    "alt": "Group of athletes and a coach talking together after training",
-    "pos": "50% 40%"
+  "efootball": {
+    "src": "/assets/img/efootball.webp",
+    "alt": "Game controller in front of a purple-lit gaming setup",
+    "pos": "50% 50%"
   },
   "track": {
     "src": "/assets/img/track.webp",
-    "alt": "Female sprinter on an athletics track at sunset",
-    "pos": "50% 30%"
+    "alt": "Athletics starting blocks on a red running track at a stadium",
+    "pos": "50% 60%"
   },
-  "p1": {
-    "src": "/assets/img/p1.webp",
-    "alt": "Young footballer in a blue training top",
-    "pos": "50% 25%"
+  "tower": {
+    "src": "/assets/img/tower.webp",
+    "alt": "Stadium floodlight tower against an evening sky",
+    "pos": "50% 40%"
   },
-  "p2": {
-    "src": "/assets/img/p2.webp",
-    "alt": "Female athlete in a black training vest",
-    "pos": "50% 25%"
+  "stadium": {
+    "src": "/assets/img/stadium.webp",
+    "alt": "Empty stadium and pitch at dusk",
+    "pos": "50% 50%"
   },
-  "p3": {
-    "src": "/assets/img/p3.webp",
-    "alt": "Footballer in a red kit",
-    "pos": "50% 25%"
-  },
-  "p4": {
-    "src": "/assets/img/p4.webp",
-    "alt": "Female athlete in a green training jacket",
-    "pos": "50% 25%"
+  "roof": {
+    "src": "/assets/img/roof.webp",
+    "alt": "Stadium roof and floodlights seen from below at sunset",
+    "pos": "50% 50%"
   }
 }

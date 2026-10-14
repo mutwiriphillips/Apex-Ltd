@@ -4,498 +4,400 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/svg+xml" href="/assets/jsm-emblem-icon.svg" />
-<title>My Account — Josriri Sports Management</title>
-<script>
-  (function(){
-    try{
-      var saved = localStorage.getItem('josriri_theme');
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
-  })();
-</script>
+<title>My account — Josriri Sports Management</title>
+<meta name="description" content="Manage your Josriri athlete profile, photo, clips and introduction requests." />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#101B2D" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --pitch:#15171B; --pitch-deep:#0C0D0F; --paper:#101113; --paper-alt:#17181C;
-    --surface:#1B1D22;
-    --ink:#F2F3F5; --ink-soft:#9BA0A8; --gold:#C6FF3D; --gold-deep:#9FE01B;
-    --red:#FF3D68; --green:#0EA5B8; --line:rgba(255,255,255,0.08); --white:#FFFFFF;
-  }
-  html[data-theme="dark"]{
-    --pitch:#0A0A0A; --pitch-deep:#000000; --paper:#000000; --paper-alt:#0A0A0A;
-    --surface:#141518;
-    --ink:#F5F5F5; --ink-soft:#8A8F98; --gold:#D4FF5C; --gold-deep:#B8FF3B;
-    --red:#FF6E8C; --green:#34C6D9; --line:rgba(255,255,255,0.10); --white:#F6F5FC;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--paper); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.5;
-    transition:background-color .3s ease, color .3s ease;}
-  .display{font-family:'Exo 2', sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;}
-  .mono{font-family:'JetBrains Mono', monospace;}
-  .theme-toggle{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px;
-    border-radius:50%; border:1.5px solid #4E6B5C; background:transparent; color:var(--white); cursor:pointer;}
-  .theme-toggle:hover{border-color:var(--gold);}
-  .theme-toggle svg{width:17px; height:17px;}
-  .theme-toggle .icon-sun{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
-  header{background:var(--pitch); border-bottom:3px solid var(--gold); padding:16px 24px;
-    display:flex; align-items:center; justify-content:space-between;}
-  header .brand{display:flex; align-items:center; gap:10px; color:var(--white); font-size:19px; text-decoration:none;}
-  header .brand .mark{width:30px; height:30px; border-radius:50%; background:var(--gold);
-    color:var(--pitch-deep); display:flex; align-items:center; justify-content:center;
-    font-family:'Exo 2'; font-weight:800; font-size:10px; letter-spacing:-0.3px;}
-  #logout-btn{background:transparent; border:1.5px solid #4E6B5C; color:var(--white); padding:8px 16px;
-    border-radius:2px; font-size:13px; cursor:pointer; display:none;}
-  #logout-btn:hover{border-color:var(--gold); color:var(--gold);}
-  .wrap{max-width:760px; margin:0 auto; padding:32px 24px 80px;}
-
-  /* Auth panel */
-  #auth-view{max-width:400px; margin:60px auto;}
-  #auth-view h1{font-size:24px; margin-bottom:6px;}
-  #auth-view p{color:var(--ink-soft); font-size:14px; margin-bottom:22px;}
-  .auth-tabs{display:flex; gap:0; margin-bottom:22px; border:1.5px solid var(--line); border-radius:3px; overflow:hidden;}
-  .auth-tab{flex:1; text-align:center; padding:10px; font-size:13.5px; font-weight:700; cursor:pointer; background:var(--surface); color:var(--ink-soft);}
-  .auth-tab.active{background:var(--pitch); color:var(--white);}
-  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
-  .field label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
-  .field input, .field select, .field textarea{padding:11px 12px; border:1.5px solid var(--line); border-radius:2px; font-size:14px; background:var(--surface); font-family:'Work Sans';}
-  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--gold); outline-offset:1px;}
-  .field textarea{resize:vertical; min-height:70px;}
-  .role-note{font-size:12px; color:var(--ink-soft); margin-top:-6px; margin-bottom:14px;}
-  .btn{display:inline-flex; align-items:center; justify-content:center; padding:12px 22px; font-weight:700;
-    font-size:14px; border-radius:2px; border:none; cursor:pointer;}
-  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
-  .btn-gold:hover{background:#DBA939;}
-  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
-  .btn-outline:hover{border-color:var(--pitch);}
-  .btn-small{padding:8px 14px; font-size:13px;}
-  .error-msg{background:rgba(255,61,104,0.10); border:1px solid var(--red); color:var(--red); padding:10px 14px;
-    border-radius:2px; font-size:13px; margin-bottom:16px; display:none;}
-
-  /* Dashboard */
-  #dashboard-view{display:none;}
-  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
-  .panel-head h2{font-size:20px;}
-  .badge{display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.4px;}
-  .badge-unverified{background:rgba(93,92,121,0.14); color:var(--ink-soft);}
-  .badge-club{background:rgba(30,110,140,0.16); color:var(--green);}
-  .badge-federation{background:rgba(200,150,43,0.18); color:var(--gold-deep);}
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:22px; margin-bottom:18px;}
-  .card h3{font-size:17px; margin-bottom:4px;}
-  .card .meta{font-size:12.5px; color:var(--ink-soft); margin-bottom:14px;}
-  .card .meta span{margin-right:12px;}
-  .consent-row{display:flex; justify-content:space-between; align-items:center; background:var(--paper-alt);
-    border:1px solid var(--line); border-radius:4px; padding:12px 14px; margin-top:14px; font-size:13px;}
-  .consent-row.active{border-color:var(--green);}
-  .consent-row.inactive{border-color:var(--red);}
-  .empty-state{border:1.5px dashed var(--line); border-radius:6px; padding:32px 24px; text-align:center;
-    color:var(--ink-soft); background:var(--surface);}
-  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
-  .toast{position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
-    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold); font-size:14px; font-weight:600;
-    z-index:999; transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;}
-  .toast.show{transform:translateY(0); opacity:1;}
-  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media (max-width:600px){ .form-grid{grid-template-columns:1fr;} }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css" />
 </head>
 <body>
-
-<header>
-  <a class="brand" href="/"><div class="mark">JSM</div><span class="display" style="font-size:18px;">Josriri</span></a>
-  <div style="display:flex; align-items:center; gap:12px;">
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-    </button>
-    <button id="logout-btn">Log out</button>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="in">
+    <a class="wordmark" href="/" aria-label="Josriri Sports Management — home"><span class="wm">JOSRIRI</span><span class="wd">Sports<br>Management</span></a>
+    <nav class="hnav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/#directory">Directory</a>
+      <a href="/account.html" aria-current="page">My Account</a>
+      
+      <button type="button" class="linkbtn" id="logout-btn" hidden>Log out</button>
+    </nav>
   </div>
 </header>
+<main id="main">
+<div class="page"><div class="wrap">
 
-<div class="wrap">
-
-  <div id="auth-view">
-    <div class="auth-tabs">
-      <div class="auth-tab active" data-mode="login">Log in</div>
-      <div class="auth-tab" data-mode="register">Create account</div>
-    </div>
-
-    <div id="login-panel">
-      <h1 class="display">Welcome back</h1>
-      <p>Log in to manage your player profile.</p>
-      <div class="error-msg" id="login-error"></div>
-      <form id="login-form">
-        <div class="field"><label>Email</label><input type="email" id="login-email" required autocomplete="username" /></div>
-        <div class="field"><label>Password</label><input type="password" id="login-password" required autocomplete="current-password" /></div>
-        <button type="submit" class="btn btn-gold" style="width:100%;">Log in</button>
-      </form>
-    </div>
-
-    <div id="register-panel" style="display:none;">
-      <h1 class="display">Create an account</h1>
-      <p>Manage your own profile, or a child's profile as their guardian.</p>
-      <div class="error-msg" id="register-error"></div>
-      <form id="register-form">
-        <div class="field">
-          <label>I am registering as a…</label>
-          <select id="reg-role">
-            <option value="player">Player (18 or older, managing my own profile)</option>
-            <option value="guardian">Guardian (managing a child's profile)</option>
-          </select>
+  <div id="auth-view" hidden>
+    <div class="auth">
+      <div class="eyebrow">My account</div>
+      <h1 class="title">Manage your <em>profile</em></h1>
+      <p class="sub" style="margin-bottom:28px">Athletes and guardians sign in here to edit a profile, add a photo, upload clips and handle introduction requests.</p>
+      <div class="card">
+        <div class="seg" role="tablist" aria-label="Sign in or create an account">
+          <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="login-panel">Sign in</button>
+          <button type="button" role="tab" id="tab-register" aria-selected="false" aria-controls="register-panel">Create account</button>
         </div>
-        <div class="role-note" id="role-note">You'll be able to create and edit your own player profile after signing up.</div>
-        <div class="field"><label>Email</label><input type="email" id="reg-email" required autocomplete="username" /></div>
-        <div class="field"><label>Password (min. 8 characters)</label><input type="password" id="reg-password" required minlength="8" autocomplete="new-password" /></div>
-        <button type="submit" class="btn btn-gold" style="width:100%;">Create account</button>
-      </form>
+        <div id="login-panel" role="tabpanel" aria-labelledby="tab-login">
+          <div class="msg bad" id="login-error" role="alert"></div>
+          <form id="login-form" novalidate>
+            <div class="field"><label for="login-email">Email</label><input type="email" id="login-email" required autocomplete="username" /></div>
+            <div class="field"><label for="login-password">Password</label><input type="password" id="login-password" required autocomplete="current-password" /></div>
+            <button type="submit" class="btn btn-violet btn-block">Sign in</button>
+          </form>
+          <p class="note" style="margin-top:14px">Josriri staff sign in on the <a href="/admin.html">staff page</a>.</p>
+        </div>
+        <div id="register-panel" role="tabpanel" aria-labelledby="tab-register" hidden>
+          <div class="msg bad" id="register-error" role="alert"></div>
+          <form id="register-form" novalidate>
+            <div class="field">
+              <label for="reg-role">I am a…</label>
+              <select id="reg-role"><option value="player">Player (18 or over)</option><option value="guardian">Parent or guardian of a player under 18</option></select>
+              <span class="hint" id="role-note">You'll be able to create and edit your own player profile after signing up.</span>
+            </div>
+            <div class="field"><label for="reg-email">Email</label><input type="email" id="reg-email" required autocomplete="username" /></div>
+            <div class="field"><label for="reg-password">Password</label><input type="password" id="reg-password" required minlength="8" autocomplete="new-password" /><span class="hint">At least 8 characters.</span></div>
+            <button type="submit" class="btn btn-violet btn-block">Create account</button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="dashboard-view">
-    <div id="dashboard-content"></div>
+  <div id="dashboard-view" hidden>
+    <div class="eyebrow">My account</div>
+    <h1 class="title" id="dash-title">Your <em>profile</em></h1>
+    <div id="dashboard-content" style="margin-top:28px" aria-live="polite"></div>
   </div>
 
-</div>
-
-<div class="toast" id="toast"></div>
+</div></div>
+</main>
+<footer class="site-footer">
+  <div class="inner">
+    <div class="foot-grid">
+      <div>
+        <a class="wordmark" href="/"><span class="wm">JOSRIRI</span><span class="wd">Sports<br>Management</span></a>
+        <p class="about">Helping Kenyan athletes become visible, discoverable and professionally represented — whatever their county, club or level.</p>
+      </div>
+      <div><h4>Platform</h4><ul><li><a href="/#register">Athlete registration</a></li><li><a href="/#directory">Athlete directory</a></li><li><a href="/#showcase">Video showcase</a></li><li><a href="/#managed">Managed athletes</a></li></ul></div>
+      <div><h4>Organisations</h4><ul><li><a href="/#sponsors">Scout &amp; sponsor access</a></li><li><a href="/#contact">Partnerships</a></li><li><a href="/account.html">My account</a></li><li><a href="/admin.html">Staff login</a></li></ul></div>
+      <div><h4>Contact &amp; policies</h4><ul><li><a href="tel:+254771648205">+254 771 648 205</a></li><li><a href="mailto:skywalkerstalents@gmail.com">skywalkerstalents@gmail.com</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/child-safety.html">Child safeguarding</a></li><li><a href="/terms.html">Terms of use</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Josriri Sports Management. Nairobi, Kenya.</span><span>Early-stage platform.</span></div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
+  'use strict';
   const TOKEN_KEY = 'josriri_account_token';
-  const SPORT_OPTIONS = ['Football','Rugby','Basketball','E-Football'];
+  const SPORTS = ['Football','Rugby','Basketball','E-Football'];
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 
-  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
-  function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
-  function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
-
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 3200);
-  }
+  function getToken(){ try{ return localStorage.getItem(TOKEN_KEY); }catch(e){ return null; } }
+  function setToken(t){ try{ localStorage.setItem(TOKEN_KEY, t); }catch(e){} }
+  function clearToken(){ try{ localStorage.removeItem(TOKEN_KEY); }catch(e){} }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600); }
+  function fmtDate(d){ try{ return new Date(d).toLocaleDateString('en-KE', { day:'numeric', month:'short', year:'numeric' }); }catch(e){ return ''; } }
+  function fmtMb(b){ return (b / 1048576).toFixed(1) + ' MB'; }
 
   async function api(path, options){
     const token = getToken();
     const res = await fetch('/api' + path, Object.assign({
-      headers: Object.assign(
-        { 'Content-Type': 'application/json' },
-        token ? { 'Authorization': 'Bearer ' + token } : {}
-      ),
+      headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'Authorization': 'Bearer ' + token } : {}),
     }, options));
-    let body = null;
-    try{ body = await res.json(); }catch(e){}
-    if(res.status === 401){
-      clearToken();
-      showAuth();
-      throw new Error((body && body.error) || 'Session expired. Please log in again.');
-    }
-    if(!res.ok){
-      throw new Error((body && body.error) || `Request failed (${res.status})`);
-    }
+    let body = null; try{ body = await res.json(); }catch(e){}
+    if(res.status === 401){ clearToken(); showAuth(); throw new Error((body && body.error) || 'Session expired. Please sign in again.'); }
+    if(!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
     return body;
   }
-
-  function showAuth(){
-    document.getElementById('auth-view').style.display = 'block';
-    document.getElementById('dashboard-view').style.display = 'none';
-    document.getElementById('logout-btn').style.display = 'none';
-  }
-  function showDashboard(){
-    document.getElementById('auth-view').style.display = 'none';
-    document.getElementById('dashboard-view').style.display = 'block';
-    document.getElementById('logout-btn').style.display = 'inline-flex';
-    loadDashboard();
-  }
-
-  // ---------- Auth tabs ----------
-  document.querySelectorAll('.auth-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('login-panel').style.display = tab.dataset.mode === 'login' ? 'block' : 'none';
-      document.getElementById('register-panel').style.display = tab.dataset.mode === 'register' ? 'block' : 'none';
+  // Raw-body upload with progress (photo / video).
+  function upload(path, file, onProgress){
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api' + path);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(e.loaded / e.total); };
+      xhr.onerror = () => reject(new Error('Network error. Check your connection and try again.'));
+      xhr.onload = () => {
+        let body = null; try{ body = JSON.parse(xhr.responseText); }catch(e){}
+        if(xhr.status === 401){ clearToken(); showAuth(); return reject(new Error('Session expired. Please sign in again.')); }
+        if(xhr.status >= 200 && xhr.status < 300) resolve(body);
+        else reject(new Error((body && body.error) || `Upload failed (${xhr.status})`));
+      };
+      xhr.send(file);
     });
-  });
+  }
+  async function blobUrl(path){
+    const res = await fetch('/api' + path, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if(!res.ok) throw new Error('preview unavailable');
+    return URL.createObjectURL(await res.blob());
+  }
 
-  document.getElementById('reg-role').addEventListener('change', (e) => {
-    const note = document.getElementById('role-note');
-    note.textContent = e.target.value === 'guardian'
+  function showAuth(){ $('#auth-view').hidden = false; $('#dashboard-view').hidden = true; $('#logout-btn').hidden = true; }
+  function showDashboard(){ $('#auth-view').hidden = true; $('#dashboard-view').hidden = false; $('#logout-btn').hidden = false; loadDashboard(); }
+
+  /* ---------- auth ---------- */
+  function setMode(mode){
+    const login = mode === 'login';
+    $('#tab-login').setAttribute('aria-selected', login); $('#tab-register').setAttribute('aria-selected', !login);
+    $('#login-panel').hidden = !login; $('#register-panel').hidden = login;
+  }
+  $('#tab-login').addEventListener('click', () => setMode('login'));
+  $('#tab-register').addEventListener('click', () => setMode('register'));
+  $('#reg-role').addEventListener('change', e => {
+    $('#role-note').textContent = e.target.value === 'guardian'
       ? "You'll be able to register and manage a child's profile, including consent for public visibility."
       : "You'll be able to create and edit your own player profile after signing up.";
   });
-
-  // ---------- Login ----------
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errBox = document.getElementById('login-error');
-    errBox.style.display = 'none';
+  async function authSubmit(e, url, body, errBox, allow){
+    e.preventDefault(); errBox.textContent = '';
+    const btn = $('button[type=submit]', e.target); btn.disabled = true;
     try{
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      const res = await fetch('/api/auth/login', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const body = await res.json();
-      if(!res.ok) throw new Error(body.error || 'Login failed.');
-      if(!['player','guardian'].includes(body.user.role)){
-        throw new Error('This account type does not have a player dashboard. Use /admin.html if you are staff.');
-      }
-      setToken(body.token);
-      showDashboard();
-    }catch(err){
-      errBox.textContent = err.message;
-      errBox.style.display = 'block';
-    }
-  });
-
-  // ---------- Register ----------
-  document.getElementById('register-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errBox = document.getElementById('register-error');
-    errBox.style.display = 'none';
-    try{
-      const email = document.getElementById('reg-email').value.trim();
-      const password = document.getElementById('reg-password').value;
-      const role = document.getElementById('reg-role').value;
-      const res = await fetch('/api/auth/register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
-      });
-      const body = await res.json();
-      if(!res.ok) throw new Error(body.error || 'Could not create account.');
-      setToken(body.token);
-      showDashboard();
-    }catch(err){
-      errBox.textContent = err.message;
-      errBox.style.display = 'block';
-    }
-  });
-
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    clearToken();
-    showAuth();
-  });
-
-  // ---------- Dashboard ----------
-  function verificationBadge(status){
-    if(status === 'federation_verified') return '<span class="badge badge-federation">Federation verified</span>';
-    if(status === 'club_verified') return '<span class="badge badge-club">Club verified</span>';
-    return '<span class="badge badge-unverified">Verification pending</span>';
+      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || 'Something went wrong.');
+      if(allow && !['player','guardian'].includes(data.user.role)) throw new Error('This account type has no player dashboard. Staff sign in on the staff page.');
+      setToken(data.token); showDashboard();
+    }catch(err){ errBox.textContent = err.message; }
+    finally{ btn.disabled = false; }
   }
+  $('#login-form').addEventListener('submit', e => authSubmit(e, '/api/auth/login',
+    { email: $('#login-email').value.trim(), password: $('#login-password').value }, $('#login-error'), true));
+  $('#register-form').addEventListener('submit', e => authSubmit(e, '/api/auth/register',
+    { email: $('#reg-email').value.trim(), password: $('#reg-password').value, role: $('#reg-role').value }, $('#register-error'), false));
+  $('#logout-btn').addEventListener('click', () => { clearToken(); showAuth(); });
 
-  function editForm(player){
-    return `
-      <form class="edit-form" data-id="${player.id}">
-        <div class="form-grid">
-          <div class="field"><label>Position</label><input type="text" name="position" value="${player.primary_position || ''}" maxlength="40" /></div>
-          <div class="field"><label>Club</label><input type="text" name="club" value="${player.club || ''}" maxlength="60" /></div>
-          <div class="field"><label>County</label><input type="text" name="county" value="${player.county || ''}" maxlength="40" /></div>
-          <div class="field"><label>Division</label><input type="text" name="division" value="${player.division || ''}" maxlength="50" /></div>
-        </div>
-        <div class="field"><label>Bio</label><textarea name="bio" maxlength="220">${player.bio || ''}</textarea></div>
-        <button type="submit" class="btn btn-gold btn-small">Save changes</button>
-      </form>
-    `;
+  /* ---------- dashboard pieces ---------- */
+  function badge(status){
+    if(status === 'federation_verified') return '<span class="pill ok">Federation verified</span>';
+    if(status === 'club_verified') return '<span class="pill ok">Club verified</span>';
+    return '<span class="pill warn">Verification pending</span>';
   }
-
-  function wireEditForm(container){
-    const form = container.querySelector('.edit-form');
-    if(!form) return;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = form.dataset.id;
-      const payload = {
-        position: form.position.value.trim(),
-        club: form.club.value.trim(),
-        county: form.county.value.trim(),
-        division: form.division.value.trim(),
-        bio: form.bio.value.trim(),
-      };
-      try{
-        await api(`/account/players/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
-        showToast('Profile updated.');
-        loadDashboard();
-      }catch(err){
-        showToast(err.message);
-      }
-    });
+  function statusPill(s){
+    return s === 'approved' ? '<span class="pill ok">Live</span>' : s === 'rejected' ? '<span class="pill off">Not approved</span>' : '<span class="pill warn">In review</span>';
   }
-
-  function registerPlayerForm(prefillMinor){
-    return `
-      <div class="card">
-        <h3>${prefillMinor ? "Register your child's profile" : 'Create your player profile'}</h3>
-        <p class="meta">${prefillMinor ? 'Guardian consent is captured automatically for your own account.' : 'Free, and linked to your account automatically.'}</p>
-        <form id="create-profile-form">
-          <div class="form-grid">
-            <div class="field"><label>Full name</label><input type="text" name="fullName" required maxlength="60" /></div>
-            <div class="field"><label>Date of birth</label><input type="date" name="dateOfBirth" required /></div>
-            <div class="field">
-              <label>Sport</label>
-              <select name="sport" required>
-                <option value="">Select…</option>
-                ${SPORT_OPTIONS.map(s => `<option>${s}</option>`).join('')}
-              </select>
-            </div>
-            <div class="field"><label>County</label><input type="text" name="county" maxlength="40" /></div>
-          </div>
-          ${prefillMinor ? `
-          <div class="form-grid">
-            <div class="field"><label>Your name (guardian)</label><input type="text" name="guardianName" required maxlength="60" /></div>
-            <div class="field"><label>Relationship</label><input type="text" name="guardianRelationship" value="Parent" maxlength="30" /></div>
-          </div>` : ''}
-          <button type="submit" class="btn btn-gold btn-small">Create profile</button>
-        </form>
+  function editForm(p){
+    return `<form class="edit-form" data-id="${esc(p.id)}">
+      <div class="form-grid">
+        <div class="field"><label>Position</label><input name="position" value="${esc(p.primary_position)}" maxlength="40"></div>
+        <div class="field"><label>Club</label><input name="club" value="${esc(p.club)}" maxlength="60"></div>
+        <div class="field"><label>County</label><input name="county" value="${esc(p.county)}" maxlength="40"></div>
+        <div class="field"><label>Division</label><input name="division" value="${esc(p.division)}" maxlength="50"></div>
       </div>
-    `;
+      <div class="field"><label>Bio</label><textarea name="bio" maxlength="220">${esc(p.bio)}</textarea></div>
+      <button type="submit" class="btn btn-ink btn-sm">Save changes</button></form>`;
+  }
+  function mediaShell(p){
+    return `<div class="media-shell" data-media="${esc(p.id)}" data-minor="${p.is_minor ? '1' : ''}"><p class="note">Loading photo, clips and requests…</p></div>`;
+  }
+  function playerCard(p, isGuardian){
+    return `<article class="card" data-player-card="${esc(p.id)}">
+      <h2>${esc(p.full_name)} ${badge(p.verification_status)}</h2>
+      <div class="meta"><span>${esc(p.sport)}</span><span>${esc(p.county || 'County not set')}</span><span>${esc(p.club || 'No club set')}</span></div>
+      ${editForm(p)}
+      ${isGuardian ? `<div class="consent-row ${p.public_consent_active ? '' : 'inactive'}">
+        <span>${p.public_consent_active ? 'Visible in the public directory' : 'Hidden from the public directory'}</span>
+        <button class="btn btn-outline btn-sm" data-consent="${p.public_consent_active ? 'revoke' : 'restore'}" data-player-id="${esc(p.id)}">${p.public_consent_active ? 'Hide profile' : 'Make visible'}</button></div>` : ''}
+    </article>
+    ${mediaShell(p)}`;
+  }
+  function createForm(isGuardian){
+    return `<article class="card"><h2>${isGuardian ? "Register your child's profile" : 'Create your player profile'}</h2>
+      <p class="meta">${isGuardian ? 'Guardian consent is recorded with your account.' : 'Free, and linked to your account automatically.'}</p>
+      <form id="create-profile-form" novalidate>
+        <div class="msg bad" id="create-error" role="alert"></div>
+        <div class="form-grid">
+          <div class="field"><label>Full name</label><input name="fullName" required maxlength="60"></div>
+          <div class="field"><label>Date of birth</label><input type="date" name="dateOfBirth" required></div>
+          <div class="field"><label>Sport</label><select name="sport" required><option value="">Select…</option>${SPORTS.map(s => `<option>${s}</option>`).join('')}</select></div>
+          <div class="field"><label>County</label><input name="county" maxlength="40"></div>
+        </div>
+        ${isGuardian ? `<div class="form-grid">
+          <div class="field"><label>Your name (guardian)</label><input name="guardianName" required maxlength="60"></div>
+          <div class="field"><label>Relationship</label><input name="relationship" value="Parent" maxlength="30"></div></div>
+          <label class="check"><input type="checkbox" name="consent"><span>I am this child's parent or legal guardian and I consent to their profile being shown publicly on Josriri. I can hide it again at any time from this page.</span></label>` : ''}
+        <button type="submit" class="btn btn-violet btn-sm">Create profile</button>
+      </form></article>`;
   }
 
-  function wireCreateForm(container, isGuardian){
-    const form = container.querySelector('#create-profile-form');
-    if(!form) return;
-    form.addEventListener('submit', async (e) => {
+  /* ---------- per-player media / contact / introductions ---------- */
+  async function loadMedia(shell){
+    const id = shell.dataset.media;
+    try{
+      const m = await api(`/account/players/${id}/media`);
+      const minor = !!shell.dataset.minor;
+      let photoHtml = '';
+      if(m.photo){
+        photoHtml = `<div class="row" style="align-items:center"><img class="thumb" alt="Your uploaded profile photo" data-photo-preview="${esc(id)}" width="96" height="96">
+          <div class="main"><div class="title-sm">Profile photo ${statusPill(m.photo.moderation_status)}</div>
+          <div class="sub-sm">${fmtMb(m.photo.byte_size)} · uploaded ${fmtDate(m.photo.created_at)}</div>
+          <div class="sub-sm">${m.photo.moderation_status === 'approved' ? 'Shown on your public profile.' : m.photo.moderation_status === 'rejected' ? 'We could not approve this photo. Please upload a clear photo of yourself.' : 'Our team will review it before it appears publicly.'}</div></div>
+          <button type="button" class="btn btn-danger btn-sm" data-photo-remove>Remove photo</button></div>`;
+      }
+      const videos = m.videos.map(v => `<div class="row" style="padding:14px 0; border-top:1px solid var(--line)">
+          <div class="main"><div class="title-sm">${esc(v.title)} ${statusPill(v.moderation_status)} <span class="pill">${v.source === 'upload' ? 'Uploaded' : 'Link'}</span></div>
+          <div class="sub-sm">${fmtDate(v.created_at)}${v.byte_size ? ' · ' + fmtMb(v.byte_size) : ''}</div>
+          ${v.source === 'upload' ? `<video class="clip" controls preload="none" data-video-preview="${esc(v.id)}" aria-label="Preview of ${esc(v.title)}"></video>` : ''}</div>
+          <button type="button" class="btn btn-danger btn-sm" data-video-remove="${esc(v.id)}">Remove</button></div>`).join('');
+      const intros = m.introductions.length ? m.introductions.map(i => `<div class="card" style="box-shadow:none; margin:12px 0 0">
+          <div class="title-sm">${esc(i.requester_name)} — ${esc(i.organisation)}
+            ${i.owner_decision === 'accepted' ? '<span class="pill ok">You accepted</span>' : i.owner_decision === 'declined' ? '<span class="pill off">You declined</span>' : '<span class="pill warn">Needs your reply</span>'}</div>
+          <div class="sub-sm">Received ${fmtDate(i.created_at)} · reviewed and approved by Josriri</div>
+          <p style="margin:10px 0">${esc(i.message)}</p>
+          <div class="sub-sm">Their contact: <a href="mailto:${esc(i.requester_email)}">${esc(i.requester_email)}</a>${i.requester_phone ? ' · ' + esc(i.requester_phone) : ''}</div>
+          ${i.owner_decision ? '' : `<div class="actions" style="margin-top:12px"><button class="btn btn-ink btn-sm" data-intro="${esc(i.id)}" data-decision="accepted">I'm interested</button><button class="btn btn-outline btn-sm" data-intro="${esc(i.id)}" data-decision="declined">No thanks</button></div>`}
+        </div>`).join('') : '<p class="note">No approved requests yet. When a scout, club or sponsor asks to be introduced, our team reviews the request first. Approved requests appear here and you decide whether to reply. Your contact details are never given to them.</p>';
+
+      shell.innerHTML = `
+        <article class="card"><h2>Profile photo</h2>
+          <p class="meta">JPEG, PNG or WebP, up to ${m.limits.photoMb} MB. ${minor ? 'A clear photo of your child, with your consent.' : 'A clear photo of yourself.'}</p>
+          ${photoHtml}
+          <div class="msg bad" data-err="photo" role="alert"></div>
+          <div class="field" style="margin-top:14px"><label for="photo-${esc(id)}">${m.photo ? 'Replace photo' : 'Choose a photo'}</label><input id="photo-${esc(id)}" type="file" accept="image/jpeg,image/png,image/webp" data-photo-input></div>
+          <div class="progress" data-progress="photo" hidden><i></i></div>
+        </article>
+        <article class="card"><h2>Highlight clips</h2>
+          <p class="meta">Upload an MP4, MOV or WebM clip up to ${m.limits.videoMb} MB, or paste a YouTube link on the <a href="/#showcase">showcase form</a>. Every clip is reviewed before it goes live.</p>
+          ${videos || '<p class="note">No clips yet.</p>'}
+          <form data-video-form style="margin-top:16px" novalidate>
+            <div class="msg bad" data-err="video" role="alert"></div>
+            <div class="form-grid">
+              <div class="field"><label>Clip title</label><input name="title" maxlength="120" required placeholder="e.g. Winning goal vs Kabras"></div>
+              <div class="field"><label>Video file</label><input type="file" name="file" accept="video/mp4,video/quicktime,video/webm" required></div>
+            </div>
+            <div class="field"><label>Short description <span class="hint">(optional)</span></label><input name="description" maxlength="300"></div>
+            <button class="btn btn-ink btn-sm" type="submit">Upload clip</button>
+            <div class="progress" data-progress="video" hidden><i></i></div>
+          </form>
+        </article>
+        <article class="card"><h2>Private contact details</h2>
+          <p class="meta">Only you and authorised Josriri staff can see these. They are never shown publicly or given to scouts. ${minor ? 'For a minor, enter a guardian email or phone number.' : ''}</p>
+          <form data-contact-form novalidate>
+            <div class="msg bad" data-err="contact" role="alert"></div>
+            <div class="form-grid">
+              <div class="field"><label>Email</label><input type="email" name="email" value="${esc(m.contact.email)}" maxlength="254" autocomplete="email"></div>
+              <div class="field"><label>Phone / WhatsApp</label><input type="tel" name="phone" value="${esc(m.contact.phone)}" maxlength="30" autocomplete="tel"></div>
+            </div>
+            <button class="btn btn-ink btn-sm" type="submit">Save contact details</button>
+          </form>
+        </article>
+        <article class="card"><h2>Introduction requests</h2>${intros}</article>`;
+
+      wireMedia(shell, id);
+      // authenticated previews (images/videos that aren't public yet)
+      $$('[data-photo-preview]', shell).forEach(async img => { try{ img.src = await blobUrl(`/account/players/${id}/photo`); }catch(e){ img.alt = 'Preview unavailable'; } });
+      $$('[data-video-preview]', shell).forEach(v => {
+        v.addEventListener('play', async function once(){
+          v.removeEventListener('play', once);
+          if(v.dataset.loaded) return; v.dataset.loaded = '1'; v.pause();
+          try{ v.src = await blobUrl(`/account/players/${id}/videos/${v.dataset.videoPreview}/file`); v.play().catch(() => {}); }catch(e){ toast('Preview unavailable.'); }
+        });
+      });
+    }catch(err){ shell.innerHTML = `<div class="empty"><b>Couldn't load this section.</b>${esc(err.message)}</div>`; }
+  }
+
+  function setErr(shell, key, msg){ const el = $(`[data-err="${key}"]`, shell); if(el) el.textContent = msg || ''; }
+  function wireMedia(shell, id){
+    const photoInput = $('[data-photo-input]', shell);
+    photoInput.addEventListener('change', async () => {
+      setErr(shell, 'photo'); const f = photoInput.files[0]; if(!f) return;
+      if(!/^image\/(jpeg|png|webp)$/.test(f.type)) return setErr(shell, 'photo', 'Please choose a JPEG, PNG or WebP image.');
+      const bar = $('[data-progress=photo]', shell); bar.hidden = false;
+      try{ await upload(`/account/players/${id}/photo`, f, x => { $('i', bar).style.width = Math.round(x*100) + '%'; }); toast('Photo uploaded. It will appear after review.'); loadMedia(shell); }
+      catch(err){ setErr(shell, 'photo', err.message); bar.hidden = true; }
+    });
+    const rm = $('[data-photo-remove]', shell);
+    if(rm) rm.addEventListener('click', async () => {
+      if(!confirm('Remove your profile photo?')) return;
+      try{ await api(`/account/players/${id}/photo`, { method:'DELETE' }); toast('Photo removed.'); loadMedia(shell); }catch(err){ setErr(shell, 'photo', err.message); }
+    });
+    $$('[data-video-remove]', shell).forEach(b => b.addEventListener('click', async () => {
+      if(!confirm('Remove this clip?')) return;
+      try{ await api(`/account/players/${id}/videos/${b.dataset.videoRemove}`, { method:'DELETE' }); toast('Clip removed.'); loadMedia(shell); }catch(err){ setErr(shell, 'video', err.message); }
+    }));
+    $('[data-video-form]', shell).addEventListener('submit', async e => {
+      e.preventDefault(); setErr(shell, 'video');
+      const f = e.target.file.files[0], title = e.target.title.value.trim();
+      if(title.length < 2) return setErr(shell, 'video', 'Give the clip a title.');
+      if(!f) return setErr(shell, 'video', 'Choose a video file.');
+      if(!/^video\/(mp4|quicktime|webm)$/.test(f.type)) return setErr(shell, 'video', 'Please choose an MP4, MOV or WebM video.');
+      const bar = $('[data-progress=video]', shell); bar.hidden = false; const btn = $('button[type=submit]', e.target); btn.disabled = true;
+      const q = `?title=${encodeURIComponent(title)}&description=${encodeURIComponent(e.target.description.value.trim())}`;
+      try{ await upload(`/account/players/${id}/videos${q}`, f, x => { $('i', bar).style.width = Math.round(x*100) + '%'; }); toast('Clip uploaded. It will appear after review.'); loadMedia(shell); }
+      catch(err){ setErr(shell, 'video', err.message); bar.hidden = true; btn.disabled = false; }
+    });
+    $('[data-contact-form]', shell).addEventListener('submit', async e => {
+      e.preventDefault(); setErr(shell, 'contact');
+      try{ await api(`/account/players/${id}/contact`, { method:'PUT', body: JSON.stringify({ email: e.target.email.value, phone: e.target.phone.value }) }); toast('Contact details saved privately.'); }
+      catch(err){ setErr(shell, 'contact', err.message); }
+    });
+    $$('[data-intro]', shell).forEach(b => b.addEventListener('click', async () => {
+      try{ await api(`/account/players/${id}/introductions/${b.dataset.intro}/decision`, { method:'POST', body: JSON.stringify({ decision: b.dataset.decision }) }); toast('Thanks — your answer is saved.'); loadMedia(shell); }
+      catch(err){ toast(err.message); }
+    }));
+  }
+
+  /* ---------- dashboard ---------- */
+  function wireEdit(root){
+    $$('.edit-form', root).forEach(form => form.addEventListener('submit', async e => {
       e.preventDefault();
-      const fd = new FormData(form);
-      const dob = fd.get('dateOfBirth');
-      const age = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25*24*3600*1000));
-      const payload = {
-        fullName: fd.get('fullName'),
-        dateOfBirth: dob,
-        sport: fd.get('sport'),
-        county: fd.get('county'),
-      };
-      if(isGuardian){
-        payload.guardianName = fd.get('guardianName');
-        payload.guardianRelationship = fd.get('guardianRelationship');
-        payload.guardianConsent = true;
-      }
-      if(isGuardian && age >= 18){
-        showToast('Guardian accounts register players under 18. For an adult, they should create their own player account.');
-        return;
-      }
-      if(!isGuardian && age < 18){
-        showToast('Players under 18 must be registered from a guardian account, not a player account.');
-        return;
-      }
       try{
-        await api('/players', { method: 'POST', body: JSON.stringify(payload) });
-        showToast('Profile created.');
-        loadDashboard();
-      }catch(err){
-        showToast(err.message);
-      }
+        await api(`/account/players/${form.dataset.id}`, { method:'PATCH', body: JSON.stringify({
+          position: form.position.value.trim(), club: form.club.value.trim(), county: form.county.value.trim(),
+          division: form.division.value.trim(), bio: form.bio.value.trim() }) });
+        toast('Profile updated.');
+      }catch(err){ toast(err.message); }
+    }));
+  }
+  function wireCreate(root, isGuardian){
+    const form = $('#create-profile-form', root); if(!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); const err = $('#create-error', form); err.textContent = '';
+      const fd = new FormData(form); const dob = fd.get('dateOfBirth');
+      const age = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25*24*3600*1000));
+      if(!fd.get('fullName') || !dob || !fd.get('sport')) return err.textContent = 'Name, date of birth and sport are required.';
+      if(isGuardian && age >= 18) return err.textContent = 'Guardian accounts register players under 18. An adult should create their own player account.';
+      if(!isGuardian && age < 18) return err.textContent = 'Players under 18 must be registered from a guardian account.';
+      if(isGuardian && !fd.get('consent')) return err.textContent = 'Please confirm guardian consent to continue.';
+      const payload = { fullName: fd.get('fullName'), dateOfBirth: dob, sport: fd.get('sport'), county: fd.get('county') };
+      if(isGuardian){ payload.guardianName = fd.get('guardianName'); payload.guardianRelationship = fd.get('relationship'); payload.guardianConsent = true; }
+      try{ await api('/players', { method:'POST', body: JSON.stringify(payload) }); toast('Profile created.'); loadDashboard(); }
+      catch(e2){ err.textContent = e2.message; }
     });
   }
 
   async function loadDashboard(){
-    const el = document.getElementById('dashboard-content');
+    const el = $('#dashboard-content');
     try{
-      const data = await api('/account/me');
-      const user = data.user;
-
+      const data = await api('/account/me'); const user = data.user;
       if(user.role === 'player'){
-        if(!data.player){
-          el.innerHTML = `
-            <div class="panel-head"><h2>Welcome, ${user.email}</h2></div>
-            ${registerPlayerForm(false)}
-          `;
-          wireCreateForm(el, false);
-          return;
-        }
-        const p = data.player;
-        el.innerHTML = `
-          <div class="panel-head"><h2>My profile</h2></div>
-          <div class="card">
-            <h3>${p.full_name} ${verificationBadge(p.verification_status)}</h3>
-            <div class="meta"><span>${p.sport}</span><span>${p.county || 'County not set'}</span><span>${p.club || 'No club set'}</span></div>
-            ${editForm(p)}
-          </div>
-        `;
-        wireEditForm(el);
-        return;
-      }
-
-      if(user.role === 'guardian'){
+        if(!data.player){ $('#dash-title').innerHTML = 'Welcome, <em>athlete</em>'; el.innerHTML = createForm(false); wireCreate(el, false); return; }
+        $('#dash-title').innerHTML = 'My <em>profile</em>';
+        el.innerHTML = playerCard(data.player, false); wireEdit(el);
+      } else if(user.role === 'guardian'){
         const players = data.players || [];
-        el.innerHTML = `
-          <div class="panel-head"><h2>My children's profiles</h2></div>
-          ${players.map(p => `
-            <div class="card" data-player-card="${p.id}">
-              <h3>${p.full_name} ${verificationBadge(p.verification_status)}</h3>
-              <div class="meta"><span>${p.sport}</span><span>${p.county || 'County not set'}</span><span>${p.club || 'No club set'}</span></div>
-              ${editForm(p)}
-              <div class="consent-row ${p.public_consent_active ? 'active' : 'inactive'}">
-                <span>${p.public_consent_active ? 'Visible in the public directory' : 'Hidden from the public directory'}</span>
-                <button class="btn btn-outline btn-small" data-consent-action="${p.public_consent_active ? 'revoke' : 'restore'}" data-player-id="${p.id}">
-                  ${p.public_consent_active ? 'Hide profile' : 'Make visible'}
-                </button>
-              </div>
-            </div>
-          `).join('') || '<div class="empty-state"><b>No children registered yet.</b> Add your first profile below.</div>'}
-          ${registerPlayerForm(true)}
-        `;
-        el.querySelectorAll('.edit-form').forEach(form => {
-          form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = form.dataset.id;
-            const payload = {
-              position: form.position.value.trim(),
-              club: form.club.value.trim(),
-              county: form.county.value.trim(),
-              division: form.division.value.trim(),
-              bio: form.bio.value.trim(),
-            };
-            try{
-              await api(`/account/players/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
-              showToast('Profile updated.');
-              loadDashboard();
-            }catch(err){ showToast(err.message); }
-          });
-        });
-        el.querySelectorAll('[data-consent-action]').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const action = btn.dataset.consentAction;
-            const id = btn.dataset.playerId;
-            try{
-              await api(`/account/players/${id}/consent/${action}`, { method: 'POST' });
-              showToast(action === 'revoke' ? 'Profile hidden from the public directory.' : 'Profile is now publicly visible.');
-              loadDashboard();
-            }catch(err){ showToast(err.message); }
-          });
-        });
-        wireCreateForm(el, true);
-        return;
-      }
-
-      el.innerHTML = `<div class="empty-state"><b>No dashboard for this account type.</b></div>`;
-    }catch(err){
-      el.innerHTML = `<div class="empty-state"><b>Couldn't load your account.</b> ${err.message}</div>`;
-    }
+        $('#dash-title').innerHTML = "My children's <em>profiles</em>";
+        el.innerHTML = (players.map(p => playerCard(p, true)).join('') || '<div class="empty"><b>No children registered yet.</b>Add your first profile below.</div>') + createForm(true);
+        wireEdit(el); wireCreate(el, true);
+        $$('[data-consent]', el).forEach(btn => btn.addEventListener('click', async () => {
+          try{ await api(`/account/players/${btn.dataset.playerId}/consent/${btn.dataset.consent}`, { method:'POST' });
+            toast(btn.dataset.consent === 'revoke' ? 'Profile hidden from the public directory.' : 'Profile is now publicly visible.'); loadDashboard(); }
+          catch(err){ toast(err.message); }
+        }));
+      } else { el.innerHTML = '<div class="empty"><b>No dashboard for this account type.</b></div>'; return; }
+      $$('.media-shell', el).forEach(loadMedia);
+    }catch(err){ el.innerHTML = `<div class="empty"><b>Couldn't load your account.</b>${esc(err.message)}</div>`; }
   }
 
-  // ---------- Theme toggle ----------
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    try{ localStorage.setItem('josriri_theme', next); }catch(e){}
-  });
-
-  // ---------- Init ----------
-  if(getToken()){
-    showDashboard();
-  }else{
-    showAuth();
-  }
+  getToken() ? showDashboard() : showAuth();
 })();
 </script>
-
 </body>
 </html>

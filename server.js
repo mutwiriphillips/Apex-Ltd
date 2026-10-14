@@ -17,6 +17,8 @@ const statsRouter = require('./src/routes/stats');
 const authRouter = require('./src/routes/auth');
 const adminRouter = require('./src/routes/admin');
 const accountRouter = require('./src/routes/account');
+const mediaRouter = require('./src/routes/media');
+const introductionsRouter = require('./src/routes/introductions');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,9 +62,21 @@ function limitWritesOnly(limiter) {
 app.use('/api/players', limitWritesOnly(writeLimiter), optionalAuth, playersRouter);
 app.use('/api/highlights', limitWritesOnly(writeLimiter), highlightsRouter);
 app.use('/api/leads', limitWritesOnly(writeLimiter), leadsRouter);
+app.use('/api/introductions', limitWritesOnly(writeLimiter), introductionsRouter);
+app.use('/api/media', mediaRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/admin', requireAuth, requireRole('staff_admin', 'superadmin'), adminRouter);
+// Uploads are a bigger abuse surface than normal writes: cap them per address.
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many uploads from this address. Please try again later.' },
+});
+app.use('/api/account/players/:id/photo', (req, res, next) => (req.method === 'POST' ? uploadLimiter(req, res, next) : next()));
+app.use('/api/account/players/:id/videos', (req, res, next) => (req.method === 'POST' ? uploadLimiter(req, res, next) : next()));
 app.use('/api/account', requireAuth, requireRole('player', 'guardian'), accountRouter);
 
 // Fallback to index.html for the single-page site.
@@ -77,6 +91,13 @@ app.get('*', (req, res, next) => {
 app.use((err, req, res, next) => {
   if (err instanceof HttpError) {
     return res.status(err.status).json({ error: err.message });
+  }
+  // Body-parser errors (oversized upload, malformed JSON) carry a 4xx status.
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'That file is too large. Please choose a smaller one.' });
+  }
+  if (err && err.status >= 400 && err.status < 500 && err.type) {
+    return res.status(err.status).json({ error: 'The request could not be read.' });
   }
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Something went wrong. Please try again.' });

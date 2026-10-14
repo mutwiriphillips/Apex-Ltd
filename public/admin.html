@@ -4,498 +4,354 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/svg+xml" href="/assets/jsm-emblem-icon.svg" />
-<title>Josriri Sports Management — Admin</title>
-<script>
-  (function(){
-    try{
-      var saved = localStorage.getItem('josriri_theme');
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
-  })();
-</script>
+<title>Staff admin — Josriri Sports Management</title>
+<meta name="description" content="Josriri staff moderation and account management." />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#101B2D" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --pitch:#15171B; --pitch-deep:#0C0D0F; --paper:#101113; --paper-alt:#17181C;
-    --surface:#1B1D22;
-    --ink:#F2F3F5; --ink-soft:#9BA0A8; --gold:#C6FF3D; --gold-deep:#9FE01B;
-    --red:#FF3D68; --green:#0EA5B8; --line:rgba(255,255,255,0.08); --white:#FFFFFF;
-  }
-  html[data-theme="dark"]{
-    --pitch:#0A0A0A; --pitch-deep:#000000; --paper:#000000; --paper-alt:#0A0A0A;
-    --surface:#141518;
-    --ink:#F5F5F5; --ink-soft:#8A8F98; --gold:#D4FF5C; --gold-deep:#B8FF3B;
-    --red:#FF6E8C; --green:#34C6D9; --line:rgba(255,255,255,0.10); --white:#F6F5FC;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--paper); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.5;
-    transition:background-color .3s ease, color .3s ease;}
-  .display{font-family:'Exo 2', sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;}
-  .mono{font-family:'JetBrains Mono', monospace;}
-  .theme-toggle{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px;
-    border-radius:50%; border:1.5px solid #4E6B5C; background:transparent; color:var(--white); cursor:pointer;}
-  .theme-toggle:hover{border-color:var(--gold);}
-  .theme-toggle svg{width:17px; height:17px;}
-  .theme-toggle .icon-sun{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
-  header{background:var(--pitch); border-bottom:3px solid var(--gold); padding:16px 24px;
-    display:flex; align-items:center; justify-content:space-between;}
-  header .brand{display:flex; align-items:center; gap:10px; color:var(--white); font-size:19px;}
-  header .brand .mark{width:30px; height:30px; border-radius:50%; background:var(--gold);
-    color:var(--pitch-deep); display:flex; align-items:center; justify-content:center;
-    font-family:'Exo 2'; font-weight:800; font-size:10px; letter-spacing:-0.3px;}
-  header .tag{color:var(--gold); font-family:'JetBrains Mono'; font-size:11px; letter-spacing:1px; text-transform:uppercase;}
-  #logout-btn{background:transparent; border:1.5px solid #4E6B5C; color:var(--white); padding:8px 16px;
-    border-radius:2px; font-size:13px; cursor:pointer; display:none;}
-  #logout-btn:hover{border-color:var(--gold); color:var(--gold);}
-
-  .wrap{max-width:1000px; margin:0 auto; padding:32px 24px;}
-
-  /* Login */
-  #login-view{max-width:380px; margin:80px auto;}
-  #login-view h1{font-size:24px; margin-bottom:6px;}
-  #login-view p{color:var(--ink-soft); font-size:14px; margin-bottom:24px;}
-  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
-  .field label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
-  .field input{padding:11px 12px; border:1.5px solid var(--line); border-radius:2px; font-size:14px; background:var(--surface);}
-  .field input:focus{outline:2px solid var(--gold); outline-offset:1px;}
-  .btn{display:inline-flex; align-items:center; justify-content:center; padding:12px 22px; font-weight:700;
-    font-size:14px; border-radius:2px; border:none; cursor:pointer;}
-  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
-  .btn-gold:hover{background:#DBA939;}
-  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
-  .btn-outline:hover{border-color:var(--pitch);}
-  .btn-reject{background:transparent; border:1.5px solid var(--red); color:var(--red);}
-  .btn-reject:hover{background:var(--red); color:var(--white);}
-  .error-msg{background:rgba(255,61,104,0.10); border:1px solid var(--red); color:var(--red); padding:10px 14px;
-    border-radius:2px; font-size:13px; margin-bottom:16px; display:none;}
-
-  /* Dashboard */
-  #dashboard-view{display:none;}
-  .tabs{display:flex; gap:8px; margin-bottom:24px; border-bottom:2px solid var(--line);}
-  .tab{padding:10px 18px; font-weight:700; font-size:13.5px; color:var(--ink-soft); cursor:pointer;
-    border-bottom:3px solid transparent; margin-bottom:-2px;}
-  .tab.active{color:var(--gold); border-bottom-color:var(--gold);}
-  .panel{display:none;}
-  .panel.active{display:block;}
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:18px;
-    margin-bottom:14px; display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;}
-  .card-main{flex:1; min-width:220px;}
-  .card-title{font-weight:700; font-size:15px; margin-bottom:4px;}
-  .card-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:6px;}
-  .card-sub a{color:var(--gold-deep); text-decoration:none;}
-  .minor-badge{display:inline-block; background:rgba(255,61,104,0.12); color:var(--red); font-size:10.5px;
-    font-weight:700; padding:2px 8px; border-radius:10px; margin-left:8px; text-transform:uppercase;}
-  .actions{display:flex; gap:8px; flex-wrap:wrap;}
-  .empty-state{border:1.5px dashed var(--line); border-radius:6px; padding:36px 24px; text-align:center;
-    color:var(--ink-soft); background:var(--surface);}
-  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
-  select.mini{padding:9px 10px; border:1.5px solid var(--line); border-radius:2px; font-size:13px;}
-  .toast{position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
-    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold); font-size:14px; font-weight:600;
-    z-index:999; transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;}
-  .toast.show{transform:translateY(0); opacity:1;}
-  .user-summary{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
-  .user-summary div{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:12px 18px; min-width:110px;}
-  .user-summary b{display:block; font-family:'Exo 2'; font-size:24px; color:var(--gold);}
-  .user-summary span{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-soft);}
-  .user-toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
-  .user-toolbar input{flex:1; min-width:200px; padding:10px 12px; border:1.5px solid var(--line); border-radius:2px; background:var(--surface); color:var(--ink); font-size:14px;}
-  select.mini{background:var(--surface); color:var(--ink);}
-  .pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:8px; text-transform:uppercase; background:rgba(198,255,61,.14); color:var(--gold);}
-  .pill.off{background:rgba(255,61,104,.12); color:var(--red);}
-  .btn-sm{padding:8px 12px; font-size:12.5px;}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css" />
 </head>
 <body>
-
-<header>
-  <div class="brand"><div class="mark">JSM</div><span class="display" style="font-size:18px;">Josriri</span></div>
-  <span class="tag" id="header-tag">Admin</span>
-  <div style="display:flex; align-items:center; gap:12px;">
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-    </button>
-    <button id="logout-btn">Log out</button>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="in">
+    <a class="wordmark" href="/" aria-label="Josriri Sports Management — home"><span class="wm">JOSRIRI</span><span class="wd">Sports<br>Management</span></a>
+    <nav class="hnav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/#directory">Directory</a>
+      <a href="/account.html">My Account</a>
+      
+      <button type="button" class="linkbtn" id="logout-btn" hidden>Log out</button>
+    </nav>
   </div>
 </header>
+<main id="main">
+<div class="page"><div class="wrap">
 
-<div class="wrap">
-
-  <div id="login-view">
-    <h1 class="display">Staff sign in</h1>
-    <p>Moderation tools are restricted to staff_admin / superadmin accounts. See the README for two ways to create the first one: <code>npm run create-admin</code>, or the free-tier-friendly bootstrap endpoint.</p>
-    <div class="error-msg" id="login-error"></div>
-    <form id="login-form">
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="login-email" required autocomplete="username" />
+  <div id="login-view" hidden>
+    <div class="auth">
+      <div class="eyebrow">Staff only</div>
+      <h1 class="title">Staff <em>sign in</em></h1>
+      <p class="sub" style="margin-bottom:28px">Moderation tools are restricted to staff_admin and superadmin accounts.</p>
+      <div class="card">
+        <div class="msg bad" id="login-error" role="alert"></div>
+        <form id="login-form">
+          <div class="field"><label for="login-email">Email</label><input type="email" id="login-email" required autocomplete="username" /></div>
+          <div class="field"><label for="login-password">Password</label><input type="password" id="login-password" required autocomplete="current-password" /></div>
+          <button type="submit" class="btn btn-violet btn-block">Sign in</button>
+        </form>
+        <p class="note" style="margin-top:14px">First time? See the README for creating the first admin: <code>npm run create-admin</code>, or the bootstrap endpoint on the free tier.</p>
       </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" id="login-password" required autocomplete="current-password" />
-      </div>
-      <button type="submit" class="btn btn-gold" style="width:100%;">Sign in</button>
-    </form>
+    </div>
   </div>
 
-  <div id="dashboard-view">
-    <div class="tabs">
-      <div class="tab active" data-panel="highlights">Pending highlights</div>
-      <div class="tab" data-panel="players">Unverified players</div>
-      <div class="tab" data-panel="leads">Sponsor &amp; scout leads</div>
-      <div class="tab" data-panel="users">Users &amp; sign-ins</div>
+  <div id="dashboard-view" hidden>
+    <div class="eyebrow">Admin</div>
+    <h1 class="title">Moderation &amp; <em>accounts</em></h1>
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+      <button class="tab" role="tab" id="t-highlights" aria-selected="true" aria-controls="panel-highlights" data-panel="highlights">Highlights<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-photos" aria-selected="false" aria-controls="panel-photos" data-panel="photos">Photos<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-intros" aria-selected="false" aria-controls="panel-intros" data-panel="intros">Introductions<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-players" aria-selected="false" aria-controls="panel-players" data-panel="players">Unverified players<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-leads" aria-selected="false" aria-controls="panel-leads" data-panel="leads">Scout &amp; sponsor leads</button>
+      <button class="tab" role="tab" id="t-users" aria-selected="false" aria-controls="panel-users" data-panel="users">Users &amp; sign-ins</button>
     </div>
 
-    <div class="panel active" id="panel-highlights"></div>
-    <div class="panel" id="panel-players"></div>
-    <div class="panel" id="panel-leads"></div>
-    <div class="panel" id="panel-users">
-      <div id="user-summary" class="user-summary"></div>
-      <div class="user-toolbar">
-        <input type="search" id="user-q" placeholder="Search by email or phone…" />
-        <select class="mini" id="user-role"><option value="">All roles</option></select>
-        <select class="mini" id="user-status"><option value="">Any status</option><option value="active">Active</option><option value="suspended">Suspended</option></select>
-        <button class="btn btn-gold" id="user-new" type="button" style="display:none;">+ New account</button>
+    <div class="panel active" id="panel-highlights" role="tabpanel" aria-labelledby="t-highlights"></div>
+    <div class="panel" id="panel-photos" role="tabpanel" aria-labelledby="t-photos"></div>
+    <div class="panel" id="panel-intros" role="tabpanel" aria-labelledby="t-intros">
+      <div class="toolbar"><label class="sr-only" for="intro-status">Status</label>
+        <select class="mini" id="intro-status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="declined">Declined</option><option value="closed">Closed</option><option value="">All</option></select></div>
+      <div id="intro-list"></div>
+    </div>
+    <div class="panel" id="panel-players" role="tabpanel" aria-labelledby="t-players"></div>
+    <div class="panel" id="panel-leads" role="tabpanel" aria-labelledby="t-leads"></div>
+    <div class="panel" id="panel-users" role="tabpanel" aria-labelledby="t-users">
+      <div id="user-summary" class="stats"></div>
+      <div class="toolbar">
+        <label class="sr-only" for="user-q">Search users</label><input type="search" id="user-q" placeholder="Search by email or phone…" />
+        <label class="sr-only" for="user-role">Role</label><select class="mini" id="user-role"><option value="">All roles</option></select>
+        <label class="sr-only" for="user-status">Status</label><select class="mini" id="user-status"><option value="">Any status</option><option value="active">Active</option><option value="suspended">Suspended</option></select>
+        <button class="btn btn-violet btn-sm" id="user-new" type="button" hidden>+ New account</button>
       </div>
-      <form id="user-create" class="card" style="display:none;">
-        <div class="card-main" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
-          <div class="field" style="margin:0; flex:1; min-width:180px;"><label>Email</label><input type="email" id="nu-email" required /></div>
-          <div class="field" style="margin:0; flex:1; min-width:160px;"><label>Temporary password</label><input type="text" id="nu-pass" minlength="8" required autocomplete="off" /></div>
-          <div class="field" style="margin:0;"><label>Role</label><select class="mini" id="nu-role"></select></div>
-          <button class="btn btn-gold" type="submit">Create</button>
+      <form id="user-create" class="card" hidden>
+        <div class="form-grid">
+          <div class="field"><label for="nu-email">Email</label><input type="email" id="nu-email" required /></div>
+          <div class="field"><label for="nu-pass">Temporary password</label><input type="text" id="nu-pass" minlength="8" required autocomplete="off" /></div>
+          <div class="field"><label for="nu-role">Role</label><select id="nu-role"></select></div>
         </div>
+        <button class="btn btn-ink btn-sm" type="submit">Create account</button>
       </form>
       <div id="user-list"></div>
     </div>
   </div>
 
-</div>
-
-<div class="toast" id="toast"></div>
+</div></div>
+</main>
+<footer class="site-footer">
+  <div class="inner">
+    <div class="foot-grid">
+      <div>
+        <a class="wordmark" href="/"><span class="wm">JOSRIRI</span><span class="wd">Sports<br>Management</span></a>
+        <p class="about">Helping Kenyan athletes become visible, discoverable and professionally represented — whatever their county, club or level.</p>
+      </div>
+      <div><h4>Platform</h4><ul><li><a href="/#register">Athlete registration</a></li><li><a href="/#directory">Athlete directory</a></li><li><a href="/#showcase">Video showcase</a></li><li><a href="/#managed">Managed athletes</a></li></ul></div>
+      <div><h4>Organisations</h4><ul><li><a href="/#sponsors">Scout &amp; sponsor access</a></li><li><a href="/#contact">Partnerships</a></li><li><a href="/account.html">My account</a></li><li><a href="/admin.html">Staff login</a></li></ul></div>
+      <div><h4>Contact &amp; policies</h4><ul><li><a href="tel:+254771648205">+254 771 648 205</a></li><li><a href="mailto:skywalkerstalents@gmail.com">skywalkerstalents@gmail.com</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/child-safety.html">Child safeguarding</a></li><li><a href="/terms.html">Terms of use</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Josriri Sports Management. Nairobi, Kenya.</span><span>Early-stage platform.</span></div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
+  'use strict';
   const TOKEN_KEY = 'josriri_admin_token';
-
-  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
-  function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
-  function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
-
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  function getToken(){ try{ return localStorage.getItem(TOKEN_KEY); }catch(e){ return null; } }
+  function setToken(t){ try{ localStorage.setItem(TOKEN_KEY, t); }catch(e){} }
+  function clearToken(){ try{ localStorage.removeItem(TOKEN_KEY); }catch(e){} }
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function safeUrl(u){ return /^https?:\/\//i.test(u || '') ? u : ''; }
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 3000);
-  }
+  function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3400); }
+  const fmt = d => { try{ return new Date(d).toLocaleDateString('en-KE', { day:'numeric', month:'short', year:'numeric' }); }catch(e){ return ''; } };
+  const minorPill = m => m ? '<span class="pill off">Minor</span>' : '';
+  function badgeCount(tab, n){ const b = $(`#t-${tab} .n`); if(!b) return; b.textContent = n; b.hidden = !n; }
 
   async function api(path, options){
     const token = getToken();
     const res = await fetch('/api' + path, Object.assign({
-      headers: Object.assign(
-        { 'Content-Type': 'application/json' },
-        token ? { 'Authorization': 'Bearer ' + token } : {}
-      ),
+      headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'Authorization': 'Bearer ' + token } : {}),
     }, options));
-    let body = null;
-    try{ body = await res.json(); }catch(e){}
-    if(res.status === 401){
-      clearToken();
-      showLogin();
-      throw new Error((body && body.error) || 'Session expired. Please sign in again.');
-    }
-    if(!res.ok){
-      throw new Error((body && body.error) || `Request failed (${res.status})`);
-    }
+    let body = null; try{ body = await res.json(); }catch(e){}
+    if(res.status === 401){ clearToken(); showLogin(); throw new Error((body && body.error) || 'Session expired. Please sign in again.'); }
+    if(!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
     return body;
   }
-
-  function showLogin(){
-    document.getElementById('login-view').style.display = 'block';
-    document.getElementById('dashboard-view').style.display = 'none';
-    document.getElementById('logout-btn').style.display = 'none';
+  async function blobUrl(path){
+    const res = await fetch('/api' + path, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if(!res.ok) throw new Error('preview unavailable');
+    return URL.createObjectURL(await res.blob());
   }
+
+  function showLogin(){ $('#login-view').hidden = false; $('#dashboard-view').hidden = true; $('#logout-btn').hidden = true; }
   function showDashboard(){
-    document.getElementById('login-view').style.display = 'none';
-    document.getElementById('dashboard-view').style.display = 'block';
-    document.getElementById('logout-btn').style.display = 'inline-flex';
-    loadHighlights();
-    loadPlayers();
-    loadLeads();
-    loadUsers();
+    $('#login-view').hidden = true; $('#dashboard-view').hidden = false; $('#logout-btn').hidden = false;
+    loadHighlights(); loadPhotos(); loadIntros(); loadPlayers(); loadLeads(); loadUsers();
   }
 
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errBox = document.getElementById('login-error');
-    errBox.style.display = 'none';
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
+  $('#login-form').addEventListener('submit', async e => {
+    e.preventDefault(); const box = $('#login-error'); box.textContent = '';
     try{
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const body = await res.json();
+      const res = await fetch('/api/auth/login', { method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ email: $('#login-email').value.trim(), password: $('#login-password').value }) });
+      const body = await res.json().catch(() => ({}));
       if(!res.ok) throw new Error(body.error || 'Login failed.');
-      if(!['staff_admin','superadmin'].includes(body.user.role)){
-        throw new Error('This account does not have admin access.');
-      }
-      setToken(body.token);
-      showDashboard();
-    }catch(err){
-      errBox.textContent = err.message;
-      errBox.style.display = 'block';
-    }
+      if(!['staff_admin','superadmin'].includes(body.user.role)) throw new Error('This account does not have admin access.');
+      setToken(body.token); showDashboard();
+    }catch(err){ box.textContent = err.message; }
   });
+  $('#logout-btn').addEventListener('click', () => { clearToken(); showLogin(); });
 
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    clearToken();
-    showLogin();
-  });
+  $$('.tab').forEach(tab => tab.addEventListener('click', () => {
+    $$('.tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    tab.setAttribute('aria-selected', 'true'); $('#panel-' + tab.dataset.panel).classList.add('active');
+  }));
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
-    });
-  });
+  const empty = (title, text) => `<div class="empty"><b>${esc(title)}</b>${esc(text)}</div>`;
 
-  // ---------- Highlights ----------
+  /* ---------- Highlights (links + uploaded clips) ---------- */
   async function loadHighlights(){
-    const panel = document.getElementById('panel-highlights');
+    const panel = $('#panel-highlights');
     try{
-      const data = await api('/admin/highlights/pending');
-      const items = data.highlights || [];
-      if(items.length === 0){
-        panel.innerHTML = `<div class="empty-state"><b>Nothing pending.</b> New highlight submissions will show up here for review.</div>`;
-        return;
-      }
-      panel.innerHTML = items.map(h => `
-        <div class="card" data-id="${h.id}">
-          <div class="card-main">
-            <div class="card-title">${esc(h.title)} ${h.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
-            <div class="card-sub">${esc(h.player_name)} · submitted ${new Date(h.created_at).toLocaleDateString()}</div>
-            ${h.description ? `<div class="card-sub">${esc(h.description)}</div>` : ''}
-            ${safeUrl(h.video_url) ? `<div class="card-sub"><a href="${esc(h.video_url)}" target="_blank" rel="noopener noreferrer">${esc(h.video_url)}</a></div>` : ''}
+      const items = (await api('/admin/highlights/pending')).highlights || [];
+      badgeCount('highlights', items.length);
+      if(!items.length){ panel.innerHTML = empty('Nothing pending.', 'New highlight links and uploaded clips will show up here for review.'); return; }
+      panel.innerHTML = items.map(h => `<div class="card" data-id="${esc(h.id)}"><div class="row">
+          <div class="main"><div class="title-sm">${esc(h.title)} ${minorPill(h.is_minor)} <span class="pill">${h.source === 'upload' ? 'Uploaded clip' : 'Link'}</span></div>
+            <div class="sub-sm">${esc(h.player_name)} · submitted ${fmt(h.created_at)}</div>
+            ${h.description ? `<div class="sub-sm">${esc(h.description)}</div>` : ''}
+            ${h.source === 'upload'
+              ? `<video class="clip" controls preload="none" data-clip="${esc(h.id)}" aria-label="Review ${esc(h.title)}"></video>`
+              : (safeUrl(h.video_url) ? `<div class="sub-sm"><a href="${esc(h.video_url)}" target="_blank" rel="noopener noreferrer">${esc(h.video_url)}</a></div>` : '')}
           </div>
-          <div class="actions">
-            <button class="btn btn-gold" data-action="approve">Approve</button>
-            <button class="btn btn-reject" data-action="reject">Reject</button>
-          </div>
-        </div>
-      `).join('');
-      panel.querySelectorAll('.card').forEach(card => {
+          <div class="actions"><button class="btn btn-violet btn-sm" data-act="approve">Approve</button><button class="btn btn-danger btn-sm" data-act="reject">Reject</button></div></div></div>`).join('');
+      $$('.card', panel).forEach(card => {
         const id = card.dataset.id;
-        card.querySelector('[data-action=approve]').addEventListener('click', () => moderateHighlight(id, 'approve'));
-        card.querySelector('[data-action=reject]').addEventListener('click', () => moderateHighlight(id, 'reject'));
+        $('[data-act=approve]', card).addEventListener('click', () => moderate(`/admin/highlights/${id}/approve`, 'Highlight approved.', loadHighlights));
+        $('[data-act=reject]', card).addEventListener('click', () => moderate(`/admin/highlights/${id}/reject`, 'Highlight rejected.', loadHighlights));
+        const v = $('[data-clip]', card);
+        if(v) v.addEventListener('play', async function once(){
+          v.removeEventListener('play', once); if(v.dataset.loaded) return; v.dataset.loaded = '1'; v.pause();
+          try{ v.src = await blobUrl(`/admin/media/video/${id}`); v.play().catch(() => {}); }catch(e){ toast('Preview unavailable.'); }
+        });
       });
-    }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${esc(err.message)}</div>`;
-    }
+    }catch(err){ panel.innerHTML = empty("Couldn't load highlights.", err.message); }
+  }
+  async function moderate(path, msg, reload){
+    try{ await api(path, { method:'POST' }); toast(msg); reload(); }catch(err){ toast(err.message); }
   }
 
-  async function moderateHighlight(id, action){
+  /* ---------- Photos ---------- */
+  async function loadPhotos(){
+    const panel = $('#panel-photos');
     try{
-      await api(`/admin/highlights/${id}/${action}`, { method: 'POST' });
-      showToast(action === 'approve' ? 'Highlight approved.' : 'Highlight rejected.');
-      loadHighlights();
-    }catch(err){
-      showToast(err.message);
-    }
+      const items = (await api('/admin/photos/pending')).photos || [];
+      badgeCount('photos', items.length);
+      if(!items.length){ panel.innerHTML = empty('No photos waiting.', 'Profile photos appear here for review before they are public.'); return; }
+      panel.innerHTML = items.map(p => `<div class="card" data-id="${esc(p.player_id)}"><div class="row" style="align-items:center">
+          <img class="thumb" width="96" height="96" alt="Pending photo of ${esc(p.full_name)}" data-photo="${esc(p.player_id)}">
+          <div class="main"><div class="title-sm">${esc(p.full_name)} ${minorPill(p.is_minor)}</div>
+            <div class="sub-sm">Uploaded ${fmt(p.created_at)} · ${(p.byte_size/1048576).toFixed(1)} MB</div>
+            <div class="sub-sm">Approve only clear photos of the athlete. Check for other people, contact details or inappropriate content.</div></div>
+          <div class="actions"><button class="btn btn-violet btn-sm" data-act="approve">Approve</button><button class="btn btn-danger btn-sm" data-act="reject">Reject</button></div></div></div>`).join('');
+      $$('.card', panel).forEach(card => {
+        const id = card.dataset.id;
+        blobUrl(`/admin/media/photo/${id}`).then(u => { $('[data-photo]', card).src = u; }).catch(() => {});
+        $('[data-act=approve]', card).addEventListener('click', () => moderate(`/admin/photos/${id}/approve`, 'Photo approved.', loadPhotos));
+        $('[data-act=reject]', card).addEventListener('click', () => moderate(`/admin/photos/${id}/reject`, 'Photo rejected.', loadPhotos));
+      });
+    }catch(err){ panel.innerHTML = empty("Couldn't load photos.", err.message); }
   }
 
-  // ---------- Players ----------
+  /* ---------- Introductions ---------- */
+  async function loadIntros(){
+    const list = $('#intro-list'); const status = $('#intro-status').value;
+    try{
+      const items = (await api('/admin/introductions' + (status ? '?status=' + status : ''))).introductions || [];
+      if(!status || status === 'pending') badgeCount('intros', items.filter(i => i.status === 'pending').length);
+      if(!items.length){ list.innerHTML = empty('No requests here.', 'Scout, club and sponsor introduction requests will appear here.'); return; }
+      list.innerHTML = items.map(i => `<div class="card" data-id="${esc(i.id)}"><div class="row">
+          <div class="main"><div class="title-sm">${esc(i.requester_name)} — ${esc(i.organisation)} <span class="pill ${i.status === 'pending' ? 'warn' : i.status === 'approved' ? 'ok' : 'off'}">${esc(i.status)}</span></div>
+            <div class="sub-sm">wants to meet <strong>${esc(i.player_name)}</strong> ${minorPill(i.is_minor)} · ${fmt(i.created_at)}</div>
+            <p style="margin:8px 0">${esc(i.message)}</p>
+            <div class="sub-sm"><a href="mailto:${esc(i.requester_email)}">${esc(i.requester_email)}</a>${i.requester_phone ? ' · ' + esc(i.requester_phone) : ''}</div>
+            ${i.owner_decision ? `<div class="sub-sm">Athlete's answer: <strong>${esc(i.owner_decision)}</strong></div>` : ''}
+            ${i.staff_note ? `<div class="sub-sm">Staff note: ${esc(i.staff_note)}</div>` : ''}
+            ${i.status === 'approved' ? `<div class="actions" style="margin-top:8px"><button class="btn btn-outline btn-sm" data-act="contact">View athlete's private contact</button></div><div class="sub-sm" data-contact style="margin-top:6px"></div>` : ''}
+          </div>
+          ${i.status === 'pending' ? `<div class="actions"><button class="btn btn-violet btn-sm" data-act="approved">Approve &amp; forward</button><button class="btn btn-danger btn-sm" data-act="declined">Decline</button></div>`
+            : i.status === 'approved' ? `<div class="actions"><button class="btn btn-outline btn-sm" data-act="closed">Mark closed</button></div>` : ''}
+        </div></div>`).join('');
+      $$('.card', list).forEach((card, idx) => {
+        const i = items[idx];
+        ['approved','declined','closed'].forEach(s => { const b = $(`[data-act=${s}]`, card); if(b) b.addEventListener('click', async () => {
+          let note = '';
+          if(s === 'declined'){ note = prompt('Optional note for your records (not sent to the requester):') || ''; }
+          if(s === 'approved' && !confirm(`Forward this request to ${i.player_name}${i.is_minor ? "'s guardian" : ''}? You have checked that the requester is genuine.`)) return;
+          try{ await api('/admin/introductions/' + i.id, { method:'PATCH', body: JSON.stringify({ status: s, note }) }); toast('Request ' + s + '.'); loadIntros(); }
+          catch(err){ toast(err.message); }
+        }); });
+        const c = $('[data-act=contact]', card);
+        if(c) c.addEventListener('click', async () => {
+          try{
+            const r = await api(`/admin/players/${i.player_id}/contact`);
+            $('[data-contact]', card).textContent = r.contact ? `Email: ${r.contact.email || '—'} · Phone: ${r.contact.phone || '—'} (this view was logged)` : 'No private contact stored yet. (this view was logged)';
+          }catch(err){ toast(err.message); }
+        });
+      });
+    }catch(err){ list.innerHTML = empty("Couldn't load requests.", err.message); }
+  }
+  $('#intro-status').addEventListener('change', loadIntros);
+
+  /* ---------- Players ---------- */
   async function loadPlayers(){
-    const panel = document.getElementById('panel-players');
+    const panel = $('#panel-players');
     try{
-      const data = await api('/admin/players/unverified');
-      const items = data.players || [];
-      if(items.length === 0){
-        panel.innerHTML = `<div class="empty-state"><b>All caught up.</b> No unverified players waiting.</div>`;
-        return;
-      }
-      panel.innerHTML = items.map(p => `
-        <div class="card" data-id="${p.id}">
-          <div class="card-main">
-            <div class="card-title">${esc(p.full_name)} ${p.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
-            <div class="card-sub">${esc(p.sport)} · ${esc(p.county || 'County not set')} · registered ${new Date(p.created_at).toLocaleDateString()}</div>
-          </div>
-          <div class="actions">
-            <select class="mini" data-role="entity-type">
-              <option value="club">Club verify</option>
-              <option value="federation">Federation verify</option>
-            </select>
-            <button class="btn btn-gold" data-action="verify">Verify</button>
-          </div>
-        </div>
-      `).join('');
-      panel.querySelectorAll('.card').forEach(card => {
-        const id = card.dataset.id;
-        card.querySelector('[data-action=verify]').addEventListener('click', () => {
-          const entityType = card.querySelector('[data-role=entity-type]').value;
-          verifyPlayer(id, entityType);
-        });
-      });
-    }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load players.</b> ${esc(err.message)}</div>`;
-    }
+      const items = (await api('/admin/players/unverified')).players || [];
+      badgeCount('players', items.length);
+      if(!items.length){ panel.innerHTML = empty('All caught up.', 'No unverified players waiting.'); return; }
+      panel.innerHTML = items.map(p => `<div class="card" data-id="${esc(p.id)}"><div class="row">
+          <div class="main"><div class="title-sm">${esc(p.full_name)} ${minorPill(p.is_minor)}</div>
+            <div class="sub-sm">${esc(p.sport)} · ${esc(p.county || 'County not set')} · registered ${fmt(p.created_at)}</div></div>
+          <div class="actions"><label class="sr-only" for="v-${esc(p.id)}">Verification type</label>
+            <select class="mini" id="v-${esc(p.id)}" data-role="entity"><option value="club">Club verify</option><option value="federation">Federation verify</option></select>
+            <button class="btn btn-violet btn-sm" data-act="verify">Verify</button></div></div></div>`).join('');
+      $$('.card', panel).forEach(card => $('[data-act=verify]', card).addEventListener('click', async () => {
+        try{ await api(`/admin/players/${card.dataset.id}/verify`, { method:'POST', body: JSON.stringify({ entityType: $('[data-role=entity]', card).value }) }); toast('Player verified.'); loadPlayers(); }
+        catch(err){ toast(err.message); }
+      }));
+    }catch(err){ panel.innerHTML = empty("Couldn't load players.", err.message); }
   }
 
-  async function verifyPlayer(id, entityType){
-    try{
-      await api(`/admin/players/${id}/verify`, {
-        method: 'POST',
-        body: JSON.stringify({ entityType }),
-      });
-      showToast('Player verified.');
-      loadPlayers();
-    }catch(err){
-      showToast(err.message);
-    }
-  }
-
-  // ---------- Leads ----------
+  /* ---------- Leads ---------- */
   async function loadLeads(){
-    const panel = document.getElementById('panel-leads');
+    const panel = $('#panel-leads');
     try{
-      const data = await api('/admin/leads');
-      const items = data.leads || [];
-      if(items.length === 0){
-        panel.innerHTML = `<div class="empty-state"><b>No leads yet.</b> Sponsor/scout portal submissions will appear here.</div>`;
-        return;
-      }
-      panel.innerHTML = items.map(l => `
-        <div class="card">
-          <div class="card-main">
-            <div class="card-title">${esc(l.organization_name)} <span class="mono" style="font-size:11px; color:var(--ink-soft);">· ${esc(l.lead_type)}</span></div>
-            <div class="card-sub">${esc(l.contact_email)} · ${new Date(l.created_at).toLocaleDateString()} · status: ${esc(l.status)}</div>
-            ${l.message ? `<div class="card-sub">${esc(l.message)}</div>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load leads.</b> ${esc(err.message)}</div>`;
-    }
+      const items = (await api('/admin/leads')).leads || [];
+      if(!items.length){ panel.innerHTML = empty('No leads yet.', 'Scout and sponsor access requests will appear here.'); return; }
+      panel.innerHTML = items.map(l => `<div class="card"><div class="title-sm">${esc(l.organization_name)} <span class="pill">${esc(l.lead_type)}</span></div>
+          <div class="sub-sm"><a href="mailto:${esc(l.contact_email)}">${esc(l.contact_email)}</a> · ${fmt(l.created_at)} · status: ${esc(l.status)}</div>
+          ${l.message ? `<p style="margin-top:6px">${esc(l.message)}</p>` : ''}</div>`).join('');
+    }catch(err){ panel.innerHTML = empty("Couldn't load leads.", err.message); }
   }
 
-  // ---------- Users & sign-ins ----------
+  /* ---------- Users & sign-ins ---------- */
   const ROLES = ['player','guardian','scout','sponsor','club_admin','agent','staff_admin','superadmin'];
-  let me = null; // { id, role }
-  function myRole(){
-    try{ return JSON.parse(atob(getToken().split('.')[1])).role; }catch(e){ return null; }
-  }
-  (function initUserControls(){
-    document.getElementById('user-role').insertAdjacentHTML('beforeend', ROLES.map(r => `<option value="${r}">${r}</option>`).join(''));
-    document.getElementById('nu-role').innerHTML = ROLES.map(r => `<option value="${r}">${r}</option>`).join('');
-    let t = null;
-    document.getElementById('user-q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(loadUsers, 300); });
-    document.getElementById('user-role').addEventListener('change', loadUsers);
-    document.getElementById('user-status').addEventListener('change', loadUsers);
-    document.getElementById('user-new').addEventListener('click', () => {
-      const f = document.getElementById('user-create');
-      f.style.display = f.style.display === 'none' ? 'flex' : 'none';
-    });
-    document.getElementById('user-create').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try{
-        await api('/admin/users', { method:'POST', body: JSON.stringify({
-          email: document.getElementById('nu-email').value,
-          password: document.getElementById('nu-pass').value,
-          role: document.getElementById('nu-role').value }) });
-        showToast('Account created. Share the temporary password securely.');
-        e.target.reset(); e.target.style.display = 'none';
-        loadUsers();
-      }catch(err){ showToast(err.message); }
-    });
-  })();
-  async function loadUsers(){
-    const list = document.getElementById('user-list');
-    const isSuper = myRole() === 'superadmin';
-    document.getElementById('user-new').style.display = isSuper ? 'inline-flex' : 'none';
-    const params = new URLSearchParams();
-    const q = document.getElementById('user-q').value.trim();
-    if(q) params.set('q', q);
-    if(document.getElementById('user-role').value) params.set('role', document.getElementById('user-role').value);
-    if(document.getElementById('user-status').value) params.set('status', document.getElementById('user-status').value);
+  const ADMINS = ['staff_admin','superadmin'];
+  function myRole(){ try{ return JSON.parse(atob(getToken().split('.')[1])).role; }catch(e){ return null; } }
+  $('#user-role').insertAdjacentHTML('beforeend', ROLES.map(r => `<option value="${r}">${r}</option>`).join(''));
+  $('#nu-role').innerHTML = ROLES.map(r => `<option value="${r}">${r}</option>`).join('');
+  let qt = null;
+  $('#user-q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(loadUsers, 300); });
+  $('#user-role').addEventListener('change', loadUsers);
+  $('#user-status').addEventListener('change', loadUsers);
+  $('#user-new').addEventListener('click', () => { const f = $('#user-create'); f.hidden = !f.hidden; });
+  $('#user-create').addEventListener('submit', async e => {
+    e.preventDefault();
     try{
-      const data = await api('/admin/users?' + params.toString());
-      const s = data.summary;
-      document.getElementById('user-summary').innerHTML =
-        `<div><b>${s.total}</b><span>Total accounts</span></div><div><b>${s.active}</b><span>Active</span></div>` +
-        `<div><b>${s.suspended}</b><span>Suspended</span></div><div><b>${s.new_7d}</b><span>New (7 days)</span></div>`;
-      if(!data.users.length){
-        list.innerHTML = `<div class="empty-state"><b>No accounts found.</b> Sign-ups will appear here as people register.</div>`;
-        return;
-      }
+      await api('/admin/users', { method:'POST', body: JSON.stringify({ email: $('#nu-email').value, password: $('#nu-pass').value, role: $('#nu-role').value }) });
+      toast('Account created. Share the temporary password securely.'); e.target.reset(); e.target.hidden = true; loadUsers();
+    }catch(err){ toast(err.message); }
+  });
+  async function loadUsers(){
+    const list = $('#user-list'); const isSuper = myRole() === 'superadmin';
+    $('#user-new').hidden = !isSuper;
+    const params = new URLSearchParams();
+    const q = $('#user-q').value.trim(); if(q) params.set('q', q);
+    if($('#user-role').value) params.set('role', $('#user-role').value);
+    if($('#user-status').value) params.set('status', $('#user-status').value);
+    try{
+      const data = await api('/admin/users?' + params.toString()); const s = data.summary;
+      $('#user-summary').innerHTML = `<div><b>${s.total}</b><span>Total accounts</span></div><div><b>${s.active}</b><span>Active</span></div><div><b>${s.suspended}</b><span>Suspended</span></div><div><b>${s.new_7d}</b><span>New (7 days)</span></div>`;
+      if(!data.users.length){ list.innerHTML = empty('No accounts found.', 'Sign-ups will appear here as people register.'); return; }
       list.innerHTML = data.users.map(u => {
-        const self = u.id === data.you;
-        const adminTarget = ['staff_admin','superadmin'].includes(u.role);
-        const locked = self || (adminTarget && !isSuper);
-        return `
-        <div class="card" data-id="${esc(u.id)}" data-email="${esc(u.email || '')}">
-          <div class="card-main">
-            <div class="card-title">${esc(u.email || u.phone || '(no email)')}
-              <span class="pill">${esc(u.role)}</span>${u.is_active ? '' : '<span class="pill off">Suspended</span>'}${self ? '<span class="pill">You</span>' : ''}</div>
-            <div class="card-sub">Joined ${new Date(u.created_at).toLocaleDateString()} · last sign-in ${u.last_login_at ? new Date(u.last_login_at).toLocaleString() : 'never'}</div>
-          </div>
+        const self = u.id === data.you; const adminTarget = ADMINS.includes(u.role); const locked = self || (adminTarget && !isSuper);
+        return `<div class="card"><div class="row">
+          <div class="main"><div class="title-sm">${esc(u.email || u.phone || '(no email)')} <span class="pill">${esc(u.role)}</span>${u.is_active ? '' : '<span class="pill off">Suspended</span>'}${self ? '<span class="pill ok">You</span>' : ''}</div>
+            <div class="sub-sm">Joined ${fmt(u.created_at)} · last sign-in ${u.last_login_at ? new Date(u.last_login_at).toLocaleString('en-KE') : 'never'}</div></div>
           <div class="actions">
-            <select class="mini" data-act="role" ${locked ? 'disabled' : ''}>${ROLES.filter(r => isSuper || !['staff_admin','superadmin'].includes(r) || r === u.role).map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select>
-            <button class="btn btn-outline btn-sm" data-act="reset" ${self || locked ? 'disabled' : ''}>Reset password</button>
-            <button class="btn ${u.is_active ? 'btn-reject' : 'btn-gold'} btn-sm" data-act="toggle" ${locked ? 'disabled' : ''}>${u.is_active ? 'Suspend' : 'Reactivate'}</button>
-          </div>
-        </div>`;
+            <select class="mini" data-act="role" aria-label="Role for ${esc(u.email || 'user')}" ${locked ? 'disabled' : ''}>${ROLES.filter(r => isSuper || !ADMINS.includes(r) || r === u.role).map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select>
+            <button class="btn btn-outline btn-sm" data-act="reset" ${locked ? 'disabled' : ''}>Reset password</button>
+            <button class="btn ${u.is_active ? 'btn-danger' : 'btn-violet'} btn-sm" data-act="toggle" ${locked ? 'disabled' : ''}>${u.is_active ? 'Suspend' : 'Reactivate'}</button>
+          </div></div></div>`;
       }).join('');
-      list.querySelectorAll('.card').forEach((card, i) => {
+      $$('.card', list).forEach((card, i) => {
         const u = data.users[i];
-        card.querySelector('[data-act=role]').addEventListener('change', async (e) => {
-          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ role: e.target.value }) }); showToast('Role updated.'); }
-          catch(err){ showToast(err.message); }
+        $('[data-act=role]', card).addEventListener('change', async e => {
+          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ role: e.target.value }) }); toast('Role updated.'); }catch(err){ toast(err.message); }
           loadUsers();
         });
-        card.querySelector('[data-act=toggle]').addEventListener('click', async () => {
+        $('[data-act=toggle]', card).addEventListener('click', async () => {
           if(u.is_active && !confirm('Suspend ' + (u.email || 'this user') + '? They will be signed out immediately.')) return;
-          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ is_active: !u.is_active }) }); showToast(u.is_active ? 'Account suspended.' : 'Account reactivated.'); }
-          catch(err){ showToast(err.message); }
+          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ is_active: !u.is_active }) }); toast(u.is_active ? 'Account suspended.' : 'Account reactivated.'); }catch(err){ toast(err.message); }
           loadUsers();
         });
-        card.querySelector('[data-act=reset]').addEventListener('click', async () => {
-          const pw = prompt('New temporary password for ' + (u.email || 'this user') + ' (min 8 characters):');
-          if(!pw) return;
-          try{ await api('/admin/users/' + u.id + '/reset-password', { method:'POST', body: JSON.stringify({ password: pw }) }); showToast('Password reset. Share it securely.'); }
-          catch(err){ showToast(err.message); }
+        $('[data-act=reset]', card).addEventListener('click', async () => {
+          const pw = prompt('New temporary password for ' + (u.email || 'this user') + ' (min 8 characters):'); if(!pw) return;
+          try{ await api('/admin/users/' + u.id + '/reset-password', { method:'POST', body: JSON.stringify({ password: pw }) }); toast('Password reset. Share it securely.'); }catch(err){ toast(err.message); }
         });
       });
-    }catch(err){
-      list.innerHTML = `<div class="empty-state"><b>Couldn't load users.</b> ${esc(err.message)}</div>`;
-    }
+    }catch(err){ list.innerHTML = empty("Couldn't load users.", err.message); }
   }
-  // ---------- Theme toggle ----------
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    try{ localStorage.setItem('josriri_theme', next); }catch(e){}
-  });
 
-  // ---------- Init ----------
-  if(getToken()){
-    showDashboard();
-  }else{
-    showLogin();
-  }
+  getToken() ? showDashboard() : showLogin();
 })();
 </script>
-
 </body>
 </html>

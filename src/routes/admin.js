@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/highlights/pending', async (req, res, next) => {
   try {
     const result = await pool.query(
-      `SELECT h.id, h.title, h.description, h.video_url, h.created_at,
+      `SELECT h.id, h.title, h.description, h.video_url, h.source, h.created_at,
               p.id AS player_id, p.full_name AS player_name, p.is_minor
        FROM highlights h
        JOIN players p ON p.id = h.player_id
@@ -262,6 +262,115 @@ router.post('/users/:id/reset-password', async (req, res, next) => {
     await pool.query('UPDATE users SET password_hash = $2 WHERE id = $1', [target.id, await hashPassword(password)]);
     console.log(`[admin-audit] ${req.user.email} reset password for ${target.email}`);
     res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+
+// =====================================================================
+// PHOTOS, UPLOADED VIDEO PREVIEW, INTRODUCTIONS, PRIVATE CONTACT
+// =====================================================================
+
+const { sendVideo, escapeHtml } = require('../media');
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// GET /api/admin/photos/pending
+router.get('/photos/pending', async (req, res, next) => {
+  try {
+    const r = await pool.query(
+      `SELECT ph.player_id, ph.created_at, ph.byte_size, p.full_name, p.is_minor
+       FROM player_photos ph JOIN players p ON p.id = ph.player_id
+       WHERE ph.moderation_status = 'pending' ORDER BY ph.created_at ASC LIMIT 100`);
+    res.json({ photos: r.rows });
+  } catch (err) { next(err); }
+});
+
+// GET /api/admin/media/photo/:playerId — preview a photo regardless of status.
+router.get('/media/photo/:playerId', async (req, res, next) => {
+  try {
+    if (!UUID_RE.test(req.params.playerId)) return res.status(404).end();
+    const r = await pool.query('SELECT content_type, data FROM player_photos WHERE player_id = $1', [req.params.playerId]);
+    if (!r.rows.length) return res.status(404).end();
+    res.set({ 'Content-Type': r.rows[0].content_type, 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'private, no-store' });
+    res.end(r.rows[0].data);
+  } catch (err) { next(err); }
+});
+
+// GET /api/admin/media/video/:highlightId — preview an uploaded clip regardless of status.
+router.get('/media/video/:highlightId', async (req, res, next) => {
+  try {
+    if (!UUID_RE.test(req.params.highlightId)) return res.status(404).end();
+    const meta = await pool.query('SELECT content_type, byte_size FROM highlight_videos WHERE highlight_id = $1', [req.params.highlightId]);
+    if (!meta.rows.length) return res.status(404).end();
+    await sendVideo(req, res, {
+      contentType: meta.rows[0].content_type, size: meta.rows[0].byte_size, cacheControl: 'private, no-store',
+      fetchSlice: async (start, end) => {
+        const s = await pool.query(
+          'SELECT substring(data FROM $2::int FOR $3::int) AS chunk FROM highlight_videos WHERE highlight_id = $1',
+          [req.params.highlightId, start + 1, end - start + 1]);
+        return s.rows[0].chunk;
+      },
+    });
+  } catch (err) { next(err); }
+});
+
+// POST /api/admin/photos/:playerId/(approve|reject)
+router.post('/photos/:playerId/:action(approve|reject)', async (req, res, next) => {
+  try {
+    if (!UUID_RE.test(req.params.playerId)) return res.status(404).json({ error: 'Photo not found.' });
+    const status = req.params.action === 'approve' ? 'approved' : 'rejected';
+    const r = await pool.query(
+      `UPDATE player_photos SET moderation_status = $2, moderated_by = $3, moderated_at = now()
+       WHERE player_id = $1 RETURNING player_id`, [req.params.playerId, status, req.user.sub]);
+    if (!r.rows.length) return res.status(404).json({ error: 'Photo not found.' });
+    res.json({ status });
+  } catch (err) { next(err); }
+});
+
+// GET /api/admin/introductions?status=pending|approved|declined|closed
+router.get('/introductions', async (req, res, next) => {
+  try {
+    const params = [];
+    let where = '';
+    if (['pending', 'approved', 'declined', 'closed'].includes(req.query.status)) {
+      params.push(req.query.status); where = 'WHERE i.status = $1';
+    }
+    const r = await pool.query(
+      `SELECT i.id, i.player_id, p.full_name AS player_name, p.is_minor, i.requester_name, i.organisation,
+              i.requester_email, i.requester_phone, i.message, i.status, i.staff_note, i.owner_decision, i.created_at
+       FROM introduction_requests i JOIN players p ON p.id = i.player_id
+       ${where} ORDER BY i.created_at DESC LIMIT 200`, params);
+    res.json({ introductions: r.rows });
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/admin/introductions/:id  body: { status, note? }
+router.patch('/introductions/:id', async (req, res, next) => {
+  try {
+    const { status, note } = req.body || {};
+    if (!['approved', 'declined', 'closed'].includes(status)) return badRequest(res, 'status must be approved, declined or closed.');
+    if (!UUID_RE.test(req.params.id)) return res.status(404).json({ error: 'Request not found.' });
+    const r = await pool.query(
+      `UPDATE introduction_requests SET status = $2, staff_note = $3, handled_by = $4, handled_at = now()
+       WHERE id = $1 RETURNING id, status`,
+      [req.params.id, status, String(note || '').trim().slice(0, 300) || null, req.user.sub]);
+    if (!r.rows.length) return res.status(404).json({ error: 'Request not found.' });
+    console.log(`[admin-audit] ${req.user.email} set introduction ${r.rows[0].id} to ${status}`);
+    res.json({ introduction: r.rows[0] });
+  } catch (err) { next(err); }
+});
+
+// GET /api/admin/players/:id/contact — staff-only view of private contact
+// details. Every access is written to the data-processing audit log.
+router.get('/players/:id/contact', async (req, res, next) => {
+  try {
+    if (!UUID_RE.test(req.params.id)) return res.status(404).json({ error: 'Player not found.' });
+    const p = await pool.query('SELECT full_name FROM players WHERE id = $1', [req.params.id]);
+    if (!p.rows.length) return res.status(404).json({ error: 'Player not found.' });
+    const c = await pool.query('SELECT email, phone, updated_at FROM player_contacts WHERE player_id = $1', [req.params.id]);
+    await pool.query(
+      `INSERT INTO data_processing_log (actor_user_id, subject_player_id, action, purpose)
+       VALUES ($1,$2,'contact_viewed','staff relaying an approved introduction')`, [req.user.sub, req.params.id]);
+    res.json({ player: p.rows[0].full_name, contact: c.rows[0] || null });
   } catch (err) { next(err); }
 });
 

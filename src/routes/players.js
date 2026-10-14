@@ -5,6 +5,7 @@ const {
   getSportId, findOrCreateCounty, findOrCreateClub, findOrCreateDivision, HttpError,
 } = require('../helpers');
 const { notifyAdmin } = require('../mailer');
+const { escapeHtml: e } = require('../media');
 
 const router = express.Router();
 
@@ -47,7 +48,10 @@ router.get('/', async (req, res, next) => {
     const [result, total] = await Promise.all([
       pool.query(
         `SELECT id, full_name, sport, primary_position, county, club, division,
-                verification_status, bio, created_at
+                verification_status, bio, created_at,
+                EXISTS (SELECT 1 FROM player_photos ph
+                        WHERE ph.player_id = v_public_player_directory.id
+                          AND ph.moderation_status = 'approved') AS has_photo
          FROM v_public_player_directory
          ${where}
          ORDER BY ${orderBy}
@@ -67,7 +71,10 @@ router.get('/:id', async (req, res, next) => {
   try {
     const result = await pool.query(
       `SELECT id, full_name, sport, primary_position, county, club, division,
-              verification_status, bio, created_at
+              verification_status, bio, created_at,
+              EXISTS (SELECT 1 FROM player_photos ph
+                      WHERE ph.player_id = v_public_player_directory.id
+                        AND ph.moderation_status = 'approved') AS has_photo
        FROM v_public_player_directory
        WHERE id = $1`,
       [req.params.id]
@@ -173,9 +180,9 @@ router.post('/', async (req, res, next) => {
 
     // Best-effort admin notification — never blocks or fails the response.
     notifyAdmin(`New player sign-up: ${player.full_name}`, [
-      `<strong>${player.full_name}</strong> just registered on Josriri Sports Management.`,
-      `Sport: ${sport}${position ? ` (${position})` : ''}`,
-      `Club: ${club || '—'} &middot; County: ${county || '—'} &middot; Division: ${division || '—'}`,
+      `<strong>${e(player.full_name)}</strong> just registered on Josriri Sports Management.`,
+      `Sport: ${e(sport)}${position ? ` (${e(position)})` : ''}`,
+      `Club: ${e(club) || '—'} &middot; County: ${e(county) || '—'} &middot; Division: ${e(division) || '—'}`,
       isMinor ? 'This is a minor profile — guardian consent was captured at registration.' : 'Adult profile.',
       `Registered: ${new Date(player.created_at).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}`,
     ]);
