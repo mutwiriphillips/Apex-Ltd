@@ -6,6 +6,7 @@
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { pool } = require('./db');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const TOKEN_TTL = '12h';
@@ -37,17 +38,31 @@ function signToken(user) {
 
 // Reads "Authorization: Bearer <token>", verifies it, and attaches the
 // decoded payload to req.user. Responds 401 if missing/invalid/expired.
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const [scheme, token] = header.split(' ');
   if (scheme !== 'Bearer' || !token) {
     return res.status(401).json({ error: 'Missing or malformed Authorization header.' });
   }
+  let payload;
   try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token.' });
+  }
+  // Re-check the account on every authenticated request so that an admin
+  // suspending a user, or changing their role, takes effect immediately
+  // instead of waiting for the 12h token to expire.
+  try {
+    const r = await pool.query('SELECT role, is_active FROM users WHERE id = $1', [payload.sub]);
+    if (r.rows.length === 0 || !r.rows[0].is_active) {
+      return res.status(401).json({ error: 'This account is no longer active.' });
+    }
+    payload.role = r.rows[0].role;
+    req.user = payload;
+    next();
+  } catch (err) {
+    next(err);
   }
 }
 

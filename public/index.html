@@ -772,7 +772,7 @@
   </div>
 </section>
 
-<section id="spotlight">
+<section id="spotlight" style="display:none">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">Featured athlete</span>
@@ -949,12 +949,12 @@
   </div>
 </section>
 
-<section id="managed">
+<section id="managed" style="display:none">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">Premium representation</span>
       <h2 class="display">Managed athletes</h2>
-      <p>A small, selectively signed roster receiving full-service representation — contract negotiation, transfer facilitation, sponsorship brokerage, and career management. Illustrative profiles below.</p>
+      <p>A small, selectively signed roster receiving full-service representation — contract negotiation, transfer facilitation, sponsorship brokerage, and career management.</p>
     </div>
     <div class="managed-grid reveal" id="managed-grid"></div>
   </div>
@@ -1153,76 +1153,80 @@
     return body;
   }
 
-  // ---------- Managed athletes (static illustrative content) ----------
-  const MANAGED = [
-    { name:"Brian Otieno", sport:"Football", role:"Winger — Signed 2025", county:"Kisumu",
-      bio:"Broke into the Premier League from a Division One academy pathway; now fielding interest from two regional clubs.",
-      stat1:["12","Assists"], stat2:["3","Sponsor deals"] },
-    { name:"Naliaka Wekesa", sport:"Rugby", role:"Fly-half — Signed 2024", county:"Bungoma",
-      bio:"Kenya Cup standout recruited from a county sevens circuit; represented in national training camp selection.",
-      stat1:["240","Points scored"], stat2:["1","Int'l trial"] },
-    { name:"Kevin Mutiso", sport:"Basketball", role:"Point Guard — Signed 2025", county:"Machakos",
-      bio:"Discovered through a university league highlight reel; now in active transfer discussions with a regional club.",
-      stat1:["18.4","Pts / game"], stat2:["2","Club offers"] },
-  ];
-
+  // ---------- HTML escaping (all user-submitted text goes through this) ----------
+  function esc(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
   const ATHLETE_SILHOUETTE = `
     <svg viewBox="0 0 80 80" class="silhouette" aria-hidden="true">
       <circle cx="40" cy="40" r="40" fill="var(--pitch-deep)"/>
       <circle cx="40" cy="30" r="12" fill="var(--gold)" opacity="0.85"/>
       <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="var(--gold)" opacity="0.85"/>
     </svg>`;
+  function verText(p){
+    return p.verification_status === 'federation_verified' ? 'Federation verified'
+      : p.verification_status === 'club_verified' ? 'Club verified' : 'Verification pending';
+  }
 
-  function renderManaged(){
+  // ---------- Managed athletes (live from managed_athletes; hidden when empty) ----------
+  async function renderManaged(){
+    const sec = document.getElementById('managed');
     const grid = document.getElementById('managed-grid');
-    grid.innerHTML = MANAGED.map(m => `
+    let players = [];
+    try{ players = (await api('/stats/managed')).players || []; }catch(e){}
+    document.querySelectorAll('a[href="#managed"]').forEach(a => { const li = a.closest('li'); (li || a).style.display = players.length ? '' : 'none'; });
+    if(!players.length){ sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    grid.innerHTML = players.map(m => `
       <div class="managed-card">
         <div class="managed-ribbon">Signed</div>
         <div class="managed-body">
           <div style="display:flex; gap:14px; align-items:center; margin-bottom:6px;">
             ${ATHLETE_SILHOUETTE}
             <div>
-              <div class="cap-sport">${sportIcon(m.sport)} ${m.sport} · ${m.county}</div>
-              <h3 style="margin:2px 0 0;">${m.name}</h3>
+              <div class="cap-sport">${sportIcon(m.sport)} ${esc(m.sport)} · ${esc(m.county || 'Kenya')}</div>
+              <h3 style="margin:2px 0 0;">${esc(m.full_name)}</h3>
             </div>
           </div>
-          <div class="role">${m.role}</div>
-          <p>${m.bio}</p>
-          <div class="managed-stats">
-            <div><div class="n">${m.stat1[0]}</div><div class="l">${m.stat1[1]}</div></div>
-            <div><div class="n">${m.stat2[0]}</div><div class="l">${m.stat2[1]}</div></div>
-          </div>
+          <div class="role">${esc(m.primary_position || '')}${m.club ? ' · ' + esc(m.club) : ''}</div>
+          ${m.bio ? `<p>${esc(m.bio)}</p>` : ''}
         </div>
       </div>
     `).join('');
   }
 
-  // ---------- Featured athlete spotlight ----------
+  // ---------- Featured athlete spotlight (verified public players; hidden when none) ----------
   let spotlightIndex = 0;
+  let SPOT = [];
   function renderSpotlight(){
     const body = document.getElementById('spotlight-body');
     const dotsWrap = document.getElementById('spotlight-dots');
-    if(!body || !dotsWrap) return;
-    const m = MANAGED[spotlightIndex];
+    if(!body || !dotsWrap || !SPOT.length) return;
+    const m = SPOT[spotlightIndex];
     body.innerHTML = `
       <div class="spot-silhouette">${ATHLETE_SILHOUETTE.replace('class="silhouette"', '')}</div>
       <div class="spot-info">
-        <div class="cap-sport">${sportIcon(m.sport)} ${m.sport} · ${m.county}</div>
-        <h3>${m.name}</h3>
-        <div class="role">${m.role}</div>
-        <p>${m.bio}</p>
-        <div class="spot-stats">
-          <div><div class="n">${m.stat1[0]}</div><div class="l">${m.stat1[1]}</div></div>
-          <div><div class="n">${m.stat2[0]}</div><div class="l">${m.stat2[1]}</div></div>
-        </div>
+        <div class="cap-sport">${sportIcon(m.sport)} ${esc(m.sport)} · ${esc(m.county || 'Kenya')}</div>
+        <h3>${esc(m.full_name)}</h3>
+        <div class="role">${esc(m.primary_position || '')}${m.club ? ' · ' + esc(m.club) : ''}</div>
+        ${m.bio ? `<p>${esc(m.bio)}</p>` : ''}
+        <div class="spot-stats"><div><div class="l">${verText(m)}</div></div></div>
       </div>
     `;
-    dotsWrap.innerHTML = MANAGED.map((_, i) =>
+    dotsWrap.innerHTML = SPOT.map((_, i) =>
       `<button class="spot-dot${i === spotlightIndex ? ' active' : ''}" data-idx="${i}" aria-label="Show athlete ${i + 1}"></button>`
     ).join('');
   }
   function spotlightGo(delta){
-    spotlightIndex = (spotlightIndex + delta + MANAGED.length) % MANAGED.length;
+    if(!SPOT.length) return;
+    spotlightIndex = (spotlightIndex + delta + SPOT.length) % SPOT.length;
+    renderSpotlight();
+  }
+  async function loadSpotlight(){
+    const sec = document.getElementById('spotlight');
+    try{ SPOT = (await api('/stats/featured')).players || []; }catch(e){ SPOT = []; }
+    sec.style.display = SPOT.length ? '' : 'none';
+    spotlightIndex = 0;
     renderSpotlight();
   }
 
@@ -1240,16 +1244,16 @@
       <div class="cap-card">
         <div class="cap-top">
           <div class="cap-tab">${verLabel}</div>
-          <div class="cap-num">${initials}</div>
-          <div class="cap-sport">${sportIcon(p.sport)} ${p.sport}</div>
-          <div class="cap-name">${p.full_name}</div>
+          <div class="cap-num">${esc(initials)}</div>
+          <div class="cap-sport">${sportIcon(p.sport)} ${esc(p.sport)}</div>
+          <div class="cap-name">${esc(p.full_name)}</div>
         </div>
         <div class="cap-body">
-          <div class="cap-row"><span>Position</span><b>${p.primary_position || '—'}</b></div>
-          <div class="cap-row"><span>Club</span><b>${p.club || '—'}</b></div>
-          <div class="cap-row"><span>County</span><b>${p.county || '—'}</b></div>
-          <div class="cap-row"><span>Division</span><b>${p.division || '—'}</b></div>
-          ${p.bio ? `<div class="cap-bio">${p.bio}</div>` : ''}
+          <div class="cap-row"><span>Position</span><b>${esc(p.primary_position) || '—'}</b></div>
+          <div class="cap-row"><span>Club</span><b>${esc(p.club) || '—'}</b></div>
+          <div class="cap-row"><span>County</span><b>${esc(p.county) || '—'}</b></div>
+          <div class="cap-row"><span>Division</span><b>${esc(p.division) || '—'}</b></div>
+          ${p.bio ? `<div class="cap-bio">${esc(p.bio)}</div>` : ''}
         </div>
       </div>
     `;
@@ -1315,7 +1319,7 @@
     const sel = document.getElementById('h-player');
     const current = sel.value;
     sel.innerHTML = '<option value="">Select a registered player…</option>' +
-      allPlayers.map(p => `<option value="${p.id}">${p.full_name} — ${p.sport}</option>`).join('');
+      allPlayers.map(p => `<option value="${p.id}">${esc(p.full_name)} — ${esc(p.sport)}</option>`).join('');
     if(current) sel.value = current;
   }
 
@@ -1336,15 +1340,15 @@
         <div class="highlight-item">
           <div class="highlight-thumb">▶</div>
           <div class="highlight-meta">
-            <div class="title">${h.title}</div>
-            <div class="sub">${h.player_name || 'Unknown player'} ${h.description ? '· ' + h.description : ''}
+            <div class="title">${esc(h.title)}</div>
+            <div class="sub">${esc(h.player_name || 'Unknown player')} ${h.description ? '· ' + esc(h.description) : ''}
               ${h.moderation_status === 'pending' ? ' · <span style="color:var(--gold-deep);">pending review</span>' : ''}</div>
-            ${h.video_url ? `<a href="${h.video_url}" target="_blank" rel="noopener noreferrer">View clip →</a>` : '<span style="font-size:12px;color:var(--ink-soft);">No link provided</span>'}
+            ${/^https?:\/\//i.test(h.video_url || '') ? `<a href="${esc(h.video_url)}" target="_blank" rel="noopener noreferrer">View clip →</a>` : '<span style="font-size:12px;color:var(--ink-soft);">No link provided</span>'}
           </div>
         </div>
       `).join('');
     }catch(err){
-      list.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${err.message}</div>`;
+      list.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${esc(err.message)}</div>`;
     }
   }
 
@@ -1599,7 +1603,7 @@
 
   // ---------- Init ----------
   renderManaged();
-  renderSpotlight();
+  loadSpotlight();
   refreshPlayers();
   refreshHighlights();
   refreshScoreboard();

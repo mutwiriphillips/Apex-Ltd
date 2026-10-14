@@ -1,10 +1,12 @@
 // src/routes/admin.js
 // Every route in this file is protected by requireAuth + requireRole
-// (mounted in server.js) — only staff_admin / superadmin accounts, created
-// exclusively via `npm run create-admin`, can reach these endpoints.
+// (mounted in server.js) — only staff_admin / superadmin accounts can reach
+// these endpoints. Managing ADMIN accounts (creating, promoting, demoting,
+// suspending, resetting) is further restricted to superadmin.
 
 const express = require('express');
 const { pool } = require('../db');
+const { hashPassword } = require('../auth');
 
 const router = express.Router();
 
@@ -129,6 +131,138 @@ router.get('/leads', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// =====================================================================
+// SIGN-IN / ACCOUNT MANAGEMENT
+// =====================================================================
+
+const ALL_ROLES = ['player', 'guardian', 'scout', 'sponsor', 'club_admin', 'agent', 'staff_admin', 'superadmin'];
+const ADMIN_ROLES = ['staff_admin', 'superadmin'];
+const isAdminRole = (r) => ADMIN_ROLES.includes(r);
+
+function badRequest(res, msg) { return res.status(400).json({ error: msg }); }
+
+// Staff may manage non-admin accounts; touching an admin account (or
+// granting an admin role) needs superadmin. Nobody may act on themselves
+// for suspend / role change, so an admin can't lock themselves out.
+function canManage(actor, target, newRole) {
+  if (actor.role === 'superadmin') return true;
+  if (isAdminRole(target.role)) return false;
+  if (newRole && isAdminRole(newRole)) return false;
+  return true;
+}
+
+async function activeSuperadminCountExcluding(client, id) {
+  const r = await client.query(
+    "SELECT COUNT(*)::int AS n FROM users WHERE role = 'superadmin' AND is_active AND id <> $1", [id]);
+  return r.rows[0].n;
+}
+
+// GET /api/admin/users?q=&role=&status=active|suspended
+router.get('/users', async (req, res, next) => {
+  try {
+    const { q, role, status } = req.query;
+    const clauses = [];
+    const params = [];
+    if (q) { params.push(`%${String(q).trim()}%`); clauses.push(`(email ILIKE $${params.length} OR phone ILIKE $${params.length})`); }
+    if (role && ALL_ROLES.includes(role)) { params.push(role); clauses.push(`role = $${params.length}`); }
+    if (status === 'active') clauses.push('is_active');
+    if (status === 'suspended') clauses.push('NOT is_active');
+    const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const [list, summary] = await Promise.all([
+      pool.query(
+        `SELECT id, email, phone, role, is_active, is_email_verified, last_login_at, created_at
+         FROM users ${where} ORDER BY created_at DESC LIMIT 200`, params),
+      pool.query(
+        `SELECT COUNT(*)::int AS total,
+                COUNT(*) FILTER (WHERE is_active)::int AS active,
+                COUNT(*) FILTER (WHERE NOT is_active)::int AS suspended,
+                COUNT(*) FILTER (WHERE created_at > now() - interval '7 days')::int AS new_7d
+         FROM users`),
+    ]);
+    res.json({ users: list.rows, summary: summary.rows[0], you: req.user.sub });
+  } catch (err) { next(err); }
+});
+
+// POST /api/admin/users — superadmin creates an account (any role, incl. admins)
+router.post('/users', async (req, res, next) => {
+  try {
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ error: 'Only a superadmin can create accounts from the admin panel.' });
+    }
+    const { email, password, role } = req.body;
+    if (!email || !password) return badRequest(res, 'email and password are required.');
+    if (String(password).length < 8) return badRequest(res, 'Password must be at least 8 characters.');
+    if (!ALL_ROLES.includes(role)) return badRequest(res, 'Choose a valid role.');
+    const clean = String(email).trim().toLowerCase();
+    const dup = await pool.query('SELECT 1 FROM users WHERE email = $1', [clean]);
+    if (dup.rows.length) return res.status(409).json({ error: 'An account with that email already exists.' });
+    const hash = await hashPassword(password);
+    const r = await pool.query(
+      `INSERT INTO users (email, password_hash, role, is_email_verified)
+       VALUES ($1, $2, $3, true) RETURNING id, email, role, is_active, created_at`,
+      [clean, hash, role]);
+    console.log(`[admin-audit] ${req.user.email} created ${role} account ${clean}`);
+    res.status(201).json({ user: r.rows[0] });
+  } catch (err) { next(err); }
+});
+
+// PATCH /api/admin/users/:id   body: { is_active?: boolean, role?: string }
+router.patch('/users/:id', async (req, res, next) => {
+  const { is_active, role } = req.body;
+  if (is_active === undefined && role === undefined) return badRequest(res, 'Nothing to update.');
+  if (role !== undefined && !ALL_ROLES.includes(role)) return badRequest(res, 'Invalid role.');
+  if (is_active !== undefined && typeof is_active !== 'boolean') return badRequest(res, 'is_active must be true or false.');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const t = await client.query('SELECT id, email, role, is_active FROM users WHERE id = $1 FOR UPDATE', [req.params.id]);
+    if (!t.rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'User not found.' }); }
+    const target = t.rows[0];
+    if (target.id === req.user.sub) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: "You can't suspend or change the role of your own account." });
+    }
+    if (!canManage(req.user, target, role)) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'Only a superadmin can manage admin accounts or grant admin roles.' });
+    }
+    const losingSuper = target.role === 'superadmin' &&
+      ((role !== undefined && role !== 'superadmin') || is_active === false);
+    if (losingSuper && (await activeSuperadminCountExcluding(client, target.id)) === 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'That would leave no active superadmin. Promote another one first.' });
+    }
+    const r = await client.query(
+      `UPDATE users SET role = COALESCE($2, role), is_active = COALESCE($3, is_active)
+       WHERE id = $1 RETURNING id, email, role, is_active`,
+      [target.id, role ?? null, is_active ?? null]);
+    await client.query('COMMIT');
+    console.log(`[admin-audit] ${req.user.email} updated ${target.email}: ` +
+      `${role !== undefined ? `role ${target.role}->${role} ` : ''}${is_active !== undefined ? `active ${target.is_active}->${is_active}` : ''}`);
+    res.json({ user: r.rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    next(err);
+  } finally { client.release(); }
+});
+
+// POST /api/admin/users/:id/reset-password   body: { password }
+router.post('/users/:id/reset-password', async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password || String(password).length < 8) return badRequest(res, 'Password must be at least 8 characters.');
+    const t = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [req.params.id]);
+    if (!t.rows.length) return res.status(404).json({ error: 'User not found.' });
+    const target = t.rows[0];
+    if (target.id !== req.user.sub && !canManage(req.user, target)) {
+      return res.status(403).json({ error: 'Only a superadmin can reset an admin password.' });
+    }
+    await pool.query('UPDATE users SET password_hash = $2 WHERE id = $1', [target.id, await hashPassword(password)]);
+    console.log(`[admin-audit] ${req.user.email} reset password for ${target.email}`);
+    res.json({ ok: true });
+  } catch (err) { next(err); }
 });
 
 module.exports = router;

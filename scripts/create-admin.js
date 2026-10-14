@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/create-admin.js
-// Creates a staff_admin account directly in the database. This is the ONLY
+// Creates a superadmin account directly in the database. This is the ONLY
 // way to create an admin account — the public /api/auth/register endpoint
 // deliberately refuses to create staff_admin/superadmin users, so privilege
 // can never be granted through the API itself.
@@ -42,7 +42,7 @@ async function main() {
     const passwordHash = await bcrypt.hash(password, 11);
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, role, is_email_verified)
-       VALUES ($1, $2, 'staff_admin', true)
+       VALUES ($1, $2, 'superadmin', true)
        RETURNING id, email, role, created_at`,
       [email.trim().toLowerCase(), passwordHash]
     );

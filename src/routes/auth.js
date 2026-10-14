@@ -82,7 +82,7 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// POST /api/auth/bootstrap-admin — creates the FIRST staff_admin account
+// POST /api/auth/bootstrap-admin — creates the FIRST superadmin account
 // without needing shell/SSH access, which Render's free-tier web services
 // don't support (confirmed against Render's own docs: free web services
 // don't get "Shell access via SSH or the Render Dashboard").
@@ -133,7 +133,7 @@ router.post('/bootstrap-admin', async (req, res, next) => {
     const passwordHash = await hashPassword(password);
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, role, is_email_verified)
-       VALUES ($1, $2, 'staff_admin', true)
+       VALUES ($1, $2, 'superadmin', true)
        RETURNING id, email, role, created_at`,
       [email.trim().toLowerCase(), passwordHash]
     );

@@ -79,7 +79,7 @@
   .tabs{display:flex; gap:8px; margin-bottom:24px; border-bottom:2px solid var(--line);}
   .tab{padding:10px 18px; font-weight:700; font-size:13.5px; color:var(--ink-soft); cursor:pointer;
     border-bottom:3px solid transparent; margin-bottom:-2px;}
-  .tab.active{color:var(--pitch); border-bottom-color:var(--gold);}
+  .tab.active{color:var(--gold); border-bottom-color:var(--gold);}
   .panel{display:none;}
   .panel.active{display:block;}
   .card{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:18px;
@@ -99,6 +99,16 @@
     padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold); font-size:14px; font-weight:600;
     z-index:999; transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;}
   .toast.show{transform:translateY(0); opacity:1;}
+  .user-summary{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
+  .user-summary div{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:12px 18px; min-width:110px;}
+  .user-summary b{display:block; font-family:'Exo 2'; font-size:24px; color:var(--gold);}
+  .user-summary span{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-soft);}
+  .user-toolbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .user-toolbar input{flex:1; min-width:200px; padding:10px 12px; border:1.5px solid var(--line); border-radius:2px; background:var(--surface); color:var(--ink); font-size:14px;}
+  select.mini{background:var(--surface); color:var(--ink);}
+  .pill{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:8px; text-transform:uppercase; background:rgba(198,255,61,.14); color:var(--gold);}
+  .pill.off{background:rgba(255,61,104,.12); color:var(--red);}
+  .btn-sm{padding:8px 12px; font-size:12.5px;}
 </style>
 </head>
 <body>
@@ -139,11 +149,30 @@
       <div class="tab active" data-panel="highlights">Pending highlights</div>
       <div class="tab" data-panel="players">Unverified players</div>
       <div class="tab" data-panel="leads">Sponsor &amp; scout leads</div>
+      <div class="tab" data-panel="users">Users &amp; sign-ins</div>
     </div>
 
     <div class="panel active" id="panel-highlights"></div>
     <div class="panel" id="panel-players"></div>
     <div class="panel" id="panel-leads"></div>
+    <div class="panel" id="panel-users">
+      <div id="user-summary" class="user-summary"></div>
+      <div class="user-toolbar">
+        <input type="search" id="user-q" placeholder="Search by email or phone…" />
+        <select class="mini" id="user-role"><option value="">All roles</option></select>
+        <select class="mini" id="user-status"><option value="">Any status</option><option value="active">Active</option><option value="suspended">Suspended</option></select>
+        <button class="btn btn-gold" id="user-new" type="button" style="display:none;">+ New account</button>
+      </div>
+      <form id="user-create" class="card" style="display:none;">
+        <div class="card-main" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="field" style="margin:0; flex:1; min-width:180px;"><label>Email</label><input type="email" id="nu-email" required /></div>
+          <div class="field" style="margin:0; flex:1; min-width:160px;"><label>Temporary password</label><input type="text" id="nu-pass" minlength="8" required autocomplete="off" /></div>
+          <div class="field" style="margin:0;"><label>Role</label><select class="mini" id="nu-role"></select></div>
+          <button class="btn btn-gold" type="submit">Create</button>
+        </div>
+      </form>
+      <div id="user-list"></div>
+    </div>
   </div>
 
 </div>
@@ -158,6 +187,8 @@
   function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
   function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
 
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function safeUrl(u){ return /^https?:\/\//i.test(u || '') ? u : ''; }
   function showToast(msg){
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -198,6 +229,7 @@
     loadHighlights();
     loadPlayers();
     loadLeads();
+    loadUsers();
   }
 
   document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -252,10 +284,10 @@
       panel.innerHTML = items.map(h => `
         <div class="card" data-id="${h.id}">
           <div class="card-main">
-            <div class="card-title">${h.title} ${h.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
-            <div class="card-sub">${h.player_name} · submitted ${new Date(h.created_at).toLocaleDateString()}</div>
-            ${h.description ? `<div class="card-sub">${h.description}</div>` : ''}
-            ${h.video_url ? `<div class="card-sub"><a href="${h.video_url}" target="_blank" rel="noopener noreferrer">${h.video_url}</a></div>` : ''}
+            <div class="card-title">${esc(h.title)} ${h.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
+            <div class="card-sub">${esc(h.player_name)} · submitted ${new Date(h.created_at).toLocaleDateString()}</div>
+            ${h.description ? `<div class="card-sub">${esc(h.description)}</div>` : ''}
+            ${safeUrl(h.video_url) ? `<div class="card-sub"><a href="${esc(h.video_url)}" target="_blank" rel="noopener noreferrer">${esc(h.video_url)}</a></div>` : ''}
           </div>
           <div class="actions">
             <button class="btn btn-gold" data-action="approve">Approve</button>
@@ -269,7 +301,7 @@
         card.querySelector('[data-action=reject]').addEventListener('click', () => moderateHighlight(id, 'reject'));
       });
     }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${err.message}</div>`;
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${esc(err.message)}</div>`;
     }
   }
 
@@ -296,8 +328,8 @@
       panel.innerHTML = items.map(p => `
         <div class="card" data-id="${p.id}">
           <div class="card-main">
-            <div class="card-title">${p.full_name} ${p.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
-            <div class="card-sub">${p.sport} · ${p.county || 'County not set'} · registered ${new Date(p.created_at).toLocaleDateString()}</div>
+            <div class="card-title">${esc(p.full_name)} ${p.is_minor ? '<span class="minor-badge">Minor</span>' : ''}</div>
+            <div class="card-sub">${esc(p.sport)} · ${esc(p.county || 'County not set')} · registered ${new Date(p.created_at).toLocaleDateString()}</div>
           </div>
           <div class="actions">
             <select class="mini" data-role="entity-type">
@@ -316,7 +348,7 @@
         });
       });
     }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load players.</b> ${err.message}</div>`;
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load players.</b> ${esc(err.message)}</div>`;
     }
   }
 
@@ -346,17 +378,108 @@
       panel.innerHTML = items.map(l => `
         <div class="card">
           <div class="card-main">
-            <div class="card-title">${l.organization_name} <span class="mono" style="font-size:11px; color:var(--ink-soft);">· ${l.lead_type}</span></div>
-            <div class="card-sub">${l.contact_email} · ${new Date(l.created_at).toLocaleDateString()} · status: ${l.status}</div>
-            ${l.message ? `<div class="card-sub">${l.message}</div>` : ''}
+            <div class="card-title">${esc(l.organization_name)} <span class="mono" style="font-size:11px; color:var(--ink-soft);">· ${esc(l.lead_type)}</span></div>
+            <div class="card-sub">${esc(l.contact_email)} · ${new Date(l.created_at).toLocaleDateString()} · status: ${esc(l.status)}</div>
+            ${l.message ? `<div class="card-sub">${esc(l.message)}</div>` : ''}
           </div>
         </div>
       `).join('');
     }catch(err){
-      panel.innerHTML = `<div class="empty-state"><b>Couldn't load leads.</b> ${err.message}</div>`;
+      panel.innerHTML = `<div class="empty-state"><b>Couldn't load leads.</b> ${esc(err.message)}</div>`;
     }
   }
 
+  // ---------- Users & sign-ins ----------
+  const ROLES = ['player','guardian','scout','sponsor','club_admin','agent','staff_admin','superadmin'];
+  let me = null; // { id, role }
+  function myRole(){
+    try{ return JSON.parse(atob(getToken().split('.')[1])).role; }catch(e){ return null; }
+  }
+  (function initUserControls(){
+    document.getElementById('user-role').insertAdjacentHTML('beforeend', ROLES.map(r => `<option value="${r}">${r}</option>`).join(''));
+    document.getElementById('nu-role').innerHTML = ROLES.map(r => `<option value="${r}">${r}</option>`).join('');
+    let t = null;
+    document.getElementById('user-q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(loadUsers, 300); });
+    document.getElementById('user-role').addEventListener('change', loadUsers);
+    document.getElementById('user-status').addEventListener('change', loadUsers);
+    document.getElementById('user-new').addEventListener('click', () => {
+      const f = document.getElementById('user-create');
+      f.style.display = f.style.display === 'none' ? 'flex' : 'none';
+    });
+    document.getElementById('user-create').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try{
+        await api('/admin/users', { method:'POST', body: JSON.stringify({
+          email: document.getElementById('nu-email').value,
+          password: document.getElementById('nu-pass').value,
+          role: document.getElementById('nu-role').value }) });
+        showToast('Account created. Share the temporary password securely.');
+        e.target.reset(); e.target.style.display = 'none';
+        loadUsers();
+      }catch(err){ showToast(err.message); }
+    });
+  })();
+  async function loadUsers(){
+    const list = document.getElementById('user-list');
+    const isSuper = myRole() === 'superadmin';
+    document.getElementById('user-new').style.display = isSuper ? 'inline-flex' : 'none';
+    const params = new URLSearchParams();
+    const q = document.getElementById('user-q').value.trim();
+    if(q) params.set('q', q);
+    if(document.getElementById('user-role').value) params.set('role', document.getElementById('user-role').value);
+    if(document.getElementById('user-status').value) params.set('status', document.getElementById('user-status').value);
+    try{
+      const data = await api('/admin/users?' + params.toString());
+      const s = data.summary;
+      document.getElementById('user-summary').innerHTML =
+        `<div><b>${s.total}</b><span>Total accounts</span></div><div><b>${s.active}</b><span>Active</span></div>` +
+        `<div><b>${s.suspended}</b><span>Suspended</span></div><div><b>${s.new_7d}</b><span>New (7 days)</span></div>`;
+      if(!data.users.length){
+        list.innerHTML = `<div class="empty-state"><b>No accounts found.</b> Sign-ups will appear here as people register.</div>`;
+        return;
+      }
+      list.innerHTML = data.users.map(u => {
+        const self = u.id === data.you;
+        const adminTarget = ['staff_admin','superadmin'].includes(u.role);
+        const locked = self || (adminTarget && !isSuper);
+        return `
+        <div class="card" data-id="${esc(u.id)}" data-email="${esc(u.email || '')}">
+          <div class="card-main">
+            <div class="card-title">${esc(u.email || u.phone || '(no email)')}
+              <span class="pill">${esc(u.role)}</span>${u.is_active ? '' : '<span class="pill off">Suspended</span>'}${self ? '<span class="pill">You</span>' : ''}</div>
+            <div class="card-sub">Joined ${new Date(u.created_at).toLocaleDateString()} · last sign-in ${u.last_login_at ? new Date(u.last_login_at).toLocaleString() : 'never'}</div>
+          </div>
+          <div class="actions">
+            <select class="mini" data-act="role" ${locked ? 'disabled' : ''}>${ROLES.filter(r => isSuper || !['staff_admin','superadmin'].includes(r) || r === u.role).map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}</select>
+            <button class="btn btn-outline btn-sm" data-act="reset" ${self || locked ? 'disabled' : ''}>Reset password</button>
+            <button class="btn ${u.is_active ? 'btn-reject' : 'btn-gold'} btn-sm" data-act="toggle" ${locked ? 'disabled' : ''}>${u.is_active ? 'Suspend' : 'Reactivate'}</button>
+          </div>
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.card').forEach((card, i) => {
+        const u = data.users[i];
+        card.querySelector('[data-act=role]').addEventListener('change', async (e) => {
+          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ role: e.target.value }) }); showToast('Role updated.'); }
+          catch(err){ showToast(err.message); }
+          loadUsers();
+        });
+        card.querySelector('[data-act=toggle]').addEventListener('click', async () => {
+          if(u.is_active && !confirm('Suspend ' + (u.email || 'this user') + '? They will be signed out immediately.')) return;
+          try{ await api('/admin/users/' + u.id, { method:'PATCH', body: JSON.stringify({ is_active: !u.is_active }) }); showToast(u.is_active ? 'Account suspended.' : 'Account reactivated.'); }
+          catch(err){ showToast(err.message); }
+          loadUsers();
+        });
+        card.querySelector('[data-act=reset]').addEventListener('click', async () => {
+          const pw = prompt('New temporary password for ' + (u.email || 'this user') + ' (min 8 characters):');
+          if(!pw) return;
+          try{ await api('/admin/users/' + u.id + '/reset-password', { method:'POST', body: JSON.stringify({ password: pw }) }); showToast('Password reset. Share it securely.'); }
+          catch(err){ showToast(err.message); }
+        });
+      });
+    }catch(err){
+      list.innerHTML = `<div class="empty-state"><b>Couldn't load users.</b> ${esc(err.message)}</div>`;
+    }
+  }
   // ---------- Theme toggle ----------
   document.getElementById('theme-toggle').addEventListener('click', () => {
     const html = document.documentElement;
