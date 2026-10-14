@@ -4,543 +4,364 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/svg+xml" href="/assets/jsm-emblem-icon.svg" />
-<title>Josriri Sports Management — Kenya's Sports Talent Platform</title>
-<script>
-  // Runs before first paint to avoid a flash of the wrong theme.
-  (function(){
-    try{
-      var saved = localStorage.getItem('josriri_theme');
-      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', theme);
-    }catch(e){ document.documentElement.setAttribute('data-theme', 'light'); }
-  })();
-</script>
+<title>Josriri Sports Management — Get discovered in Kenyan sport</title>
+<meta name="description" content="Josriri Sports Management is a Kenyan athlete registry and talent management platform connecting footballers, rugby, basketball and e-football players with scouts, clubs, sponsors and agents." />
+<meta name="theme-color" content="#101820" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ===== Design tokens ===== */
   :root{
-    --pitch:#15171B;
-    --pitch-deep:#0C0D0F;
-    --paper:#101113;
-    --paper-alt:#17181C;
-    --surface:#1B1D22;
-    --ink:#F2F3F5;
-    --ink-soft:#9BA0A8;
-    --gold:#C6FF3D;
-    --gold-deep:#9FE01B;
-    --red:#FF3D68;
-    --line:rgba(255,255,255,0.08);
-    --white:#FFFFFF;
-    --glow-1: rgba(198,255,61,0.18);
-    --glow-2: rgba(198,255,61,0.10);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.40);
-    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.45), 0 20px 44px rgba(198,255,61,0.14);
-    --theme-transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
+    --charcoal:#101820; --navy:#142432; --offwhite:#F7F8F5; --white:#FFFFFF;
+    --lime:#C7F36B; --lime-deep:#A8DB45; --slate:#64717D; --border:#E1E6E1;
+    --success:#217A4B; --error:#B42318;
+    --ink:#101820;            /* text on light */
+    --ink-muted:#4A5763;      /* AA on white / off-white */
+    --on-dark:#FFFFFF; --on-dark-muted:#C3CCD4; /* AA on charcoal/navy */
+    --line-dark:rgba(255,255,255,.14);
+    --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-display:'Exo 2', 'Manrope', system-ui, sans-serif;
+    --r-sm:6px; --r-md:10px; --r-lg:14px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:72px; --s9:104px;
+    --shadow-1:0 1px 2px rgba(16,24,32,.06), 0 4px 12px rgba(16,24,32,.06);
+    --shadow-2:0 8px 28px rgba(16,24,32,.16);
+    --focus:0 0 0 3px rgba(199,243,107,.9), 0 0 0 5px #101820;
+    --nav-h:68px;
   }
-  html[data-theme="dark"]{
-    --pitch:#0A0A0A;
-    --pitch-deep:#000000;
-    --paper:#000000;
-    --paper-alt:#0A0A0A;
-    --surface:#141518;
-    --ink:#F5F5F5;
-    --ink-soft:#8A8F98;
-    --gold:#D4FF5C;
-    --gold-deep:#B8FF3B;
-    --red:#FF6E8C;
-    --line:rgba(255,255,255,0.10);
-    --white:#F6F5FC;
-    --glow-1: rgba(212,255,92,0.22);
-    --glow-2: rgba(212,255,92,0.10);
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.45);
-    --shadow-card-hover: 0 4px 14px rgba(0,0,0,0.5), 0 24px 48px rgba(212,255,92,0.14);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Work Sans', sans-serif;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    transition:var(--theme-transition);
-  }
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
-  }
-  .display{font-family:'Exo 2', sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;}
-  .mono{font-family:'JetBrains Mono', monospace;}
+  *,*::before,*::after{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth; scroll-padding-top:calc(var(--nav-h) + 12px); -webkit-text-size-adjust:100%;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none !important; transition:none !important;} }
+  body{font-family:var(--font-ui); color:var(--ink); background:var(--offwhite); line-height:1.6; font-size:16px; overflow-x:hidden;}
+  img,svg{display:block; max-width:100%;}
+  [hidden]{display:none !important;}
   a{color:inherit;}
-  img{max-width:100%; display:block;}
-  button{font-family:inherit; cursor:pointer;}
-  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+  :focus-visible{outline:none; box-shadow:var(--focus); border-radius:4px;}
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .skip{position:absolute; left:12px; top:-60px; background:var(--lime); color:var(--charcoal); padding:10px 16px; font-weight:700; border-radius:var(--r-sm); z-index:200;}
+  .skip:focus{top:12px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 var(--s5);}
+  .display{font-family:var(--font-display); font-weight:800; letter-spacing:-.01em; line-height:1.05;}
+  .icon{width:22px; height:22px; flex-shrink:0;}
+  .icon-lg{width:34px; height:34px;}
 
-  /* ---------- Reveal-on-scroll ---------- */
-  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in-view{opacity:1; transform:translateY(0);}
-  @media (prefers-reduced-motion: reduce){
-    .reveal{opacity:1; transform:none; transition:none;}
-  }
-
-  /* ---------- Theme toggle ---------- */
-  .theme-toggle{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:38px; height:38px; border-radius:50%; border:1.5px solid #4E6B5C;
-    background:transparent; color:var(--white); flex-shrink:0; position:relative;
-    transition:border-color .2s ease, background .2s ease;
-  }
-  .theme-toggle:hover{border-color:var(--gold);}
-  .theme-toggle svg{width:18px; height:18px;}
-  .theme-toggle .icon-sun{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-moon{display:none;}
-  html[data-theme="dark"] .theme-toggle .icon-sun{display:block;}
-
-  /* ---------- Back to top ---------- */
-  .to-top{
-    position:fixed; right:22px; bottom:22px; z-index:90;
-    width:44px; height:44px; border-radius:50%;
-    background:var(--pitch); color:var(--gold); border:1.5px solid var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none; transform:translateY(10px);
-    transition:opacity .25s ease, transform .25s ease, background .2s ease;
-    box-shadow:var(--shadow-card);
-  }
-  .to-top.show{opacity:1; pointer-events:auto; transform:translateY(0);}
-  .to-top:hover{background:var(--gold-deep); color:var(--pitch-deep); border-color:var(--gold-deep);}
-  .to-top svg{width:18px; height:18px;}
-  @media (max-width:640px){ .to-top{right:14px; bottom:14px;} }
-
-  /* ---------- Card tilt (mouse-follow) ---------- */
-  .cap-card, .managed-card{ transform-style:preserve-3d; will-change:transform; }
-  @media (hover:none){ .cap-card, .managed-card{ transform:none !important; } }
-  @media (prefers-reduced-motion: reduce){ .cap-card, .managed-card{ transform:none !important; } }
-
-  /* ---------- NAV ---------- */
-  header.nav{
-    position:sticky; top:0; z-index:100;
-    background:var(--pitch);
-  }
-  header.nav::before{
-    content:''; position:absolute; left:0; right:0; bottom:0; height:3px;
-    background:var(--gold); opacity:0.32;
-  }
-  #scroll-progress{
-    position:absolute; left:0; bottom:0; height:3px; width:0%;
-    background:var(--red); transition:width .08s linear;
-  }
-  @media (prefers-reduced-motion: reduce){ #scroll-progress{transition:none;} }
-  .nav-inner{position:relative;}
-  .nav-inner{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 24px; max-width:1180px; margin:0 auto;
-  }
-  .logo{
-    display:flex; align-items:center; gap:10px;
-    color:var(--white); font-size:22px;
-  }
-  .logo .mark{
-    width:34px; height:34px; border-radius:50%;
-    background:var(--gold); color:var(--pitch-deep);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Exo 2', sans-serif; font-weight:800; font-size:11px; letter-spacing:-0.3px;
-    flex-shrink:0;
-  }
-  nav.links{display:flex; gap:28px; list-style:none;}
-  nav.links a{
-    color:#DCE6DD; font-size:14px; font-weight:600; text-decoration:none;
-    letter-spacing:0.3px; transition:color .15s ease;
-  }
-  nav.links a:hover, nav.links a:focus-visible{color:var(--gold);}
-  nav.links a.active{color:var(--gold);}
-  .nav-cta{
-    background:var(--gold); color:var(--pitch-deep); border:none;
-    padding:10px 18px; font-weight:700; font-size:13.5px; border-radius:2px;
-    text-transform:uppercase; letter-spacing:0.4px; text-decoration:none;
-    display:inline-block; transition:background .15s ease;
-  }
-  .nav-cta:hover{background:#9FE01B;}
-  .burger{display:none; background:none; border:none; color:var(--white); font-size:26px;}
-
-  /* ---------- HERO ---------- */
-  .hero{
-    background:var(--pitch);
-    padding:64px 0 72px;
-    position:relative;
-    overflow:hidden;
-  }
-  .hero-art{
-    position:absolute; top:0; left:0; width:100%;
-    height:clamp(340px, 45vw, 480px);
-    pointer-events:none; z-index:0;
-  }
-  .hero-grid{
-    display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px;
-    align-items:start;
-    position:relative; z-index:1;
-  }
-  .eyebrow{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:1.5px;
-    color:var(--gold); text-transform:uppercase; margin-bottom:18px;
-  }
-  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--red); animation:pulse 1.6s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.25;}}
-  .hero h1{
-    color:var(--white); font-size:clamp(38px, 5.4vw, 64px);
-    line-height:0.98; margin-bottom:20px;
-  }
-  .hero h1 span{color:var(--gold);}
-  .hero p.lead{
-    color:#D9D7EE; font-size:17px; max-width:520px; margin-bottom:28px;
-  }
-  .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:56px;}
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding:13px 24px; font-weight:700; font-size:14px; text-decoration:none;
-    border-radius:2px; letter-spacing:0.3px; border:2px solid transparent;
-    transition:transform .12s ease, background .15s ease;
-  }
+  /* ===== Buttons ===== */
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:12px 24px; font:700 15px/1 var(--font-ui);
+    border-radius:var(--r-md); border:2px solid transparent; cursor:pointer; text-decoration:none; transition:transform .15s, background-color .15s, border-color .15s, color .15s;}
   .btn:active{transform:translateY(1px);}
-  .btn-gold{background:var(--gold); color:var(--pitch-deep);}
-  .btn-gold:hover{background:#9FE01B;}
-  .btn-outline{background:transparent; border-color:#4E6B5C; color:var(--white);}
-  .btn-outline:hover{border-color:var(--gold); color:var(--gold);}
-  .btn-dark{background:var(--pitch); color:var(--white);}
-  .btn-dark:hover{background:var(--pitch-deep);}
+  .btn[disabled]{opacity:.65; cursor:not-allowed;}
+  .btn-lime{background:var(--lime); color:var(--charcoal);}
+  .btn-lime:hover{background:#D6F88F;}
+  .btn-ghost-dark{background:transparent; color:var(--white); border-color:rgba(255,255,255,.45);}
+  .btn-ghost-dark:hover{border-color:var(--lime); color:var(--lime);}
+  .btn-dark{background:var(--charcoal); color:var(--white);}
+  .btn-dark:hover{background:var(--navy);}
+  .btn-outline{background:var(--white); color:var(--charcoal); border-color:var(--border);}
+  .btn-outline:hover{border-color:var(--charcoal);}
+  .btn-sm{min-height:40px; padding:9px 16px; font-size:14px;}
 
-  /* Scoreboard */
-  .scoreboard{
-    background:var(--pitch-deep); border:2px solid var(--gold);
-    border-radius:4px; padding:22px; margin-top:8px; margin-bottom:24px;
-  }
-  .scoreboard-head{
-    display:flex; justify-content:space-between; align-items:center;
-    border-bottom:1px solid #2E2E52; padding-bottom:12px; margin-bottom:14px;
-  }
-  .scoreboard-head span{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gold); letter-spacing:1px; text-transform:uppercase;}
-  .score-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  .score-cell{}
-  .score-num{
-    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:32px;
-    color:var(--white); line-height:1;
-  }
-  .score-label{
-    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#A8A6C6;
-    text-transform:uppercase; letter-spacing:0.8px; margin-top:6px;
-  }
+  /* ===== Photo slots (real photo when in manifest, designed fallback otherwise) ===== */
+  .ph{position:relative; overflow:hidden; background:var(--navy); isolation:isolate;}
+  .ph > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .6s ease;}
+  .ph-art{position:absolute; inset:0; z-index:0;}
+  .ph-art svg{position:absolute; right:-6%; bottom:-10%; width:70%; height:auto; color:#fff; opacity:.10;}
+  .ph[data-sport="football"]{background:radial-gradient(120% 90% at 20% 0%, #1f6b46 0%, #124232 45%, #0c2a24 100%);}
+  .ph[data-sport="rugby"]{background:radial-gradient(120% 90% at 20% 0%, #3a5e2a 0%, #20381f 50%, #101f16 100%);}
+  .ph[data-sport="basketball"]{background:radial-gradient(120% 90% at 20% 0%, #8a4a1c 0%, #4a2a17 50%, #1d1612 100%);}
+  .ph[data-sport="efootball"]{background:radial-gradient(120% 90% at 20% 0%, #2a3f86 0%, #1a2358 50%, #0e1230 100%);}
+  .ph[data-sport="people"]{background:radial-gradient(120% 90% at 80% 0%, #2c4a63 0%, #142432 60%, #101820 100%);}
+  .ph[data-sport="hero"]{background:radial-gradient(90% 80% at 70% 20%, #1e6b49 0%, #124232 40%, #0c2a24 75%, #0a1a1c 100%);}
+  .ph::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,.035) 0 2px, transparent 2px 22px);}
+  .ph > img{z-index:2;}
 
-  /* ---------- SECTION GENERIC ---------- */
-  section{padding:72px 0;}
-  .section-alt{background:var(--paper-alt);}
-  .sec-head{margin-bottom:36px; max-width:640px;}
-  .sec-eyebrow{
-    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--gold-deep);
-    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; display:block;
+  /* ===== Navigation ===== */
+  .nav{position:sticky; top:0; z-index:100; background:var(--charcoal); border-bottom:1px solid var(--line-dark); height:var(--nav-h);}
+  .nav-inner{max-width:1180px; margin:0 auto; padding:0 var(--s5); height:100%; display:flex; align-items:center; gap:var(--s5);}
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--white); flex-shrink:0;}
+  .brand img{width:34px; height:34px;}
+  .brand span{font:800 17px/1.1 var(--font-display); letter-spacing:.01em;}
+  .brand small{display:block; font:600 10px/1.2 var(--font-ui); letter-spacing:.16em; text-transform:uppercase; color:var(--on-dark-muted); margin-top:2px;}
+  .links{display:flex; gap:2px; margin-left:auto; align-items:center;}
+  .links a{color:var(--on-dark-muted); text-decoration:none; font-size:14px; font-weight:600; padding:10px 11px; border-radius:var(--r-sm); white-space:nowrap;}
+  .links a:hover{color:var(--white);}
+  .links a.active{color:var(--lime);}
+  .nav-cta{margin-left:var(--s2); flex-shrink:0;}
+  .burger{display:none; margin-left:auto; width:46px; height:46px; border-radius:var(--r-md); border:1.5px solid rgba(255,255,255,.35); background:transparent; color:#fff; cursor:pointer; align-items:center; justify-content:center;}
+  .burger svg{width:22px; height:22px;}
+  #scroll-progress{position:absolute; left:0; bottom:-1px; height:3px; width:0; background:var(--lime);}
+  @media (max-width:1080px){
+    .links{position:fixed; inset:var(--nav-h) 0 auto 0; flex-direction:column; align-items:stretch; background:var(--charcoal); padding:12px var(--s5) 24px; gap:0; margin:0;
+      border-bottom:1px solid var(--line-dark); transform:translateY(-8px); opacity:0; visibility:hidden; transition:opacity .2s, transform .2s, visibility .2s; max-height:calc(100vh - var(--nav-h)); overflow:auto;}
+    .links.open{opacity:1; transform:none; visibility:visible;}
+    .links a{padding:15px 4px; font-size:17px; border-bottom:1px solid var(--line-dark); border-radius:0;}
+    .burger{display:inline-flex;}
+    .nav-cta{margin-left:0;}
+    .nav-inner{gap:var(--s3);}
+    .burger{margin-left:0;}
+    .nav-cta{margin-left:auto;}
   }
-  .sec-head h2{font-size:clamp(26px,3.4vw,38px); color:var(--ink); margin-bottom:12px;}
-  .sec-head p{color:var(--ink-soft); font-size:15.5px; max-width:560px;}
+  @media (max-width:420px){ .brand small{display:none;} .nav-cta{padding:10px 14px;} }
 
-  /* How it works */
-  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
-  .step{
-    background:var(--surface); border:1px solid var(--line); border-radius:4px;
-    padding:28px 24px; position:relative;
-  }
-  .step .num{
-    font-family:'Exo 2', sans-serif; font-weight:800; font-size:44px; color:var(--surface);
-    -webkit-text-stroke:1.5px var(--gold); text-stroke:1.5px var(--gold);
-    position:absolute; top:16px; right:20px; opacity:.9;
-  }
-  .step h3{font-size:18px; margin-bottom:10px; padding-right:40px;}
-  .step p{color:var(--ink-soft); font-size:14px;}
-
-  /* Directory */
-  .dir-controls{
-    display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:28px;
-  }
-  .dir-controls input[type=text]{
-    flex:1; min-width:220px; padding:12px 14px; border:1.5px solid var(--line);
-    border-radius:2px; font-family:'Work Sans'; font-size:14px; background:var(--surface);
-  }
-  .chip{
-    padding:9px 16px; border:1.5px solid var(--line); border-radius:20px;
-    background:var(--surface); font-size:13px; font-weight:600; color:var(--ink-soft);
-  }
-  .chip.active{background:var(--pitch); color:var(--white); border-color:var(--pitch);}
-  .chip:hover{border-color:var(--pitch);}
-
-  .card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;}
-  .cap-card{
-    background:var(--surface); border:1px solid var(--line); border-radius:6px;
-    overflow:hidden; transition:transform .15s ease, box-shadow .15s ease;
-    display:flex; flex-direction:column;
-  }
-  .cap-card:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(14,59,44,0.12);}
-  .cap-top{
-    background:var(--pitch); color:var(--white); padding:40px 16px 34px;
-    position:relative;
-  }
-  .cap-num{
-    font-family:'Exo 2', sans-serif; font-weight:800; font-size:38px; color:rgba(255,255,255,0.18);
-    position:absolute; top:8px; right:14px;
-  }
-  .cap-sport{
-    font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase;
-    letter-spacing:1px; color:var(--gold);
-  }
-  .cap-name{font-size:19px; font-weight:700; margin-top:6px; padding-right:30px;}
-  .cap-tab{
-    background:var(--gold); color:var(--pitch-deep); font-family:'JetBrains Mono', monospace;
-    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
-    padding:5px 14px; display:inline-block; border-radius:0 0 4px 0;
-    position:absolute; left:0; top:-1px;
-  }
-  .cap-body{padding:16px; flex:1; display:flex; flex-direction:column; gap:6px;}
-  .cap-row{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft);}
-  .cap-row b{color:var(--ink); font-weight:600;}
-  .cap-bio{font-size:12.5px; color:var(--ink-soft); margin-top:4px; flex:1;}
-  .empty-state{
-    border:1.5px dashed var(--line); border-radius:6px; padding:40px 24px;
-    text-align:center; color:var(--ink-soft); background:var(--surface);
-  }
-  .empty-state b{color:var(--ink); display:block; margin-bottom:6px; font-size:16px;}
-
-  /* Register form */
-  .form-panel{
-    background:var(--surface); border:1px solid var(--line); border-radius:6px;
-    padding:32px; max-width:680px;
-  }
-  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
-  .field.full{grid-column:1 / -1;}
-  .field label{font-size:12.5px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.4px;}
-  .field .req{color:var(--red);}
-  .field input, .field select, .field textarea{
-    padding:11px 12px; border:1.5px solid var(--line); border-radius:2px;
-    font-family:'Work Sans'; font-size:14px; background:var(--paper-alt);
-  }
-  .field input:focus, .field select:focus, .field textarea:focus{
-    outline:2px solid var(--gold); outline-offset:1px; background:var(--surface);
-  }
-  .field textarea{resize:vertical; min-height:80px;}
-  .consent{
-    display:flex; gap:10px; align-items:flex-start; background:var(--paper-alt);
-    border:1px solid var(--line); padding:14px; border-radius:4px; margin-bottom:18px; font-size:13px; color:var(--ink-soft);
-  }
-  .consent input{margin-top:3px;}
-  .helper-note{
-    font-size:12.5px; color:var(--ink-soft); background:var(--paper-alt);
-    border-left:3px solid var(--gold); padding:10px 14px; margin-bottom:22px; border-radius:2px;
-  }
-  .toast{
-    position:fixed; bottom:24px; right:24px; background:var(--pitch); color:var(--white);
-    padding:14px 20px; border-radius:4px; border-left:4px solid var(--gold);
-    font-size:14px; font-weight:600; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,.25);
-    transform:translateY(20px); opacity:0; transition:all .25s ease; max-width:320px;
-  }
-  .toast.show{transform:translateY(0); opacity:1;}
-
-  /* Managed athletes */
-  .managed-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:22px;}
-  .managed-card{
-    background:var(--pitch); color:var(--white); border-radius:6px; overflow:hidden;
-    border:1.5px solid var(--gold); position:relative;
-  }
-  .managed-ribbon{
-    position:absolute; top:14px; right:-32px; background:var(--gold); color:var(--pitch-deep);
-    font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:700;
-    padding:5px 40px; transform:rotate(40deg); letter-spacing:.5px;
-  }
-  .managed-body{padding:24px;}
-  .managed-body .cap-sport{color:var(--gold);}
-  .managed-body h3{font-size:20px; margin:8px 0 4px;}
-  .silhouette{width:48px; height:48px; flex-shrink:0; border-radius:50%; border:2px solid var(--gold);}
-
-  /* ---------- Featured athlete spotlight ---------- */
-  .spotlight-card{
-    display:flex; align-items:center; gap:28px;
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    padding:32px; position:relative; overflow:hidden;
-  }
-  .spot-nav{
-    flex-shrink:0; width:44px; height:44px; border-radius:50%;
-    background:transparent; border:1.5px solid var(--line); color:var(--ink);
-    display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, color .15s ease, background .15s ease;
-  }
-  .spot-nav:hover{border-color:var(--gold); color:var(--gold); background:var(--glow-2);}
-  .spot-nav svg{width:20px; height:20px;}
-  .spot-body{flex:1; display:flex; align-items:center; gap:24px; min-width:0;}
-  .spot-silhouette{width:88px; height:88px; flex-shrink:0; border-radius:16px; background:var(--pitch-deep); border:2px solid var(--gold); overflow:hidden; display:flex; align-items:center; justify-content:center;}
-  .spot-silhouette svg{width:72%; height:72%;}
-  .spot-info{min-width:0;}
-  .spot-info .cap-sport{color:var(--gold); font-size:12.5px; text-transform:uppercase; letter-spacing:.5px; font-weight:700;}
-  .spot-info h3{font-size:24px; margin:6px 0 4px;}
-  .spot-info .role{color:var(--ink-soft); font-size:13.5px; margin-bottom:10px;}
-  .spot-info p{font-size:14.5px; color:var(--ink); max-width:520px; line-height:1.55;}
-  .spot-stats{display:flex; gap:22px; margin-top:14px;}
-  .spot-stats div{font-family:'JetBrains Mono', monospace;}
-  .spot-stats .n{font-size:17px; font-weight:700; color:var(--gold);}
-  .spot-stats .l{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px;}
-  .spot-dots{display:flex; justify-content:center; gap:8px; margin-top:20px;}
-  .spot-dot{width:8px; height:8px; border-radius:50%; background:var(--line); border:none; padding:0; cursor:pointer; transition:background .15s ease, transform .15s ease;}
-  .spot-dot.active{background:var(--gold); transform:scale(1.25);}
-  @media (max-width:680px){
-    .spotlight-card{flex-direction:column; padding:24px;}
-    .spot-body{flex-direction:column; text-align:center;}
-    .spot-stats{justify-content:center;}
-    .spot-nav{position:absolute; top:50%; transform:translateY(-50%); z-index:2;}
-    .spot-nav.prev{left:10px;} .spot-nav.next{right:10px;}
+  /* ===== Hero ===== */
+  .hero{background:var(--charcoal); color:var(--white); position:relative; overflow:hidden;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:var(--s7); align-items:center; padding-top:var(--s8); padding-bottom:var(--s8);}
+  .eyebrow{display:inline-flex; align-items:center; gap:10px; font:700 12px/1 var(--font-ui); letter-spacing:.16em; text-transform:uppercase; color:var(--lime); margin-bottom:var(--s5);}
+  .eyebrow::before{content:""; width:28px; height:2px; background:var(--lime);}
+  .hero h1{font-size:clamp(38px, 5.6vw, 72px); color:var(--white); text-transform:none;}
+  .typed-line{font:800 clamp(22px, 2.8vw, 34px)/1.2 var(--font-display); color:var(--lime); margin-top:var(--s4); min-height:1.3em; display:flex; align-items:center;}
+  .typed-line .typed-text{display:inline-block;}
+  .caret{display:inline-block; width:3px; height:1em; background:var(--lime); margin-left:4px; animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0}}
+  .hero .lead{font-size:clamp(16px, 1.5vw, 19px); color:var(--on-dark-muted); max-width:56ch; margin-top:var(--s5);}
+  .hero-actions{display:flex; gap:var(--s3); flex-wrap:wrap; margin-top:var(--s6);}
+  .hero-note{margin-top:var(--s5); font-size:14px; color:var(--on-dark-muted); border-left:2px solid var(--lime); padding-left:var(--s3);}
+  .hero-media{position:relative; aspect-ratio:4/5; border-radius:var(--r-lg); box-shadow:var(--shadow-2); max-height:620px; width:100%;}
+  .hero-media .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
+  .hero-media .pitch-lines{position:absolute; inset:0; z-index:1; opacity:.22;}
+  .hero-media .cap{position:absolute; left:16px; bottom:16px; z-index:3; background:rgba(16,24,32,.88); border:1px solid var(--line-dark); border-radius:var(--r-md); padding:10px 14px; font-size:13px; color:var(--on-dark-muted); max-width:80%;}
+  .hero-media .cap b{color:var(--white); display:block; font-size:14px;}
+  .trustbar{background:var(--navy); border-top:1px solid var(--line-dark);}
+  .trustbar .wrap{display:flex; flex-wrap:wrap; gap:var(--s4) var(--s7); padding-top:var(--s5); padding-bottom:var(--s5); align-items:center;}
+  .trust-item{display:flex; align-items:baseline; gap:10px;}
+  .trust-item b{font:800 30px/1 var(--font-display); color:var(--lime);}
+  .trust-item span{font-size:13px; font-weight:600; color:var(--on-dark-muted); text-transform:uppercase; letter-spacing:.08em;}
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr; padding-top:var(--s7); padding-bottom:var(--s7); gap:var(--s6);}
+    .hero-media{aspect-ratio:16/11; max-height:none;}
   }
 
-  /* ---------- Icon system ---------- */
-  .icon{width:16px; height:16px; flex-shrink:0; vertical-align:-3px;}
-  .icon-lg{width:28px; height:28px;}
+  /* ===== Sections ===== */
+  section{padding:var(--s9) 0;}
+  @media (max-width:700px){ section{padding:var(--s8) 0;} }
+  .sec-light{background:var(--offwhite);} .sec-white{background:var(--white);}
+  .sec-dark{background:var(--charcoal); color:var(--white);} .sec-navy{background:var(--navy); color:var(--white);}
+  .sec-head{max-width:720px; margin-bottom:var(--s7);}
+  .sec-eyebrow{display:inline-block; font:700 12px/1 var(--font-ui); letter-spacing:.16em; text-transform:uppercase; color:var(--success); margin-bottom:var(--s3);}
+  .sec-dark .sec-eyebrow,.sec-navy .sec-eyebrow{color:var(--lime);}
+  .sec-head h2{font-size:clamp(30px, 4vw, 48px);}
+  .sec-head p{margin-top:var(--s4); font-size:18px; color:var(--ink-muted);}
+  .sec-dark .sec-head p,.sec-navy .sec-head p{color:var(--on-dark-muted);}
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in-view{opacity:1; transform:none;}
+  .no-js .reveal{opacity:1; transform:none;}
 
-  /* ---------- Sport picker ---------- */
-  .sport-picker{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px;}
-  .sport-option{
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    padding:16px 8px; border:1.5px solid var(--line); border-radius:6px;
-    background:var(--surface); cursor:pointer; transition:border-color .15s ease, transform .12s ease, background .15s ease;
-    color:var(--ink-soft);
-  }
-  .sport-option:hover{border-color:var(--gold); transform:translateY(-2px);}
-  .sport-option .icon-lg{color:var(--ink-soft); transition:color .15s ease;}
-  .sport-option span{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
-  .sport-option.selected{border-color:var(--gold); background:var(--pitch); color:var(--white);}
-  .sport-option.selected .icon-lg{color:var(--gold);}
-  @media (max-width:500px){ .sport-picker{grid-template-columns:repeat(2,1fr);} }
-  .managed-body .role{color:#C4C2DC; font-size:13px; margin-bottom:14px;}
-  .managed-body p{font-size:13.5px; color:#D9D7EE;}
-  .managed-stats{display:flex; gap:18px; margin-top:16px; padding-top:16px; border-top:1px solid #2E2E52;}
-  .managed-stats div{font-family:'JetBrains Mono', monospace;}
-  .managed-stats .n{font-size:18px; font-weight:700; color:var(--gold);}
-  .managed-stats .l{font-size:10px; color:#A8A6C6; text-transform:uppercase; letter-spacing:.5px;}
+  /* ===== Sport cards ===== */
+  .sport-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:var(--s4);}
+  .sport-card{position:relative; display:flex; flex-direction:column; justify-content:flex-end; min-height:380px; border-radius:var(--r-lg); overflow:hidden; text-decoration:none; color:var(--white); border:0; text-align:left; cursor:pointer; font:inherit; padding:0; background:none;}
+  .sport-card .ph{position:absolute; inset:0;}
+  .sport-card:hover .ph > img{transform:scale(1.05);}
+  .sport-card .shade{position:absolute; inset:0; z-index:2; background:linear-gradient(to top, rgba(16,24,32,.94) 0%, rgba(16,24,32,.55) 45%, rgba(16,24,32,0) 75%);}
+  .sport-card .body{position:relative; z-index:3; padding:var(--s5);}
+  .sport-card h3{font:800 26px/1.1 var(--font-display);}
+  .sport-card p{font-size:14.5px; color:#E6ECF0; margin:8px 0 14px;}
+  .sport-card .go{display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color:var(--lime);}
+  .sport-card .count{position:absolute; top:var(--s4); left:var(--s4); z-index:3; background:rgba(16,24,32,.88); color:#fff; font-size:12px; font-weight:700; padding:6px 10px; border-radius:20px; border:1px solid var(--line-dark);}
+  @media (max-width:1000px){ .sport-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .sport-grid{grid-template-columns:1fr;} .sport-card{min-height:300px;} }
 
-  /* Showcase */
-  .showcase-layout{display:grid; grid-template-columns:0.9fr 1.1fr; gap:36px;}
-  .highlight-list{display:flex; flex-direction:column; gap:14px;}
-  .highlight-item{
-    background:var(--surface); border:1px solid var(--line); border-radius:5px;
-    padding:16px; display:flex; gap:14px; align-items:flex-start;
-  }
-  .highlight-thumb{
-    width:60px; height:60px; flex-shrink:0; border-radius:4px;
-    background:var(--pitch); display:flex; align-items:center; justify-content:center;
-    color:var(--gold); font-family:'Exo 2'; font-weight:800; font-size:20px;
-  }
-  .highlight-meta{flex:1;}
-  .highlight-meta .title{font-weight:700; font-size:14.5px; margin-bottom:2px;}
-  .highlight-meta .sub{font-size:12px; color:var(--ink-soft); margin-bottom:6px;}
-  .highlight-meta a{font-size:12.5px; color:var(--gold-deep); font-weight:600; text-decoration:none;}
-  .highlight-meta a:hover{text-decoration:underline;}
+  /* ===== How it works ===== */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s5); position:relative;}
+  .step{background:var(--offwhite); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--s6); position:relative;}
+  .step .num{font:800 14px/1 var(--font-ui); letter-spacing:.14em; color:var(--success); display:flex; align-items:center; gap:12px; margin-bottom:var(--s4);}
+  .step .num::after{content:""; flex:1; height:2px; background:linear-gradient(90deg, var(--lime-deep), transparent);}
+  .step .ic{width:52px; height:52px; border-radius:var(--r-md); background:var(--charcoal); color:var(--lime); display:flex; align-items:center; justify-content:center; margin-bottom:var(--s4);}
+  .step .ic svg{width:26px; height:26px;}
+  .step h3{font:800 22px/1.15 var(--font-display); margin-bottom:var(--s2);}
+  .step p{color:var(--ink-muted); font-size:15.5px;}
+  .fine{margin-top:var(--s5); font-size:14px; color:var(--ink-muted); max-width:70ch;}
+  @media (max-width:860px){ .steps{grid-template-columns:1fr;} }
 
-  /* Sponsors */
-  .sponsor-panel{
-    background:var(--pitch); color:var(--white); border-radius:8px;
-    padding:44px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:36px; align-items:center;
-  }
-  .sponsor-panel h2{color:var(--white);}
-  .sponsor-panel p{color:#D9D7EE; font-size:15px; margin-bottom:22px;}
-  .sponsor-list{list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:24px;}
-  .sponsor-list li{font-size:14px; color:#ECEAF7; padding-left:22px; position:relative;}
-  .sponsor-list li::before{content:"✓"; position:absolute; left:0; color:var(--gold); font-weight:700;}
-  .lead-form{background:var(--pitch-deep); border-radius:6px; padding:24px; border:1px solid #2E2E52;}
-  .lead-form input, .lead-form select{
-    width:100%; margin-bottom:12px; padding:11px 12px; border-radius:2px; border:1px solid #33325C;
-    background:#14142C; color:var(--white); font-size:13.5px;
-  }
-  .lead-form label{font-size:11.5px; color:#A8A6C6; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
+  /* ===== Directory ===== */
+  .filters{background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--s5); box-shadow:var(--shadow-1); margin-bottom:var(--s5);}
+  .searchbox{position:relative;}
+  .searchbox svg{position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:var(--slate); pointer-events:none;}
+  .searchbox input{width:100%; min-height:54px; padding:14px 16px 14px 48px; font:500 16px var(--font-ui); border:1.5px solid var(--border); border-radius:var(--r-md); background:var(--offwhite); color:var(--ink);}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:var(--s4) 0;}
+  .chip{min-height:44px; padding:10px 18px; border-radius:999px; border:1.5px solid var(--border); background:var(--white); font:700 14px var(--font-ui); color:var(--ink); cursor:pointer;}
+  .chip:hover{border-color:var(--charcoal);}
+  .chip[aria-pressed="true"]{background:var(--charcoal); color:var(--lime); border-color:var(--charcoal);}
+  .filter-row{display:grid; grid-template-columns:repeat(5, 1fr) auto; gap:var(--s3); align-items:end;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label,.field .lbl{font-size:13px; font-weight:700; color:var(--ink);}
+  .field .req{color:var(--error);}
+  .field .hint{font-size:12.5px; color:var(--ink-muted);}
+  .field input,.field select,.field textarea{width:100%; min-height:48px; padding:11px 14px; font:500 15.5px var(--font-ui); color:var(--ink); background:var(--white); border:1.5px solid #B9C3BC; border-radius:var(--r-md);}
+  .field textarea{min-height:104px; resize:vertical;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none; border-color:var(--charcoal); box-shadow:var(--focus);}
+  .field .err{display:none; font-size:13px; font-weight:600; color:var(--error);}
+  .field.invalid .err{display:block;}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--error);}
+  .dir-meta{display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--s4); font-size:14px; color:var(--ink-muted); flex-wrap:wrap; gap:8px;}
+  .link-btn{background:none; border:0; color:var(--ink); font:700 14px var(--font-ui); text-decoration:underline; cursor:pointer; padding:8px;}
+  @media (max-width:1000px){ .filter-row{grid-template-columns:repeat(2, 1fr);} .filter-row .field:last-child{grid-column:1/-1;} }
+  @media (max-width:520px){ .filter-row{grid-template-columns:1fr;} }
 
-  /* ---------- Founder / why-this-exists ---------- */
-  .founder-panel{
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    padding:44px; display:grid; grid-template-columns:0.65fr 1.35fr; gap:40px; align-items:start;
-  }
-  .founder-portrait{
-    width:100%; aspect-ratio:1; border-radius:10px; background:var(--pitch-deep);
-    border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; overflow:hidden;
-  }
-  .founder-portrait svg{width:56%; height:56%;}
-  .founder-name{font-size:15px; font-weight:700; margin-top:14px;}
-  .founder-role{font-size:12.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px;}
-  .founder-copy p{font-size:15px; color:var(--ink); line-height:1.7; margin-bottom:16px;}
-  .founder-copy p:first-of-type{font-size:17px; font-weight:600;}
-  .founder-stats{display:flex; gap:28px; margin-top:24px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap;}
-  .founder-stats div{font-family:'JetBrains Mono', monospace;}
-  .founder-stats .n{font-size:20px; font-weight:700; color:var(--gold);}
-  .founder-stats .l{font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; max-width:170px; line-height:1.4;}
-  @media (max-width:760px){
-    .founder-panel{grid-template-columns:1fr; padding:28px;}
-    .founder-portrait{max-width:180px; margin:0 auto;}
-  }
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(268px,1fr)); gap:var(--s4);}
+  .ath{background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-1); transition:transform .2s, box-shadow .2s;}
+  .ath:hover{transform:translateY(-3px); box-shadow:var(--shadow-2);}
+  .ath .photo{aspect-ratio:4/3;}
+  .ath .photo .mono{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; font:800 54px/1 var(--font-display); color:rgba(255,255,255,.92); letter-spacing:.02em;}
+  .ath .tagrow{position:absolute; left:12px; top:12px; z-index:3; display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{display:inline-flex; align-items:center; gap:6px; font:700 11.5px/1 var(--font-ui); padding:6px 10px; border-radius:999px; background:rgba(16,24,32,.9); color:#fff; border:1px solid var(--line-dark);}
+  .badge.ok{background:var(--lime); color:var(--charcoal); border-color:var(--lime);}
+  .badge.pend{background:#fff; color:var(--ink-muted); border-color:var(--border);}
+  .ath .body{padding:var(--s4) var(--s5) var(--s5); display:flex; flex-direction:column; gap:6px; flex:1;}
+  .ath h3{font:800 20px/1.2 var(--font-display);}
+  .ath .sub{font-size:14px; color:var(--ink-muted); font-weight:600;}
+  .ath dl{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13.5px; margin-top:6px;}
+  .ath dt{color:var(--ink-muted);} .ath dd{font-weight:600; text-align:right;}
+  .ath .actions{margin-top:auto; padding-top:var(--s3);}
+  .ath .actions .btn{width:100%;}
+  .skeleton{background:linear-gradient(90deg,#ECEFEA 25%,#F6F8F4 37%,#ECEFEA 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite; border-radius:var(--r-lg); min-height:300px;}
+  @keyframes shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+  .empty{grid-column:1/-1; border:1.5px dashed #B9C3BC; border-radius:var(--r-lg); padding:var(--s7) var(--s5); text-align:center; background:var(--white); color:var(--ink-muted);}
+  .empty b{display:block; color:var(--ink); font-size:18px; margin-bottom:6px;}
+  .empty .btn{margin-top:var(--s4);}
+  .more{display:flex; justify-content:center; margin-top:var(--s6);}
 
-  /* ---------- Contact ---------- */
-  .contact-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-  .contact-tile{
-    background:var(--surface); border:1px solid var(--line); border-radius:8px;
-    padding:26px; text-align:center; text-decoration:none; color:var(--ink);
-    transition:border-color .15s ease, transform .15s ease, background .15s ease;
-  }
-  .contact-tile:hover{border-color:var(--gold); transform:translateY(-3px); background:var(--glow-2);}
-  .contact-tile .icon-circle{
-    width:48px; height:48px; border-radius:50%; background:var(--pitch-deep); color:var(--gold);
-    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
-  }
-  .contact-tile .icon-circle svg{width:22px; height:22px;}
-  .contact-tile h3{font-size:16px; margin-bottom:4px;}
-  .contact-tile p{font-size:13.5px; color:var(--ink-soft);}
-  @media (max-width:640px){ .contact-grid{grid-template-columns:1fr;} }
+  /* ===== Forms ===== */
+  .form-shell{display:grid; grid-template-columns:.8fr 1.2fr; gap:var(--s7); align-items:start;}
+  .form-aside h2{font-size:clamp(30px,3.6vw,44px);}
+  .form-aside p{color:var(--ink-muted); font-size:17px; margin-top:var(--s4);}
+  .privacy-box{margin-top:var(--s5); background:var(--white); border:1px solid var(--border); border-left:4px solid var(--lime-deep); border-radius:var(--r-md); padding:var(--s4) var(--s5); font-size:14.5px; color:var(--ink-muted);}
+  .privacy-box b{color:var(--ink);} .privacy-box a{font-weight:700; color:var(--ink);}
+  .form-panel{background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--s6); box-shadow:var(--shadow-1);}
+  fieldset{border:0; margin:0 0 var(--s6); min-width:0;}
+  fieldset legend{font:800 13px/1 var(--font-ui); letter-spacing:.14em; text-transform:uppercase; color:var(--success); padding:0 0 var(--s4); display:flex; align-items:center; gap:10px; width:100%;}
+  fieldset legend::after{content:""; flex:1; height:1px; background:var(--border);}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:var(--s4);}
+  .full{grid-column:1/-1;}
+  .sport-picker{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .sport-option{display:flex; flex-direction:column; align-items:center; gap:8px; min-height:84px; justify-content:center; padding:12px 8px; border:1.5px solid #B9C3BC; border-radius:var(--r-md); background:var(--white); cursor:pointer; font:700 14px var(--font-ui); text-align:center;}
+  .sport-option:hover{border-color:var(--charcoal);}
+  .sport-option[aria-checked="true"]{background:var(--charcoal); color:var(--lime); border-color:var(--charcoal);}
+  .consent{background:#F1F6E7; border:1.5px solid var(--lime-deep); border-radius:var(--r-md); padding:var(--s5); margin-top:var(--s2);}
+  .consent h3{font:800 17px var(--font-display); margin-bottom:6px;}
+  .consent p.sm{font-size:14px; color:var(--ink-muted); margin-bottom:var(--s4);}
+  .check{display:flex; gap:12px; align-items:flex-start; font-size:14.5px;}
+  .check input{width:22px; height:22px; margin-top:2px; accent-color:var(--charcoal); flex-shrink:0;}
+  .form-status{margin-top:var(--s4); font-weight:600; font-size:15px; display:none; padding:12px 16px; border-radius:var(--r-md);}
+  .form-status.show{display:block;} .form-status.ok{background:#E6F4EC; color:var(--success);} .form-status.bad{background:#FDECEA; color:var(--error);}
+  @media (max-width:960px){ .form-shell{grid-template-columns:1fr; gap:var(--s6);} }
+  @media (max-width:600px){ .form-grid{grid-template-columns:1fr;} .sport-picker{grid-template-columns:repeat(2,1fr);} .form-panel{padding:var(--s5);} }
 
-  /* ---------- Floating WhatsApp button ---------- */
-  .whatsapp-float{
-    position:fixed; left:22px; bottom:22px; z-index:90;
-    width:56px; height:56px; border-radius:50%;
-    background:#25D366; color:#FFFFFF; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 14px rgba(0,0,0,0.35), 0 2px 6px rgba(37,211,102,0.4);
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  .whatsapp-float:hover{transform:translateY(-3px) scale(1.05); box-shadow:0 8px 22px rgba(0,0,0,0.4), 0 4px 10px rgba(37,211,102,0.5);}
-  .whatsapp-float svg{width:28px; height:28px;}
-  @media (max-width:640px){ .whatsapp-float{left:14px; bottom:14px; width:52px; height:52px;} }
+  /* ===== Showcase ===== */
+  .hl-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:var(--s4);}
+  .hl{background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; display:flex; flex-direction:column;}
+  .hl .thumb{aspect-ratio:16/9; width:100%; border:0; padding:0; cursor:pointer; display:block;}
+  .hl .thumb .play{position:absolute; z-index:4; inset:0; display:flex; align-items:center; justify-content:center;}
+  .hl .thumb .play span{width:62px; height:62px; border-radius:50%; background:var(--lime); color:var(--charcoal); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,.35); transition:transform .2s;}
+  .hl .thumb:hover .play span{transform:scale(1.08);}
+  .hl .thumb .play svg{width:26px; height:26px; margin-left:3px;}
+  .hl .body{padding:var(--s4) var(--s5) var(--s5);}
+  .hl h3{font:800 18px/1.25 var(--font-display);}
+  .hl .meta{font-size:13.5px; color:var(--ink-muted); font-weight:600; margin:4px 0 8px;}
+  .hl p{font-size:14.5px; color:var(--ink-muted);}
+  .hl .row{display:flex; gap:12px; margin-top:12px; flex-wrap:wrap; font-size:14px; font-weight:700;}
+  .hl .row a,.hl .row button{color:var(--ink); background:none; border:0; font:700 14px var(--font-ui); cursor:pointer; text-decoration:underline; padding:6px 0;}
+  .hl-form-wrap{margin-top:var(--s7); display:grid; grid-template-columns:.9fr 1.1fr; gap:var(--s6); align-items:start;}
+  .hl-form-wrap h3{font:800 24px var(--font-display);}
+  .hl-form-wrap p{color:var(--ink-muted); margin-top:8px;}
+  @media (max-width:860px){ .hl-form-wrap{grid-template-columns:1fr;} }
 
-  /* Footer */
-  footer{background:var(--pitch-deep); color:#C4C2DC; padding:48px 0 24px;}
-  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; margin-bottom:32px;}
-  .footer-grid h4{color:var(--white); font-size:13px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:14px;}
-  .footer-grid ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
-  .footer-grid a{color:#A8A6C6; font-size:13px; text-decoration:none;}
-  .footer-grid a:hover{color:var(--gold);}
-  .footer-note{font-size:12.5px; color:#8785A8; max-width:420px; line-height:1.6;}
-  .footer-bottom{
-    border-top:1px solid #201F42; padding-top:20px; display:flex; justify-content:space-between;
-    flex-wrap:wrap; gap:10px; font-size:12px; color:#8785A8;
-  }
+  /* ===== Managed ===== */
+  .managed-grid2{display:grid; grid-template-columns:1.05fr .95fr; gap:var(--s7); align-items:center;}
+  .managed-grid2 h2{font-size:clamp(30px,4vw,48px);}
+  .managed-grid2 > div > p{color:var(--on-dark-muted); font-size:18px; margin-top:var(--s4); max-width:56ch;}
+  .svc{list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:12px 20px; margin:var(--s6) 0;}
+  .svc li{display:flex; gap:10px; align-items:flex-start; font-weight:600; color:var(--white); font-size:15.5px;}
+  .svc li::before{content:""; width:20px; height:20px; border-radius:50%; background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23101820' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat; flex-shrink:0; margin-top:2px;}
+  .managed-media{aspect-ratio:5/4; border-radius:var(--r-lg); box-shadow:var(--shadow-2);} .managed-media .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
+  .disclaim{font-size:13.5px; color:var(--on-dark-muted); margin-top:var(--s4); max-width:60ch;}
+  .roster{margin-top:var(--s7);}
+  .roster h3{font:800 22px var(--font-display); margin-bottom:var(--s4);}
+  .roster .card-grid .ath{background:var(--navy); border-color:var(--line-dark); color:#fff;} .roster .ath .sub,.roster .ath dt{color:var(--on-dark-muted);}
+  @media (max-width:900px){ .managed-grid2{grid-template-columns:1fr;} .svc{grid-template-columns:1fr;} }
 
-  @media (max-width:860px){
-    nav.links{
-      display:none; position:absolute; top:100%; left:0; right:0;
-      flex-direction:column; gap:0; background:var(--pitch); border-bottom:3px solid var(--gold);
-      padding:8px 24px 16px; z-index:99;
-    }
-    nav.links.open{display:flex;}
-    nav.links a{padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.08);}
-    .burger{display:block;}
-    .hero-grid, .showcase-layout, .sponsor-panel, .footer-grid{grid-template-columns:1fr;}
-    .steps{grid-template-columns:1fr;}
-    .form-grid{grid-template-columns:1fr;}
-  }
+  /* ===== Founder ===== */
+  .founder-grid{display:grid; grid-template-columns:.7fr 1.3fr; gap:var(--s7); align-items:start;}
+  .founder-portrait{aspect-ratio:4/5; border-radius:var(--r-lg); position:relative;}
+  .founder-portrait .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
+  .founder-portrait .mono{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; font:800 84px var(--font-display); color:rgba(255,255,255,.9);}
+  .founder-id{margin-top:var(--s4);} .founder-id b{display:block; font:800 22px var(--font-display);} .founder-id span{color:var(--ink-muted); font-size:14.5px;}
+  .founder-copy h2{font-size:clamp(30px,4vw,48px); margin-bottom:var(--s5);}
+  .founder-copy p{font-size:17.5px; color:#26333E; margin-bottom:var(--s4); max-width:68ch;}
+  .pull{font:800 clamp(20px,2.4vw,26px)/1.3 var(--font-display); border-left:4px solid var(--lime-deep); padding-left:var(--s4); margin:var(--s5) 0; color:var(--ink);}
+  .facts{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s3); margin-top:var(--s6);}
+  .facts div{background:var(--white); border:1px solid var(--border); border-radius:var(--r-md); padding:var(--s4);}
+  .facts .n{font:800 28px var(--font-display);} .facts .l{font-size:13px; color:var(--ink-muted); margin-top:4px;}
+  .founder-cta{margin-top:var(--s5); display:flex; gap:12px; flex-wrap:wrap;}
+  @media (max-width:900px){ .founder-grid{grid-template-columns:1fr;} .founder-portrait{max-width:320px;} .facts{grid-template-columns:1fr;} }
+
+  /* ===== Sponsors ===== */
+  .scout-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:var(--s7); align-items:start;}
+  .scout-grid h2{font-size:clamp(30px,4vw,48px);}
+  .scout-grid > div > p{color:var(--on-dark-muted); font-size:18px; margin-top:var(--s4);}
+  .ben{list-style:none; margin-top:var(--s5); display:grid; gap:12px;}
+  .ben li{display:flex; gap:12px; align-items:flex-start; color:#fff; font-weight:600;}
+  .ben li::before{content:""; width:20px; height:20px; border-radius:50%; flex-shrink:0; margin-top:2px; background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23101820' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat;}
+  .lead-form{background:var(--white); color:var(--ink); border-radius:var(--r-lg); padding:var(--s6); box-shadow:var(--shadow-2);}
+  .lead-form h3{font:800 22px var(--font-display); margin-bottom:6px;} .lead-form > p{font-size:14.5px; color:var(--ink-muted); margin-bottom:var(--s5);}
+  .lead-form .field{margin-bottom:var(--s4);}
+  @media (max-width:900px){ .scout-grid{grid-template-columns:1fr;} }
+
+  /* ===== Trust ===== */
+  .trust-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4);}
+  .trust-card{background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--s5);}
+  .trust-card .ic{width:44px; height:44px; border-radius:var(--r-md); background:var(--charcoal); color:var(--lime); display:flex; align-items:center; justify-content:center; margin-bottom:var(--s3);}
+  .trust-card .ic svg{width:22px; height:22px;}
+  .trust-card h3{font:800 18px var(--font-display); margin-bottom:6px;} .trust-card p{font-size:14.5px; color:var(--ink-muted);}
+  .policy-links{display:flex; gap:12px; flex-wrap:wrap; margin-top:var(--s6);}
+  @media (max-width:900px){ .trust-grid{grid-template-columns:1fr 1fr;} } @media (max-width:560px){ .trust-grid{grid-template-columns:1fr;} }
+
+  /* ===== Contact ===== */
+  .contact-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4);}
+  .contact-tile{display:flex; gap:var(--s4); align-items:center; background:var(--navy); border:1px solid var(--line-dark); border-radius:var(--r-lg); padding:var(--s5); text-decoration:none; color:#fff; min-height:96px; transition:border-color .2s, transform .2s;}
+  .contact-tile:hover{border-color:var(--lime); transform:translateY(-2px);}
+  .contact-tile .ic{width:48px; height:48px; border-radius:50%; background:var(--lime); color:var(--charcoal); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .contact-tile .ic svg{width:22px; height:22px;}
+  .contact-tile b{display:block; font-size:16px;} .contact-tile span{color:var(--on-dark-muted); font-size:14.5px; overflow-wrap:anywhere;}
+  @media (max-width:900px){ .contact-grid{grid-template-columns:1fr;} }
+
+  /* ===== Footer ===== */
+  footer{background:#0A1117; color:var(--on-dark-muted); padding:var(--s8) 0 var(--s5);}
+  .foot-grid{display:grid; grid-template-columns:1.4fr repeat(3,1fr); gap:var(--s6);}
+  footer h4{color:#fff; font:800 14px var(--font-display); letter-spacing:.08em; text-transform:uppercase; margin-bottom:var(--s3);}
+  footer ul{list-style:none; display:grid; gap:8px;} footer a{text-decoration:none; font-size:14.5px;} footer a:hover{color:var(--lime);}
+  footer .note{font-size:14.5px; margin-top:var(--s3); max-width:36ch;}
+  .foot-bottom{margin-top:var(--s7); padding-top:var(--s5); border-top:1px solid var(--line-dark); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:13px;}
+  .foot-grid > div{min-width:0;} footer a{overflow-wrap:anywhere;}
+  @media (max-width:900px){ .foot-grid{grid-template-columns:1fr 1fr;} .foot-grid > div:first-child{grid-column:1/-1;} }
+  @media (max-width:520px){ .foot-grid{grid-template-columns:1fr;} }
+
+  /* ===== Floating + overlays ===== */
+  .whatsapp-float{position:fixed; right:18px; bottom:18px; z-index:90; width:58px; height:58px; border-radius:50%; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(0,0,0,.3);}
+  .whatsapp-float svg{width:30px; height:30px;}
+  .to-top{position:fixed; right:18px; bottom:88px; z-index:90; width:46px; height:46px; border-radius:50%; background:var(--charcoal); color:#fff; border:1px solid var(--line-dark); display:none; align-items:center; justify-content:center; cursor:pointer;}
+  .to-top.show{display:flex;} .to-top svg{width:20px; height:20px;}
+  dialog{border:0; border-radius:var(--r-lg); padding:0; max-width:min(880px, 94vw); width:100%; box-shadow:var(--shadow-2); background:var(--white); color:var(--ink);}
+  dialog::backdrop{background:rgba(10,17,23,.72);}
+  .dlg-head{display:flex; justify-content:space-between; align-items:center; padding:var(--s4) var(--s5); border-bottom:1px solid var(--border);}
+  .dlg-head h2{font:800 20px var(--font-display);}
+  .dlg-x{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--border); background:#fff; cursor:pointer; font-size:20px; line-height:1;}
+  .dlg-body{padding:var(--s5); max-height:78vh; overflow:auto;}
+  .video-frame{aspect-ratio:16/9; width:100%; border:0; border-radius:var(--r-md); background:#000;}
+  .profile-top{display:grid; grid-template-columns:200px 1fr; gap:var(--s5);}
+  .profile-top .ph{aspect-ratio:4/5; border-radius:var(--r-md);} .profile-top .mono{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; font:800 56px var(--font-display); color:rgba(255,255,255,.92);}
+  .profile-top dl{display:grid; grid-template-columns:auto 1fr; gap:6px 16px; margin:12px 0; font-size:15px;} .profile-top dt{color:var(--ink-muted);} .profile-top dd{font-weight:700;}
+  .toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px); background:var(--charcoal); color:#fff; padding:14px 20px; border-radius:var(--r-md); border-left:4px solid var(--lime); font-weight:600; font-size:14.5px; z-index:300; opacity:0; pointer-events:none; transition:all .25s; max-width:92vw;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  @media (max-width:600px){ .profile-top{grid-template-columns:1fr;} .profile-top .ph{max-width:200px;} }
 </style>
 </head>
-<body>
+<body class="no-js">
+<script>document.body.classList.remove('no-js');</script>
+<a class="skip" href="#main">Skip to content</a>
 
-<!-- Reusable line-art sports-equipment icons — original artwork, no photos.
-     Referenced via <svg class="icon"><use href="#icon-NAME"/></svg>. -->
-<svg style="display:none" aria-hidden="true">
+<svg style="display:none" aria-hidden="true" focusable="false">
   <defs>
-    <symbol id="icon-goal" viewBox="0 0 48 48">
+<symbol id="icon-goal" viewBox="0 0 48 48">
       <path d="M6 8 L6 40 M42 8 L42 40 M6 8 L42 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path d="M6 8 L14 16 M6 16 L14 24 M6 24 L14 32 M6 32 L14 38" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
       <path d="M42 8 L34 16 M42 16 L34 24 M42 24 L34 32 M42 32 L34 38" stroke="currentColor" stroke-width="1" opacity="0.5" fill="none"/>
@@ -576,1039 +397,807 @@
       <rect x="2" y="11" width="8" height="18" stroke="currentColor" stroke-width="1.2" fill="none"/>
       <rect x="54" y="11" width="8" height="18" stroke="currentColor" stroke-width="1.2" fill="none"/>
     </symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></g></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 9l5 3-5 3z"/></g></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.6-3.2 8-8 9-4.8-1-8-4.4-8-9V6z"/><path d="M9 12l2 2 4-4"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></g></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.6 3-6 7-6s7 2.4 7 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.4c2.4.7 4 2.5 4 5.6"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></g></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></g></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></g></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></g></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></g></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></g></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></g></symbol>
   </defs>
 </svg>
 
 <header class="nav">
   <div class="nav-inner">
-    <div class="logo">
-      <div class="mark">JSM</div>
-      <span class="display" style="font-size:20px;">Josriri</span>
-    </div>
-    <nav class="links" id="nav-links">
-      <a href="#how">How it works</a>
+    <a class="brand" href="#top" aria-label="Josriri Sports Management — home">
+      <img src="/assets/jsm-emblem-icon.svg" alt="" width="34" height="34" />
+      <div><span>Josriri</span><small>Sports Management</small></div>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="#how">How It Works</a>
       <a href="#directory">Directory</a>
       <a href="#showcase">Showcase</a>
-      <a href="#managed">Managed athletes</a>
-      <a href="#sponsors">Sponsors &amp; scouts</a>
+      <a href="#managed">Managed Athletes</a>
+      <a href="#sponsors">Sponsors &amp; Scouts</a>
       <a href="#contact">Contact</a>
-      <a href="/account.html">My account</a>
+      <a href="/account.html">My Account</a>
     </nav>
-    <div style="display:flex; align-items:center; gap:14px;">
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-      </button>
-      <a href="#register" class="nav-cta">Register free</a>
-      <button class="burger" id="mobile-menu-btn" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
-    </div>
+    <a href="#register" class="btn btn-lime btn-sm nav-cta">Register Free</a>
+    <button class="burger" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><svg><use href="#i-menu"/></svg></button>
   </div>
   <div id="scroll-progress"></div>
 </header>
 
-<button class="to-top" id="to-top-btn" type="button" aria-label="Back to top" title="Back to top">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-</button>
+<main id="main">
+<div id="top"></div>
 
-<section class="hero">
-  <svg class="hero-art" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
-    <defs>
-      <radialGradient id="floodlight" cx="50%" cy="0%" r="75%">
-        <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.30"/>
-        <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="var(--glow-2)" stop-opacity="1"/>
-        <stop offset="100%" stop-color="var(--glow-2)" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <circle cx="140" cy="10" r="260" fill="url(#floodlight)"/>
-    <circle cx="1060" cy="10" r="260" fill="url(#floodlight)"/>
-    <circle cx="620" cy="260" r="340" fill="url(#ambientGlow)"/>
-    <g stroke="var(--gold)" stroke-width="1" opacity="0.28">
-      <line x1="90" y1="0" x2="10" y2="140"/>
-      <line x1="130" y1="0" x2="70" y2="150"/>
-      <line x1="170" y1="0" x2="140" y2="150"/>
-      <line x1="1110" y1="0" x2="1190" y2="140"/>
-      <line x1="1070" y1="0" x2="1130" y2="150"/>
-      <line x1="1030" y1="0" x2="1060" y2="150"/>
-    </g>
-
-    <!-- Scattered sports-equipment line-art: original vector icons, not photos -->
-    <g fill="none" stroke-linecap="round">
-      <!-- soccer ball, top-left -->
-      <g transform="translate(95,55)" opacity="0.32">
-        <circle r="22" stroke="var(--gold)" stroke-width="2"/>
-        <path d="M0,-22 L13,-7 L7,13 L-7,13 L-13,-7 Z" stroke="var(--gold)" stroke-width="1.4"/>
-      </g>
-      <!-- basketball, top-right -->
-      <g transform="translate(1105,50)" opacity="0.32">
-        <circle r="24" stroke="var(--red)" stroke-width="2"/>
-        <line x1="-24" y1="0" x2="24" y2="0" stroke="var(--red)" stroke-width="1.4"/>
-        <line x1="0" y1="-24" x2="0" y2="24" stroke="var(--red)" stroke-width="1.4"/>
-        <path d="M-17,-17 Q0,-5 17,-17" stroke="var(--red)" stroke-width="1.4"/>
-        <path d="M-17,17 Q0,5 17,17" stroke="var(--red)" stroke-width="1.4"/>
-      </g>
-      <!-- rugby ball, gap between headline and scoreboard -->
-      <g transform="translate(672,215) rotate(-24)" opacity="0.26">
-        <ellipse rx="28" ry="15" stroke="var(--gold)" stroke-width="2"/>
-        <line x1="-22" y1="0" x2="22" y2="0" stroke="var(--gold)" stroke-width="1.4"/>
-        <line x1="-6" y1="-4" x2="-6" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
-        <line x1="0" y1="-4" x2="0" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
-        <line x1="6" y1="-4" x2="6" y2="4" stroke="var(--gold)" stroke-width="1.4"/>
-      </g>
-      <!-- game controller, bottom-left -->
-      <g transform="translate(55,465)" opacity="0.28">
-        <rect x="-24" y="-11" width="48" height="22" rx="11" stroke="var(--red)" stroke-width="2"/>
-        <circle cx="13" cy="-3" r="2.4" fill="var(--red)" stroke="none"/>
-        <circle cx="19" cy="4" r="2.4" fill="var(--red)" stroke="none"/>
-        <line x1="-15" y1="0" x2="-9" y2="0" stroke="var(--red)" stroke-width="1.4"/>
-        <line x1="-12" y1="-3" x2="-12" y2="3" stroke="var(--red)" stroke-width="1.4"/>
-      </g>
-      <!-- small soccer ball, bottom-right -->
-      <g transform="translate(1150,475)" opacity="0.26">
-        <circle r="16" stroke="var(--gold)" stroke-width="1.6"/>
-        <path d="M0,-16 L9,-5 L5,9 L-5,9 L-9,-5 Z" stroke="var(--gold)" stroke-width="1.2"/>
-      </g>
-      <!-- small basketball, far left edge -->
-      <g transform="translate(24,255)" opacity="0.22">
-        <circle r="15" stroke="var(--red)" stroke-width="1.6"/>
-        <line x1="-15" y1="0" x2="15" y2="0" stroke="var(--red)" stroke-width="1.2"/>
-        <line x1="0" y1="-15" x2="0" y2="15" stroke="var(--red)" stroke-width="1.2"/>
-      </g>
-      <!-- whistle, top-center -->
-      <g transform="translate(600,32)" opacity="0.24">
-        <circle r="9" stroke="var(--gold)" stroke-width="1.8"/>
-        <rect x="7" y="-4" width="15" height="8" rx="3" stroke="var(--gold)" stroke-width="1.8"/>
-      </g>
-      <!-- goal post with net, upper-right of scoreboard -->
-      <g transform="translate(1000,90)" opacity="0.22">
-        <path d="M0,0 L0,46 M52,0 L52,46 M0,0 L52,0" stroke="var(--red)" stroke-width="2"/>
-        <path d="M0,0 L17,16 M0,16 L17,30 M0,30 L17,44" stroke="var(--red)" stroke-width="0.9"/>
-        <path d="M52,0 L35,16 M52,16 L35,30 M52,30 L35,44" stroke="var(--red)" stroke-width="0.9"/>
-      </g>
-      <!-- tennis net, lower-center, wide and low -->
-      <g transform="translate(430,410)" opacity="0.18">
-        <path d="M0,0 L0,22 M170,0 L170,22 M0,0 L170,0" stroke="var(--gold)" stroke-width="1.6"/>
-        <path d="M0,0 L85,22 M0,5 L100,22 M0,10 L120,22 M0,15 L145,22" stroke="var(--gold)" stroke-width="0.5"/>
-        <path d="M170,0 L85,22 M170,5 L70,22 M170,10 L50,22 M170,15 L25,22" stroke="var(--gold)" stroke-width="0.5"/>
-      </g>
-      <!-- marked field diagram, upper far-right corner -->
-      <g transform="translate(1140,190)" opacity="0.20">
-        <rect x="-30" y="-18" width="60" height="36" rx="1.5" stroke="var(--white)" stroke-width="1.2"/>
-        <line x1="0" y1="-18" x2="0" y2="18" stroke="var(--white)" stroke-width="1"/>
-        <circle r="7" stroke="var(--white)" stroke-width="1"/>
-      </g>
-      <!-- rugby posts, far left, mid-height -->
-      <g transform="translate(30,340)" opacity="0.2">
-        <path d="M0,0 L0,34 M26,0 L26,34 M0,13 L26,13" stroke="var(--white)" stroke-width="1.6"/>
-      </g>
-    </g>
-  </svg>
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="hero-title" style="padding:0;">
   <div class="wrap hero-grid">
-    <div style="padding-bottom:56px;">
-      <div class="eyebrow"><span class="dot"></span> Kenya · Football · Rugby · Basketball · E-football</div>
-      <h1 class="display">Talent isn't<br>the problem.<br><span>Visibility</span> is.</h1>
-      <p class="lead">Josriri Sports Management is the verified registry and showcase for Kenyan athletes at every level — from county leagues to the Premier League. Register free, build a scoutable record, and get discovered by clubs, sponsors, and agents.</p>
+    <div>
+      <div class="eyebrow">Kenya · Football · Rugby · Basketball · E-Football</div>
+      <h1 class="display" id="hero-title">Talent isn't the problem. <span style="display:block;">Visibility is.</span></h1>
+      <p class="typed-line" aria-hidden="true"><span class="typed-text" id="typed">Get discovered.</span><span class="caret" id="caret"></span></p>
+      <p class="lead">Your next opportunity starts with being seen. Build your athlete profile, showcase your highlights, and connect with scouts, clubs, sponsors, and agents looking for talent across Kenya and beyond.</p>
       <div class="hero-actions">
-        <a href="#register" class="btn btn-gold">Register as a player</a>
-        <a href="#sponsors" class="btn btn-outline">I'm a scout or sponsor</a>
+        <a href="#register" class="btn btn-lime">Register as a Player <svg class="icon"><use href="#i-arrow"/></svg></a>
+        <a href="#sponsors" class="btn btn-ghost-dark">I'm a Scout or Sponsor</a>
+      </div>
+      <p class="hero-note">From grassroots talent to the next generation of professional athletes.</p>
+    </div>
+    <div class="hero-media" role="img" aria-label="Footballer in action on a floodlit pitch">
+      <div class="ph" data-slot="hero" data-sport="hero" data-alt="African footballer in action on a professional pitch">
+        <svg class="pitch-lines" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><rect x="20" y="20" width="360" height="460" rx="4"/><line x1="20" y1="250" x2="380" y2="250"/><circle cx="200" cy="250" r="56"/><rect x="110" y="20" width="180" height="84"/><rect x="110" y="396" width="180" height="84"/></g></svg>
       </div>
     </div>
-    <div>
-      <div class="scoreboard">
-        <div class="scoreboard-head">
-          <span>Live registry</span>
-          <span id="scoreboard-updated">—</span>
-        </div>
-        <div class="score-grid">
-          <div class="score-cell">
-            <div class="score-num" id="stat-players">0</div>
-            <div class="score-label">Players registered</div>
-          </div>
-          <div class="score-cell">
-            <div class="score-num" id="stat-highlights">0</div>
-            <div class="score-label">Highlights logged</div>
-          </div>
-          <div class="score-cell">
-            <div class="score-num">4</div>
-            <div class="score-label">Sports covered</div>
-          </div>
-          <div class="score-cell">
-            <div class="score-num" id="stat-counties">0</div>
-            <div class="score-label">Counties reached</div>
-          </div>
+  </div>
+  <div class="trustbar" id="trustbar" hidden>
+    <div class="wrap" id="trustbar-items" aria-label="Live registry figures"></div>
+  </div>
+</section>
 
-        </div>
-      </div>
+<!-- ============ SPORTS ============ -->
+<section id="sports" class="sec-light" aria-labelledby="sports-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Four sports. One registry.</span>
+      <h2 class="display" id="sports-title">Discover talent. Create opportunity.</h2>
+      <p>Explore athletes across different sports, competition levels, and counties.</p>
+    </div>
+    <div class="sport-grid">
+      <button class="sport-card reveal" type="button" data-pick="Football">
+        <div class="ph" data-slot="football" data-sport="football" data-art="icon-goal" data-alt="Footballer striking the ball during a match"></div>
+        <div class="shade"></div><span class="count" data-count="Football" hidden></span>
+        <div class="body"><h3>Football</h3><p>From county leagues to the Premier League — strikers, keepers and everyone between.</p><span class="go">Explore Football Talent <svg class="icon"><use href="#i-arrow"/></svg></span></div>
+      </button>
+      <button class="sport-card reveal" type="button" data-pick="Rugby">
+        <div class="ph" data-slot="rugby" data-sport="rugby" data-art="icon-posts" data-alt="Rugby player carrying the ball in a match"></div>
+        <div class="shade"></div><span class="count" data-count="Rugby" hidden></span>
+        <div class="body"><h3>Rugby</h3><p>Kenya Cup, sevens and school circuits — power, pace and playmakers.</p><span class="go">Explore Rugby Talent <svg class="icon"><use href="#i-arrow"/></svg></span></div>
+      </button>
+      <button class="sport-card reveal" type="button" data-pick="Basketball">
+        <div class="ph" data-slot="basketball" data-sport="basketball" data-art="icon-hoop" data-alt="Basketball player jumping for a shot on an indoor court"></div>
+        <div class="shade"></div><span class="count" data-count="Basketball" hidden></span>
+        <div class="body"><h3>Basketball</h3><p>Guards, forwards and bigs from clubs, universities and street leagues.</p><span class="go">Explore Basketball Talent <svg class="icon"><use href="#i-arrow"/></svg></span></div>
+      </button>
+      <button class="sport-card reveal" type="button" data-pick="E-Football">
+        <div class="ph" data-slot="efootball" data-sport="efootball" data-art="icon-controller" data-alt="E-football competitor playing in a modern gaming setup"></div>
+        <div class="shade"></div><span class="count" data-count="E-Football" hidden></span>
+        <div class="body"><h3>E-Football</h3><p>Competitive gamers building a verified record for tournaments and teams.</p><span class="go">Explore E-Football Talent <svg class="icon"><use href="#i-arrow"/></svg></span></div>
+      </button>
     </div>
   </div>
 </section>
 
-<section id="how">
+<!-- ============ HOW ============ -->
+<section id="how" class="sec-white" aria-labelledby="how-title">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">The process</span>
-      <h2 class="display">Three steps from unseen to scouted</h2>
+      <h2 class="display" id="how-title">Three steps from unseen to scouted</h2>
       <p>The same path for every athlete, whether you play for a top-flight club or a county-division side.</p>
     </div>
     <div class="steps">
-      <div class="step reveal">
-        <div class="num">01</div>
-        <h3>Register your profile</h3>
-        <p>Add your bio-data, sport, club or division, and playing history. Free, permanently, for every athlete.</p>
-      </div>
-      <div class="step reveal">
-        <div class="num">02</div>
-        <h3>Get verified &amp; add highlights</h3>
-        <p>Upload or link match highlights and let your club co-sign your record. Verified profiles get priority in scout searches.</p>
-      </div>
-      <div class="step reveal">
-        <div class="num">03</div>
-        <h3>Get scouted, sponsored, signed</h3>
-        <p>Clubs and sponsors search the registry directly. Standout athletes may be offered a Managed Athlete package.</p>
-      </div>
+      <article class="step reveal"><div class="num">STEP 01</div><div class="ic"><svg><use href="#i-user"/></svg></div><h3>Build your profile</h3><p>Introduce yourself, share your sport, playing position, experience, and sporting background.</p></article>
+      <article class="step reveal"><div class="num">STEP 02</div><div class="ic"><svg><use href="#i-film"/></svg></div><h3>Show your talent</h3><p>Add match highlights, achievements, and supporting information to help scouts understand your abilities.</p></article>
+      <article class="step reveal"><div class="num">STEP 03</div><div class="ic"><svg><use href="#i-eye"/></svg></div><h3>Get discovered</h3><p>Make your profile available to authorized scouts, clubs, and sponsors according to the platform's verification and privacy rules.</p></article>
     </div>
+    <p class="fine">Registration is free. It does not guarantee a contract, sponsorship, selection, or professional placement — it makes you visible to the people who decide those things.</p>
   </div>
 </section>
 
-<section id="spotlight" style="display:none">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Featured athlete</span>
-      <h2 class="display">On the way up</h2>
-      <p>A rotating look at athletes building a scoutable record right now.</p>
-    </div>
-    <div class="spotlight-card reveal">
-      <button class="spot-nav prev" id="spot-prev" type="button" aria-label="Previous athlete">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="spot-body" id="spotlight-body"></div>
-      <button class="spot-nav next" id="spot-next" type="button" aria-label="Next athlete">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-    <div class="spot-dots" id="spotlight-dots"></div>
-  </div>
-</section>
-
-<section id="directory" class="section-alt">
+<!-- ============ DIRECTORY ============ -->
+<section id="directory" class="sec-light" aria-labelledby="dir-title">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">Player registry</span>
-      <h2 class="display">The open directory</h2>
-      <p>Every registered athlete, searchable by sport and name. This is a live prototype — profiles you add below appear here immediately.</p>
+      <h2 class="display" id="dir-title">The open directory</h2>
+      <p>Search registered athletes by name, sport, county, club, position or level. Only public profiles appear here, and never private contact details.</p>
     </div>
-    <div class="dir-controls">
-      <input type="text" id="dir-search" placeholder="Search by name, club, or county…" />
-      <button class="chip active" data-sport="All">All sports</button>
-      <button class="chip" data-sport="Football">Football</button>
-      <button class="chip" data-sport="Rugby">Rugby</button>
-      <button class="chip" data-sport="Basketball">Basketball</button>
-      <button class="chip" data-sport="E-Football">E-Football</button>
-    </div>
-    <div class="card-grid" id="directory-grid"></div>
+    <form class="filters" id="filters" role="search" aria-label="Athlete directory filters" onsubmit="return false">
+      <div class="searchbox">
+        <svg aria-hidden="true"><use href="#i-search"/></svg>
+        <label class="sr-only" for="dir-search">Search athletes by name, club or county</label>
+        <input type="search" id="dir-search" placeholder="Search by athlete name, club or county…" autocomplete="off" />
+      </div>
+      <div class="chips" id="sport-chips" role="group" aria-label="Filter by sport">
+        <button type="button" class="chip" data-sport="All" aria-pressed="true">All sports</button>
+        <button type="button" class="chip" data-sport="Football" aria-pressed="false">Football</button>
+        <button type="button" class="chip" data-sport="Rugby" aria-pressed="false">Rugby</button>
+        <button type="button" class="chip" data-sport="Basketball" aria-pressed="false">Basketball</button>
+        <button type="button" class="chip" data-sport="E-Football" aria-pressed="false">E-Football</button>
+      </div>
+      <div class="filter-row">
+        <div class="field"><label for="fl-county">County</label><input id="fl-county" type="text" placeholder="e.g. Nairobi" maxlength="40"></div>
+        <div class="field"><label for="fl-club">Club / academy</label><input id="fl-club" type="text" placeholder="e.g. Kabras" maxlength="60"></div>
+        <div class="field"><label for="fl-position">Position</label><input id="fl-position" type="text" placeholder="e.g. Winger" maxlength="40"></div>
+        <div class="field"><label for="fl-division">Division / level</label><input id="fl-division" type="text" placeholder="e.g. Division One" maxlength="50"></div>
+        <div class="field"><label for="fl-sort">Sort by</label>
+          <select id="fl-sort"><option value="new">Newest first</option><option value="name">Name A–Z</option><option value="verified">Verified first</option></select></div>
+        <button type="button" class="btn btn-outline btn-sm" id="clear-filters">Clear filters</button>
+      </div>
+    </form>
+    <div class="dir-meta"><span id="dir-count" aria-live="polite">Loading athletes…</span></div>
+    <div class="card-grid" id="directory-grid" aria-busy="true"></div>
+    <div class="more"><button type="button" class="btn btn-dark" id="load-more" hidden>Load more athletes</button></div>
   </div>
 </section>
 
-<section id="register">
-  <div class="wrap">
-    <div class="sec-head reveal">
+<!-- ============ REGISTER ============ -->
+<section id="register" class="sec-white" aria-labelledby="reg-title">
+  <div class="wrap form-shell">
+    <div class="form-aside reveal">
       <span class="sec-eyebrow">Join the registry</span>
-      <h2 class="display">Register your profile</h2>
-      <p>Takes under two minutes. Your profile is free and visible to scouts, clubs, and sponsors using this platform.</p>
+      <h2 class="display" id="reg-title">Register your profile</h2>
+      <p>It takes about two minutes and it is free. Your sporting profile can then be found by scouts, clubs and sponsors.</p>
+      <div class="privacy-box"><b>How we handle your information.</b> Your name, sport, position, club, county, level and bio can appear in the public directory. Players under 18 need a parent or guardian's consent, and only appear publicly once that consent covers publication. Read the <a href="/privacy.html">privacy policy</a> and <a href="/child-safety.html">child safeguarding policy</a>.</div>
+      <div class="privacy-box" style="border-left-color:var(--slate);">Want to edit your profile later, or manage a child's profile? <a href="/account.html">Create an account</a> first, then register from there — it links automatically.</div>
     </div>
-    <div class="form-panel">
-      <div class="helper-note">Your profile is stored in the live registry and appears in the public directory below. Contact details are collected for verified scouts and are not shown publicly. Want to edit your profile later or manage a child's profile? <a href="/account.html" style="color:var(--gold-deep); font-weight:600;">Create an account</a> first, then register from there — it links automatically.</div>
-      <form id="register-form">
-        <div class="field full" style="margin-bottom:20px;">
-          <label>Sport <span class="req">*</span></label>
-          <div class="sport-picker" id="sport-picker" role="radiogroup" aria-label="Select a sport">
-            <div class="sport-option" data-sport="Football" role="radio" aria-checked="false" tabindex="0">
-              <svg class="icon icon-lg"><use href="#icon-goal"/></svg>
-              <span>Football</span>
+    <div class="form-panel reveal">
+      <form id="register-form" novalidate>
+        <fieldset>
+          <legend>A · Sporting information</legend>
+          <div class="field full" id="g-sport" style="margin-bottom:var(--s4);">
+            <span class="lbl" id="sport-lbl">Sport <span class="req" aria-hidden="true">*</span><span class="sr-only"> required</span></span>
+            <div class="sport-picker" id="sport-picker" role="radiogroup" aria-labelledby="sport-lbl">
+              <div class="sport-option" data-sport="Football" role="radio" aria-checked="false" tabindex="0"><svg class="icon icon-lg"><use href="#icon-goal"/></svg><span>Football</span></div>
+              <div class="sport-option" data-sport="Rugby" role="radio" aria-checked="false" tabindex="0"><svg class="icon icon-lg"><use href="#icon-posts"/></svg><span>Rugby</span></div>
+              <div class="sport-option" data-sport="Basketball" role="radio" aria-checked="false" tabindex="0"><svg class="icon icon-lg"><use href="#icon-hoop"/></svg><span>Basketball</span></div>
+              <div class="sport-option" data-sport="E-Football" role="radio" aria-checked="false" tabindex="0"><svg class="icon icon-lg"><use href="#icon-controller"/></svg><span>E-Football</span></div>
             </div>
-            <div class="sport-option" data-sport="Rugby" role="radio" aria-checked="false" tabindex="0">
-              <svg class="icon icon-lg"><use href="#icon-posts"/></svg>
-              <span>Rugby</span>
+            <input type="hidden" id="f-sport" />
+            <span class="err" id="e-sport" role="alert">Please choose a sport.</span>
+          </div>
+          <div class="form-grid">
+            <div class="field" id="g-name"><label for="f-name">Full name <span class="req" aria-hidden="true">*</span></label><input type="text" id="f-name" maxlength="60" autocomplete="name" aria-required="true" aria-describedby="e-name"><span class="err" id="e-name">Enter your full name.</span></div>
+            <div class="field" id="g-dob"><label for="f-dob">Date of birth <span class="req" aria-hidden="true">*</span></label><input type="date" id="f-dob" aria-required="true" aria-describedby="e-dob"><span class="err" id="e-dob">Enter a valid date of birth.</span></div>
+            <div class="field"><label for="f-position">Position / discipline</label><input type="text" id="f-position" maxlength="40" placeholder="e.g. Winger, Prop, Point Guard"></div>
+            <div class="field"><label for="f-club">Club, school or academy</label><input type="text" id="f-club" maxlength="60"></div>
+            <div class="field"><label for="f-county">County</label><input type="text" id="f-county" maxlength="40" placeholder="e.g. Nairobi"></div>
+            <div class="field"><label for="f-division">Division / league level</label><input type="text" id="f-division" maxlength="50" placeholder="e.g. County League, Division Two, KPL"></div>
+            <div class="field full"><label for="f-bio">Short bio</label><textarea id="f-bio" maxlength="220" placeholder="A couple of lines about your playing style and goals."></textarea><span class="hint">Shown publicly. Don't include phone numbers, addresses or school names for under-18s.</span></div>
+          </div>
+        </fieldset>
+        <fieldset id="guardian-consent" hidden>
+          <legend>B · Guardian consent (required under 18)</legend>
+          <div class="consent">
+            <h3>Parent or guardian details</h3>
+            <p class="sm">Because this player is under 18, a parent or guardian must provide their details and consent before the profile is created.</p>
+            <div class="form-grid" style="margin-bottom:var(--s4);">
+              <div class="field" id="g-gname"><label for="f-guardian-name">Guardian full name <span class="req" aria-hidden="true">*</span></label><input type="text" id="f-guardian-name" maxlength="60" aria-describedby="e-gname"><span class="err" id="e-gname">Guardian name is required.</span></div>
+              <div class="field"><label for="f-guardian-rel">Relationship to player</label><input type="text" id="f-guardian-rel" maxlength="30" placeholder="e.g. Parent"></div>
+              <div class="field full"><label for="f-guardian-contact">Guardian contact</label><input type="text" id="f-guardian-contact" maxlength="60" placeholder="Email or phone"><span class="hint">Used only by Josriri to confirm consent. Never shown publicly.</span></div>
             </div>
-            <div class="sport-option" data-sport="Basketball" role="radio" aria-checked="false" tabindex="0">
-              <svg class="icon icon-lg"><use href="#icon-hoop"/></svg>
-              <span>Basketball</span>
-            </div>
-            <div class="sport-option" data-sport="E-Football" role="radio" aria-checked="false" tabindex="0">
-              <svg class="icon icon-lg"><use href="#icon-controller"/></svg>
-              <span>E-Football</span>
-            </div>
+            <div class="field" id="g-consent"><label class="check" for="f-consent"><input type="checkbox" id="f-consent" aria-describedby="e-consent"><span>I confirm I am the parent or guardian of this player (under 18) and consent to this profile being registered and, if highlights are added later, being made visible to verified scouts and sponsors.</span></label><span class="err" id="e-consent">Guardian consent is required to register a player under 18.</span></div>
           </div>
-          <select id="f-sport" style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true" tabindex="-1">
-            <option value="">Select…</option>
-            <option>Football</option>
-            <option>Rugby</option>
-            <option>Basketball</option>
-            <option>E-Football</option>
-          </select>
-        </div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Full name <span class="req">*</span></label>
-            <input type="text" id="f-name" required maxlength="60" />
-          </div>
-          <div class="field">
-            <label>Date of birth <span class="req">*</span></label>
-            <input type="date" id="f-dob" required />
-          </div>
-          <div class="field">
-            <label>Position / discipline</label>
-            <input type="text" id="f-position" maxlength="40" placeholder="e.g. Winger, Prop, Point Guard" />
-          </div>
-          <div class="field">
-            <label>Club / school / academy</label>
-            <input type="text" id="f-club" maxlength="60" />
-          </div>
-          <div class="field">
-            <label>County</label>
-            <input type="text" id="f-county" maxlength="40" placeholder="e.g. Nairobi" />
-          </div>
-          <div class="field">
-            <label>Division / league level</label>
-            <input type="text" id="f-division" maxlength="50" placeholder="e.g. County League, Division Two, KPL" />
-          </div>
-          <div class="field">
-            <label>Contact (private — for verified scouts only)</label>
-            <input type="text" id="f-contact" maxlength="60" placeholder="Email or phone" />
-          </div>
-          <div class="field full">
-            <label>Short bio</label>
-            <textarea id="f-bio" maxlength="220" placeholder="A couple of lines about your playing style and goals."></textarea>
-          </div>
-        </div>
-        <div class="consent" id="guardian-consent" style="display:none;">
-          <div class="form-grid" style="margin-bottom:12px;">
-            <div class="field">
-              <label>Guardian full name <span class="req">*</span></label>
-              <input type="text" id="f-guardian-name" maxlength="60" />
-            </div>
-            <div class="field">
-              <label>Relationship to player</label>
-              <input type="text" id="f-guardian-rel" maxlength="30" placeholder="e.g. Parent" />
-            </div>
-            <div class="field full">
-              <label>Guardian contact</label>
-              <input type="text" id="f-guardian-contact" maxlength="60" placeholder="Email or phone" />
-            </div>
-          </div>
-          <div style="display:flex; gap:10px; align-items:flex-start;">
-            <input type="checkbox" id="f-consent" style="margin-top:3px;" />
-            <label for="f-consent">I confirm I am the parent or guardian of this player (under 18) and consent to this profile being registered and, if highlights are added later, being made visible to verified scouts and sponsors.</label>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-gold">Submit registration</button>
+        </fieldset>
+        <button type="submit" class="btn btn-lime" id="reg-submit" style="width:100%;">Submit registration</button>
+        <div class="form-status" id="reg-status" role="status" aria-live="polite"></div>
       </form>
     </div>
   </div>
 </section>
 
-<section id="showcase" class="section-alt">
+<!-- ============ SHOWCASE ============ -->
+<section id="showcase" class="sec-light" aria-labelledby="show-title">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="sec-eyebrow">Video showcase</span>
-      <h2 class="display">Highlight-worthy moments</h2>
-      <p>Link a highlight clip to a registered profile. In the full platform, video is uploaded directly and moderated before publishing — this prototype accepts a link and description.</p>
+      <h2 class="display" id="show-title">Let your performance speak.</h2>
+      <p>Highlight clips linked to registered athletes. Every clip is reviewed by the Josriri team before it appears here. Clips are shared as links to the original video, such as YouTube or Vimeo.</p>
     </div>
-    <div class="showcase-layout">
-      <div>
-        <div class="form-panel" style="padding:24px;">
-          <form id="highlight-form">
-            <div class="field">
-              <label>Player <span class="req">*</span></label>
-              <select id="h-player" required>
-                <option value="">Select a registered player…</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Highlight title <span class="req">*</span></label>
-              <input type="text" id="h-title" maxlength="60" required placeholder="e.g. Match-winning try vs Kabras" />
-            </div>
-            <div class="field">
-              <label>Video link</label>
-              <input type="text" id="h-link" maxlength="200" placeholder="YouTube / Vimeo / club upload link" />
-            </div>
-            <div class="field">
-              <label>Description</label>
-              <textarea id="h-desc" maxlength="160" placeholder="What happens in the clip and when it was recorded."></textarea>
-            </div>
-            <button type="submit" class="btn btn-dark">Add to showcase</button>
-          </form>
-        </div>
-      </div>
-      <div>
-        <div class="highlight-list" id="highlight-list"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="managed" style="display:none">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Premium representation</span>
-      <h2 class="display">Managed athletes</h2>
-      <p>A small, selectively signed roster receiving full-service representation — contract negotiation, transfer facilitation, sponsorship brokerage, and career management.</p>
-    </div>
-    <div class="managed-grid reveal" id="managed-grid"></div>
-  </div>
-</section>
-
-<section id="founder">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Why Josriri exists</span>
-      <h2 class="display">Talent doesn't fail. Visibility does.</h2>
-    </div>
-    <div class="founder-panel reveal">
-      <div>
-        <div class="founder-portrait">
-          <svg viewBox="0 0 80 80" aria-hidden="true">
-            <circle cx="40" cy="40" r="40" fill="var(--pitch-deep)"/>
-            <circle cx="40" cy="30" r="12" fill="var(--gold)" opacity="0.85"/>
-            <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="var(--gold)" opacity="0.85"/>
-          </svg>
-        </div>
-        <div class="founder-name">Ray Phillips Mutwiri</div>
-        <div class="founder-role">Founder &amp; CEO, Josriri Sports Management</div>
-      </div>
-      <div class="founder-copy">
-        <p>I played football because I loved it. What I didn't expect was how far ability alone would fail to take me — not because it wasn't good enough, but because there was no structure connecting a county-league talent to the scout, sponsor, or club that could do something about it.</p>
-        <p>That gap isn't a personal misfortune. It's a national one. Thousands of young footballers, rugby players, and athletes across Kenya train hard every week with real ability and no path to the people who could change their trajectory. Their opportunity never meets the right eyes — and Kenya, and Africa more broadly, loses talent to that gap every single year.</p>
-        <p>The timing makes this urgent. In 2027, Kenya co-hosts the Africa Cup of Nations with Uganda and Tanzania — the first three-nation AFCON in history, and the first time the tournament returns to East Africa since 1976. In 2029, Nairobi will host the World Athletics Championships, the first time that event has ever been held on African soil, on the back of a team that finished 2nd in the world at the 2025 Championships in Tokyo with seven gold medals. Home advantage on this scale comes once in a generation — but a tournament on your soil only becomes opportunity for your athletes if there's a system built to see them, verify them, and put them in front of the people who can sign, sponsor, or select them.</p>
-        <p>That system doesn't exist at scale in Kenya today. That's not a marketing problem — it's the reason this platform has to exist. Josriri is a verified, searchable registry built for the athletes nobody is watching yet: county-league players, rising rugby sevens talent, e-football competitors, and track athletes training without a scout in sight. With Kenya about to host the continent's biggest football tournament and the world's biggest athletics championship back to back, software like this isn't a convenience. It's necessary infrastructure.</p>
-        <div class="founder-stats">
-          <div><div class="n">2027</div><div class="l">AFCON co-hosted by Kenya, Uganda &amp; Tanzania</div></div>
-          <div><div class="n">2029</div><div class="l">World Athletics Championships in Nairobi — first ever on African soil</div></div>
-          <div><div class="n">7 gold</div><div class="l">Kenya's medal haul at the 2025 World Championships in Tokyo</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="sponsors" class="section-alt">
-  <div class="wrap">
-    <div class="sponsor-panel reveal">
-      <div>
-        <span class="sec-eyebrow" style="color:var(--gold);">For clubs, sponsors &amp; agents</span>
-        <h2 class="display">Scout the verified pool</h2>
-        <p>Search a growing, verified database of Kenyan athletes across every division — with video evidence attached, not just word of mouth.</p>
-        <ul class="sponsor-list">
-          <li>Filter by sport, position, county, and division</li>
-          <li>Video-backed profiles reduce scouting risk</li>
-          <li>Direct introductions routed through Josriri Sports Management</li>
-          <li>Data partnerships available for clubs &amp; federations</li>
-        </ul>
-      </div>
-      <div class="lead-form">
-        <form id="lead-form">
-          <div class="field" style="margin-bottom:12px;">
-            <label>Organisation name</label>
-            <input type="text" id="l-org" maxlength="60" />
-          </div>
-          <div class="field" style="margin-bottom:12px;">
-            <label>I am a…</label>
-            <select id="l-type">
-              <option value="club">Club</option>
-              <option value="sponsor">Sponsor / brand</option>
-              <option value="agent">Agent</option>
-              <option value="federation">Federation</option>
-              <option value="media">Media</option>
-            </select>
-          </div>
-          <div class="field" style="margin-bottom:16px;">
-            <label>Contact email</label>
-            <input type="text" id="l-email" maxlength="60" />
-          </div>
-          <button type="submit" class="btn btn-gold" style="width:100%;">Request access</button>
+    <div class="hl-grid" id="highlight-list" aria-busy="true"></div>
+    <div class="hl-form-wrap reveal">
+      <div><h3>Add a highlight</h3><p>Already registered? Link a clip of your best moments. It will be reviewed before it is published,.</p></div>
+      <div class="form-panel" style="padding:var(--s5);">
+        <form id="highlight-form" novalidate>
+          <div class="field" style="margin-bottom:var(--s4);" id="g-hplayer"><label for="h-player">Athlete <span class="req" aria-hidden="true">*</span></label><select id="h-player" aria-describedby="e-hplayer"><option value="">Select a registered athlete…</option></select><span class="err" id="e-hplayer">Choose an athlete.</span></div>
+          <div class="field" style="margin-bottom:var(--s4);" id="g-htitle"><label for="h-title">Highlight title <span class="req" aria-hidden="true">*</span></label><input type="text" id="h-title" maxlength="60" placeholder="e.g. Match-winning try vs Kabras" aria-describedby="e-htitle"><span class="err" id="e-htitle">Give the clip a title.</span></div>
+          <div class="field" style="margin-bottom:var(--s4);" id="g-hlink"><label for="h-link">Video link</label><input type="url" id="h-link" maxlength="200" placeholder="https://youtube.com/watch?v=…" aria-describedby="e-hlink"><span class="err" id="e-hlink">Enter a link starting with https://</span></div>
+          <div class="field" style="margin-bottom:var(--s4);"><label for="h-desc">Description</label><textarea id="h-desc" maxlength="160" placeholder="What happens in the clip and when it was recorded."></textarea></div>
+          <button type="submit" class="btn btn-dark" id="hl-submit">Submit for review</button>
+          <div class="form-status" id="hl-status" role="status" aria-live="polite"></div>
         </form>
       </div>
     </div>
   </div>
 </section>
 
-<section id="contact">
+<!-- ============ MANAGED ============ -->
+<section id="managed" class="sec-dark" aria-labelledby="mgd-title">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Get in touch</span>
-      <h2 class="display">Talk to us directly</h2>
-      <p>Questions about registering, verification, or a partnership — reach us however's easiest for you.</p>
+    <div class="managed-grid2">
+      <div class="reveal">
+        <span class="sec-eyebrow">Athlete representation</span>
+        <h2 class="display" id="mgd-title">Your talent. Your ambition. A stronger team behind you.</h2>
+        <p>A small, selectively signed roster receives full-service representation from Josriri Sports Management.</p>
+        <ul class="svc">
+          <li>Career planning</li><li>Representation</li><li>Contract negotiation</li><li>Transfer facilitation</li><li>Sponsorship brokerage</li><li>Athlete profile development</li>
+        </ul>
+        <a class="btn btn-lime" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20enquire%20about%20athlete%20management." target="_blank" rel="noopener noreferrer">Enquire About Management <svg class="icon"><use href="#i-arrow"/></svg></a>
+        <p class="disclaim">Representation is offered selectively. Josriri does not guarantee contracts, transfers, sponsors or income.</p>
+      </div>
+      <div class="managed-media reveal" role="img" aria-label="Athlete and manager reviewing a career plan">
+        <div class="ph" data-slot="management" data-sport="people" data-art="icon-field" data-alt="Sports manager and athlete discussing a contract"></div>
+      </div>
     </div>
-    <div class="contact-grid reveal">
-      <a class="contact-tile" href="tel:+254771648205">
-        <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </div>
-        <h3>Call us</h3>
-        <p>+254 771 648 205</p>
-      </a>
-      <a class="contact-tile" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer">
-        <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </div>
-        <h3>WhatsApp</h3>
-        <p>Chat with us instantly</p>
-      </a>
-      <a class="contact-tile" href="mailto:skywalkerstalents@gmail.com">
-        <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <h3>Email</h3>
-        <p>skywalkerstalents@gmail.com</p>
-      </a>
+    <div class="roster" id="roster" hidden><h3>Currently represented</h3><div class="card-grid" id="managed-grid"></div></div>
+  </div>
+</section>
+
+<!-- ============ FOUNDER ============ -->
+<section id="founder" class="sec-light" aria-labelledby="founder-title">
+  <div class="wrap founder-grid">
+    <div class="reveal">
+      <div class="founder-portrait"><div class="ph" data-slot="founder" data-sport="people" data-alt="Ray Phillips Mutwiri, Founder and CEO of Josriri Sports Management"></div><div class="mono" id="founder-mono" aria-hidden="true">RM</div></div>
+      <div class="founder-id"><b>Ray Phillips Mutwiri</b><span>Founder &amp; CEO, Josriri Sports Management</span></div>
+    </div>
+    <div class="founder-copy reveal">
+      <span class="sec-eyebrow">Why Josriri exists</span>
+      <h2 class="display" id="founder-title">Talent exists everywhere. Opportunity doesn't always reach it.</h2>
+      <p>I played football because I loved it. What I didn't expect was how far ability alone would fail to take me — not because it wasn't good enough, but because there was no structure connecting a county-league talent to the scout, sponsor, or club that could do something about it.</p>
+      <p class="pull">That gap isn't a personal misfortune. It's a national one.</p>
+      <p>Thousands of young footballers, rugby players, and athletes across Kenya train hard every week with real ability and no path to the people who could change their trajectory. Their opportunity never meets the right eyes — and Kenya, and Africa more broadly, loses talent to that gap every single year.</p>
+      <p>The timing makes this urgent. In 2027, Kenya co-hosts the Africa Cup of Nations with Uganda and Tanzania — the first three-nation AFCON in history, and the first time the tournament returns to East Africa since 1976. In 2029, Nairobi will host the World Athletics Championships, the first time that event has ever been held on African soil, on the back of a team that finished 2nd in the world at the 2025 Championships in Tokyo with seven gold medals. Home advantage on this scale comes once in a generation — but a tournament on your soil only becomes opportunity for your athletes if there's a system built to see them, verify them, and put them in front of the people who can sign, sponsor, or select them.</p>
+      <p>That system doesn't exist at scale in Kenya today. Josriri is a searchable registry built for the athletes nobody is watching yet: county-league players, rising rugby sevens talent, e-football competitors, and track athletes training without a scout in sight. With Kenya about to host the continent's biggest football tournament and the world's biggest athletics championship back to back, software like this isn't a convenience. It's necessary infrastructure.</p>
+      <div class="facts">
+        <div><div class="n">2027</div><div class="l">AFCON co-hosted by Kenya, Uganda &amp; Tanzania</div></div>
+        <div><div class="n">2029</div><div class="l">World Athletics Championships in Nairobi — first ever on African soil</div></div>
+        <div><div class="n">7 gold</div><div class="l">Kenya's medal haul at the 2025 World Championships in Tokyo</div></div>
+      </div>
+      <div class="founder-cta"><a href="#register" class="btn btn-dark">Register as an athlete</a><a href="#sponsors" class="btn btn-outline">Partner with us</a></div>
     </div>
   </div>
 </section>
 
-<a class="whatsapp-float" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp" title="Chat on WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.39-.24.65-.14.27.1 1.69.8 1.98.94.29.15.48.22.55.34.07.13.07.72-.17 1.4z"/></svg>
+<!-- ============ SCOUTS ============ -->
+<section id="sponsors" class="sec-navy" aria-labelledby="scout-title">
+  <div class="wrap scout-grid">
+    <div class="reveal">
+      <span class="sec-eyebrow">For clubs, scouts, sponsors &amp; agents</span>
+      <h2 class="display" id="scout-title">Find the talent others haven't seen yet.</h2>
+      <p>Explore athlete profiles, review available match highlights, and connect with promising talent through Josriri Sports Management.</p>
+      <ul class="ben">
+        <li>Searchable athlete profiles</li>
+        <li>Sport and location filters</li>
+        <li>Available video evidence</li>
+        <li>Appropriate profile verification</li>
+        <li>Contact pathways managed according to privacy permissions</li>
+      </ul>
+    </div>
+    <div class="lead-form reveal">
+      <h3>Request Scout Access</h3>
+      <p>Tell us who you are. The Josriri team reviews each request and replies by email — access is not automatic.</p>
+      <form id="lead-form" novalidate>
+        <div class="field" id="g-lorg"><label for="l-org">Organisation name <span class="req" aria-hidden="true">*</span></label><input type="text" id="l-org" maxlength="60" autocomplete="organization" aria-describedby="e-lorg"><span class="err" id="e-lorg">Enter your organisation's name.</span></div>
+        <div class="field"><label for="l-type">I am a…</label><select id="l-type"><option value="club">Club</option><option value="sponsor">Sponsor / brand</option><option value="agent">Agent</option><option value="federation">Federation</option><option value="media">Media</option></select></div>
+        <div class="field" id="g-lemail"><label for="l-email">Contact email <span class="req" aria-hidden="true">*</span></label><input type="email" id="l-email" maxlength="60" autocomplete="email" aria-describedby="e-lemail"><span class="err" id="e-lemail">Enter a valid email address.</span></div>
+        <div class="field"><label for="l-msg">What are you looking for? <span style="font-weight:500; color:var(--ink-muted);">(optional)</span></label><textarea id="l-msg" maxlength="300" style="min-height:80px;" placeholder="e.g. U20 strikers in Western Kenya"></textarea></div>
+        <button type="submit" class="btn btn-lime" id="lead-submit" style="width:100%;">Request Scout Access</button>
+        <div class="form-status" id="lead-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST ============ -->
+<section id="trust" class="sec-white" aria-labelledby="trust-title">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-eyebrow">Trust &amp; safeguarding</span>
+      <h2 class="display" id="trust-title">Built carefully, because young athletes use it.</h2>
+      <p>Here is how the platform actually works today — no badges, no inflated claims.</p>
+    </div>
+    <div class="trust-grid">
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-shield"/></svg></div><h3>Verification you can see</h3><p>Every profile starts as <b>unverified</b>, user-submitted information. A profile shows "Club verified" or "Federation verified" only after the Josriri team has confirmed it.</p></article>
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-users"/></svg></div><h3>Guardian consent for under-18s</h3><p>A parent or guardian must provide details and explicit consent before a minor is registered. Minors appear publicly only while publication consent is in place.</p></article>
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-lock"/></svg></div><h3>Contact details stay private</h3><p>The public directory never shows phone numbers, emails or guardian details. Introductions are routed through Josriri.</p></article>
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-eye"/></svg></div><h3>Scout access is reviewed</h3><p>Organisations request access and are reviewed by our team. Access is not granted automatically.</p></article>
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-film"/></svg></div><h3>Clips are reviewed first</h3><p>Highlight links are held for review and only published after approval. We link to videos hosted elsewhere; we don't host uploads yet.</p></article>
+      <article class="trust-card reveal"><div class="ic"><svg><use href="#i-check"/></svg></div><h3>Honest about what we are</h3><p>Josriri is an early-stage platform. Data protection registration and alignment with sports regulators are in progress.</p></article>
+    </div>
+    <div class="policy-links"><a class="btn btn-outline btn-sm" href="/privacy.html">Privacy policy</a><a class="btn btn-outline btn-sm" href="/child-safety.html">Child safeguarding policy</a><a class="btn btn-outline btn-sm" href="/terms.html">Terms of use</a></div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact" class="sec-dark" aria-labelledby="contact-title">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="sec-eyebrow">Get in touch</span><h2 class="display" id="contact-title">Let's create more opportunities for talent.</h2><p>Questions about registering, verification, or a partnership — reach us whichever way is easiest.</p></div>
+    <div class="contact-grid reveal">
+      <a class="contact-tile" href="tel:+254771648205"><div class="ic"><svg><use href="#i-phone"/></svg></div><div><b>Call us</b><span>+254 771 648 205</span></div></a>
+      <a class="contact-tile" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer"><div class="ic"><svg><use href="#i-chat"/></svg></div><div><b>WhatsApp</b><span>Chat with us instantly</span></div></a>
+      <a class="contact-tile" href="mailto:skywalkerstalents@gmail.com"><div class="ic"><svg><use href="#i-mail"/></svg></div><div><b>Email</b><span>skywalkerstalents@gmail.com</span></div></a>
+    </div>
+  </div>
+</section>
+</main>
+
+<a class="whatsapp-float" href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.39-.24.65-.14.27.1 1.69.8 1.98.94.29.15.48.22.55.34.07.13.07.72-.17 1.4z"/></svg>
 </a>
+<button class="to-top" id="to-top" type="button" aria-label="Back to top"><svg><use href="#i-up"/></svg></button>
 
 <footer>
   <div class="wrap">
-    <div class="footer-grid">
+    <div class="foot-grid">
       <div>
-        <h4 style="color:var(--gold);">Josriri Sports Management</h4>
-        <p class="footer-note">Kenya's unified sports talent, data, and representation platform — from grassroots county leagues to the Premier League, and every division in between.</p>
-        <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:16px;">
-          <li><a href="tel:+254771648205">📞 +254 771 648 205</a></li>
-          <li><a href="mailto:skywalkerstalents@gmail.com">✉️ skywalkerstalents@gmail.com</a></li>
-          <li><a href="https://wa.me/254771648205?text=Hi%20Josriri%20Sports%20Management%2C%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener noreferrer">💬 Chat on WhatsApp</a></li>
-        </ul>
+        <a class="brand" href="#top"><img src="/assets/jsm-emblem-icon.svg" alt="" width="34" height="34"><div><span>Josriri</span><small>Sports Management</small></div></a>
+        <p class="note">Helping Kenyan athletes become visible, discoverable and professionally represented — whatever their county, club or level.</p>
       </div>
-      <div>
-        <h4>Platform</h4>
-        <ul>
-          <li><a href="#directory">Player directory</a></li>
-          <li><a href="#register">Register</a></li>
-          <li><a href="#showcase">Video showcase</a></li>
-          <li><a href="#managed">Managed athletes</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>For organisations</h4>
-        <ul>
-          <li><a href="#sponsors">Sponsors &amp; scouts</a></li>
-          <li><a href="#sponsors">Club partnerships</a></li>
-          <li><a href="#sponsors">Federation data</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Compliance</h4>
-        <ul>
-          <li><a href="/privacy.html">Privacy &amp; data policy</a></li>
-          <li><a href="/child-safety.html">Child safeguarding policy</a></li>
-          <li><a href="/terms.html">Terms of use</a></li>
-        </ul>
-      </div>
+      <div><h4>Platform</h4><ul><li><a href="#register">Athlete registration</a></li><li><a href="#directory">Athlete directory</a></li><li><a href="#showcase">Video showcase</a></li><li><a href="#managed">Managed athletes</a></li></ul></div>
+      <div><h4>Organisations</h4><ul><li><a href="#sponsors">Scout &amp; sponsor access</a></li><li><a href="#contact">Partnerships</a></li><li><a href="/account.html">My account</a></li></ul></div>
+      <div><h4>Contact &amp; policies</h4><ul><li><a href="tel:+254771648205">+254 771 648 205</a></li><li><a href="mailto:skywalkerstalents@gmail.com">skywalkerstalents@gmail.com</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/child-safety.html">Child safeguarding</a></li><li><a href="/terms.html">Terms of use</a></li></ul></div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2026 Josriri Sports Management Ltd. Nairobi, Kenya.</span>
-      <span>Prototype build — data protection registration and Sports Registrar alignment in progress.</span>
-    </div>
+    <div class="foot-bottom"><span>© 2026 Josriri Sports Management. Nairobi, Kenya.</span><span>Early-stage platform.</span></div>
   </div>
 </footer>
 
-<div class="toast" id="toast"></div>
-
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg-head"><h2 id="dlg-title">Details</h2><button class="dlg-x" type="button" id="dlg-close" aria-label="Close">✕</button></div>
+  <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (function(){
-  const SPORT_ICON_ID = { "Football":"icon-goal", "Rugby":"icon-posts", "Basketball":"icon-hoop", "E-Football":"icon-controller" };
-  function sportIcon(sport){
-    const id = SPORT_ICON_ID[sport];
-    return id ? `<svg class="icon"><use href="#${id}"/></svg>` : '';
-  }
+  'use strict';
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SPORT_ICON = { 'Football':'icon-goal', 'Rugby':'icon-posts', 'Basketball':'icon-hoop', 'E-Football':'icon-controller' };
+  const SPORT_KEY = { 'Football':'football', 'Rugby':'rugby', 'Basketball':'basketball', 'E-Football':'efootball' };
 
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=> t.classList.remove('show'), 3200);
-  }
-
-  function calcAge(dobStr){
-    if(!dobStr) return null;
-    const dob = new Date(dobStr);
-    const diff = Date.now() - dob.getTime();
-    return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
-  }
-
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function initials(name){ return (name || '?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase(); }
+  function calcAge(dobStr){ if(!dobStr) return null; return Math.floor((Date.now() - new Date(dobStr).getTime()) / (365.25*24*3600*1000)); }
+  function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3600); }
   async function api(path, options){
-    const res = await fetch('/api' + path, Object.assign({
-      headers: { 'Content-Type': 'application/json' },
-    }, options));
-    let body = null;
-    try{ body = await res.json(); }catch(e){ /* no body */ }
-    if(!res.ok){
-      const msg = (body && body.error) ? body.error : `Request failed (${res.status})`;
-      throw new Error(msg);
-    }
+    const res = await fetch('/api' + path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, options));
+    let body = null; try{ body = await res.json(); }catch(e){}
+    if(!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
     return body;
   }
+  function status(el, kind, msg){ el.className = 'form-status show ' + kind; el.textContent = msg; }
+  function setInvalid(group, bad){ const g = typeof group === 'string' ? $('#'+group) : group; if(g) g.classList.toggle('invalid', !!bad); const i = g && $('input,select,textarea', g); if(i) i.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad; }
 
-  // ---------- HTML escaping (all user-submitted text goes through this) ----------
-  function esc(v){
-    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  /* ---------- Photo slots: real photos load only if listed in /assets/img/manifest.json ---------- */
+  let IMAGES = {};
+  function artSvg(id){ return id ? `<div class="ph-art" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#${id}"/></svg></div>` : ''; }
+  function fillSlots(root){
+    $$('[data-slot]', root).forEach(el => {
+      if(el.dataset.filled) return; el.dataset.filled = '1';
+      el.insertAdjacentHTML('afterbegin', artSvg(el.dataset.art));
+      const m = IMAGES[el.dataset.slot];
+      if(!m) return;
+      const img = new Image();
+      img.alt = m.alt || el.dataset.alt || ''; img.decoding = 'async';
+      if(!el.closest('.hero')) img.loading = 'lazy';
+      if(m.srcset) img.srcset = m.srcset, img.sizes = m.sizes || '100vw';
+      img.src = m.src;
+      img.onerror = () => img.remove();            // fall back to the designed panel, never a broken icon
+      img.onload = () => { if(el.dataset.slot === 'founder'){ const mono = $('#founder-mono'); if(mono) mono.hidden = true; } };
+      el.appendChild(img);
+    });
   }
-  const ATHLETE_SILHOUETTE = `
-    <svg viewBox="0 0 80 80" class="silhouette" aria-hidden="true">
-      <circle cx="40" cy="40" r="40" fill="var(--pitch-deep)"/>
-      <circle cx="40" cy="30" r="12" fill="var(--gold)" opacity="0.85"/>
-      <path d="M14,74 C14,54 24,46 40,46 C56,46 66,54 66,74 Z" fill="var(--gold)" opacity="0.85"/>
-    </svg>`;
-  function verText(p){
-    return p.verification_status === 'federation_verified' ? 'Federation verified'
-      : p.verification_status === 'club_verified' ? 'Club verified' : 'Verification pending';
+  async function loadImages(){
+    try{ const r = await fetch('/assets/img/manifest.json', { cache:'no-cache' }); if(r.ok) IMAGES = await r.json(); }catch(e){}
+    fillSlots(document);
   }
 
-  // ---------- Managed athletes (live from managed_athletes; hidden when empty) ----------
-  async function renderManaged(){
-    const sec = document.getElementById('managed');
-    const grid = document.getElementById('managed-grid');
-    let players = [];
-    try{ players = (await api('/stats/managed')).players || []; }catch(e){}
-    document.querySelectorAll('a[href="#managed"]').forEach(a => { const li = a.closest('li'); (li || a).style.display = players.length ? '' : 'none'; });
-    if(!players.length){ sec.style.display = 'none'; return; }
-    sec.style.display = '';
-    grid.innerHTML = players.map(m => `
-      <div class="managed-card">
-        <div class="managed-ribbon">Signed</div>
-        <div class="managed-body">
-          <div style="display:flex; gap:14px; align-items:center; margin-bottom:6px;">
-            ${ATHLETE_SILHOUETTE}
-            <div>
-              <div class="cap-sport">${sportIcon(m.sport)} ${esc(m.sport)} · ${esc(m.county || 'Kenya')}</div>
-              <h3 style="margin:2px 0 0;">${esc(m.full_name)}</h3>
+  /* ---------- Hero typing headline (one phrase at a time, fixed colours, reduced-motion safe) ---------- */
+  (function typing(){
+    const phrases = ['Be seen by scouts.', 'Unlock your next opportunity.', 'Take your talent further.', 'Get discovered.', 'Build your sporting future.'];
+    const el = $('#typed'), caret = $('#caret'), line = el.parentElement;
+    // reserve space for the longest phrase so nothing shifts
+    const longest = phrases.reduce((a, b) => a.length >= b.length ? a : b);
+    if(reduceMotion){ caret.style.display = 'none'; el.textContent = phrases[3]; return; }
+    el.textContent = longest; line.style.minHeight = line.offsetHeight + 'px'; line.style.minWidth = el.offsetWidth + 'px'; el.textContent = '';
+    let i = 0, n = 0, del = false;
+    (function tick(){
+      const p = phrases[i];
+      el.textContent = p.slice(0, n);
+      let wait = del ? 28 : 62;
+      if(!del && n === p.length){ del = true; wait = 1700; }
+      else if(del && n === 0){ del = false; i = (i + 1) % phrases.length; wait = 380; }
+      else n += del ? -1 : 1;
+      setTimeout(tick, wait);
+    })();
+    // keep the full phrase available to assistive tech without announcing every keystroke
+    line.setAttribute('aria-hidden', 'true');
+  })();
+
+  /* ---------- Navigation ---------- */
+  const menuBtn = $('#menu-btn'), links = $('#nav-links');
+  function setMenu(open){
+    links.classList.toggle('open', open);
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menuBtn.innerHTML = `<svg><use href="#${open ? 'i-x' : 'i-menu'}"/></svg>`;
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  menuBtn.addEventListener('click', () => setMenu(!links.classList.contains('open')));
+  $$('a', links).forEach(a => a.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && links.classList.contains('open')){ setMenu(false); menuBtn.focus(); } });
+  window.addEventListener('resize', () => { if(window.innerWidth > 1080) setMenu(false); });
+
+  const spy = $$('main section[id]').filter(s => $(`.links a[href="#${s.id}"]`));
+  const progress = $('#scroll-progress'), toTop = $('#to-top');
+  function onScroll(){
+    const d = document.documentElement, st = d.scrollTop || document.body.scrollTop;
+    progress.style.width = Math.min(100, st / ((d.scrollHeight - d.clientHeight) || 1) * 100) + '%';
+    toTop.classList.toggle('show', st > 600);
+    let cur = null; spy.forEach(s => { if(s.offsetTop <= st + 140) cur = s.id; });
+    $$('.links a[href^="#"]').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+  }
+  document.addEventListener('scroll', onScroll, { passive:true }); onScroll();
+  toTop.addEventListener('click', () => window.scrollTo({ top:0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } }), { threshold:.1, rootMargin:'0px 0px -40px 0px' });
+    $$('.reveal').forEach(el => io.observe(el));
+  } else $$('.reveal').forEach(el => el.classList.add('in-view'));
+
+  /* ---------- Live stats (only real numbers; hidden while empty) ---------- */
+  async function loadStats(){
+    try{
+      const s = await api('/stats/summary');
+      const items = [];
+      if(s.players > 0) items.push([s.players, 'Athletes registered']);
+      if(s.highlights > 0) items.push([s.highlights, 'Highlights published']);
+      if(s.counties > 0) items.push([s.counties, s.counties === 1 ? 'County represented' : 'Counties represented']);
+      if(items.length){
+        items.push([s.sports, 'Sports covered']);
+        $('#trustbar-items').innerHTML = items.map(([n, l]) => `<div class="trust-item"><b>${n}</b><span>${l}</span></div>`).join('');
+        $('#trustbar').hidden = false;
+      }
+    }catch(e){ /* omit stats rather than show placeholders */ }
+  }
+  async function loadSportCounts(){
+    await Promise.all(Object.keys(SPORT_KEY).map(async sp => {
+      try{
+        const r = await api('/players?limit=1&sport=' + encodeURIComponent(sp));
+        const b = $(`[data-count="${sp}"]`);
+        if(r.total > 0){ b.textContent = r.total + (r.total === 1 ? ' athlete' : ' athletes'); b.hidden = false; }
+      }catch(e){}
+    }));
+  }
+
+  /* ---------- Athlete cards ---------- */
+  function photoBlock(p){
+    const key = SPORT_KEY[p.sport] || 'people';
+    return `<div class="ph photo" data-sport="${key}" data-art="${SPORT_ICON[p.sport] || ''}"><div class="mono" aria-hidden="true">${esc(initials(p.full_name))}</div></div>`;
+  }
+  function verBadge(p){
+    if(p.verification_status === 'federation_verified') return '<span class="badge ok">✓ Federation verified</span>';
+    if(p.verification_status === 'club_verified') return '<span class="badge ok">✓ Club verified</span>';
+    return '<span class="badge pend">Unverified</span>';
+  }
+  function athleteCard(p, hlSet){
+    return `<article class="ath">
+      ${photoBlock(p).replace('</div></div>', `</div><div class="tagrow">${verBadge(p)}${hlSet && hlSet.has(p.id) ? '<span class="badge">▶ Highlight</span>' : ''}</div></div>`)}
+      <div class="body">
+        <h3>${esc(p.full_name)}</h3>
+        <div class="sub">${esc(p.sport)}${p.primary_position ? ' · ' + esc(p.primary_position) : ''}</div>
+        <dl>
+          <dt>Club</dt><dd>${esc(p.club) || '—'}</dd>
+          <dt>County</dt><dd>${esc(p.county) || '—'}</dd>
+          <dt>Level</dt><dd>${esc(p.division) || '—'}</dd>
+        </dl>
+        <div class="actions"><button type="button" class="btn btn-dark btn-sm" data-profile="${esc(p.id)}">View Profile</button></div>
+      </div></article>`;
+  }
+
+  /* ---------- Directory ---------- */
+  const PAGE = 12;
+  const state = { sport:'All', offset:0, total:0, players:[], hl:new Set() };
+  let reqId = 0, debounce = null;
+  function params(offset){
+    const p = new URLSearchParams();
+    if(state.sport !== 'All') p.set('sport', state.sport);
+    const q = $('#dir-search').value.trim(); if(q) p.set('q', q);
+    [['county','fl-county'],['club','fl-club'],['position','fl-position'],['division','fl-division']].forEach(([k,id]) => { const v = $('#'+id).value.trim(); if(v) p.set(k, v); });
+    const s = $('#fl-sort').value; if(s !== 'new') p.set('sort', s);
+    p.set('limit', PAGE); p.set('offset', offset);
+    return p;
+  }
+  function filtersActive(){
+    return state.sport !== 'All' || ['dir-search','fl-county','fl-club','fl-position','fl-division'].some(id => $('#'+id).value.trim());
+  }
+  async function loadDirectory(append){
+    const my = ++reqId, grid = $('#directory-grid');
+    grid.setAttribute('aria-busy', 'true');
+    if(!append){ state.offset = 0; grid.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; }
+    try{
+      const r = await api('/players?' + params(append ? state.offset : 0).toString());
+      if(my !== reqId) return;
+      state.total = r.total;
+      state.players = append ? state.players.concat(r.players) : r.players;
+      state.offset = state.players.length;
+      render();
+    }catch(err){
+      if(my !== reqId) return;
+      grid.innerHTML = `<div class="empty"><b>We couldn't load the directory.</b>${esc(err.message)}<br><button class="btn btn-dark btn-sm" type="button" id="retry-dir">Try again</button></div>`;
+      $('#retry-dir').addEventListener('click', () => loadDirectory(false));
+      $('#dir-count').textContent = '';
+    }finally{ grid.setAttribute('aria-busy', 'false'); }
+  }
+  function render(){
+    const grid = $('#directory-grid');
+    if(!state.players.length){
+      grid.innerHTML = filtersActive()
+        ? `<div class="empty"><b>No athletes match those filters.</b>Try fewer filters or a different spelling.<br><button class="btn btn-dark btn-sm" type="button" id="empty-clear">Clear filters</button></div>`
+        : `<div class="empty"><b>No athletes have registered yet.</b>Be the first. It takes about two minutes and it's free.<br><a class="btn btn-lime" href="#register">Register as a Player</a></div>`;
+      const c = $('#empty-clear'); if(c) c.addEventListener('click', clearFilters);
+      $('#dir-count').textContent = filtersActive() ? '0 athletes found' : '';
+    } else {
+      grid.innerHTML = state.players.map(p => athleteCard(p, state.hl)).join('');
+      fillSlots(grid);
+      $('#dir-count').textContent = `Showing ${state.players.length} of ${state.total} ${state.total === 1 ? 'athlete' : 'athletes'}`;
+    }
+    $('#load-more').hidden = state.players.length >= state.total;
+  }
+  function clearFilters(){
+    ['dir-search','fl-county','fl-club','fl-position','fl-division'].forEach(id => $('#'+id).value = '');
+    $('#fl-sort').value = 'new'; setSport('All', true);
+  }
+  function setSport(sp, reload){
+    state.sport = sp;
+    $$('#sport-chips .chip').forEach(c => c.setAttribute('aria-pressed', c.dataset.sport === sp ? 'true' : 'false'));
+    if(reload) loadDirectory(false);
+  }
+  $$('#sport-chips .chip').forEach(c => c.addEventListener('click', () => setSport(c.dataset.sport, true)));
+  ['dir-search','fl-county','fl-club','fl-position','fl-division'].forEach(id => $('#'+id).addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(() => loadDirectory(false), 320); }));
+  $('#fl-sort').addEventListener('change', () => loadDirectory(false));
+  $('#clear-filters').addEventListener('click', clearFilters);
+  $('#load-more').addEventListener('click', () => loadDirectory(true));
+  $$('.sport-card').forEach(c => c.addEventListener('click', () => { setSport(c.dataset.pick, true); $('#directory').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' }); }));
+
+  /* ---------- Profile + video dialogs ---------- */
+  const dlg = $('#dlg'); let lastFocus = null;
+  function openDialog(title, html){
+    lastFocus = document.activeElement;
+    $('#dlg-title').textContent = title; $('#dlg-body').innerHTML = html;
+    if(typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  }
+  function closeDialog(){ if(dlg.open) dlg.close(); }
+  dlg.addEventListener('close', () => { $('#dlg-body').innerHTML = ''; if(location.hash.startsWith('#p=')) history.replaceState(null, '', location.pathname); if(lastFocus && lastFocus.focus) lastFocus.focus(); });
+  $('#dlg-close').addEventListener('click', closeDialog);
+  dlg.addEventListener('click', e => { if(e.target === dlg) closeDialog(); });
+
+  async function openProfile(id){
+    openDialog('Athlete profile', '<div class="skeleton" style="min-height:200px"></div>');
+    try{
+      const [pr, hr] = await Promise.all([api('/players/' + encodeURIComponent(id)), api('/highlights?playerId=' + encodeURIComponent(id))]);
+      const p = pr.player, hl = hr.highlights || [];
+      const key = SPORT_KEY[p.sport] || 'people';
+      $('#dlg-title').textContent = p.full_name;
+      $('#dlg-body').innerHTML = `
+        <div class="profile-top">
+          <div class="ph" data-sport="${key}" data-art="${SPORT_ICON[p.sport] || ''}"><div class="mono" aria-hidden="true">${esc(initials(p.full_name))}</div></div>
+          <div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">${verBadge(p).replace('badge pend','badge pend')}</div>
+            <dl>
+              <dt>Sport</dt><dd>${esc(p.sport)}</dd>
+              <dt>Position</dt><dd>${esc(p.primary_position) || '—'}</dd>
+              <dt>Club</dt><dd>${esc(p.club) || '—'}</dd>
+              <dt>County</dt><dd>${esc(p.county) || '—'}</dd>
+              <dt>Level</dt><dd>${esc(p.division) || '—'}</dd>
+            </dl>
+            ${p.bio ? `<p style="color:var(--ink-muted);">${esc(p.bio)}</p>` : ''}
+            <p style="font-size:13px; color:var(--ink-muted); margin-top:10px;">${p.verification_status === 'unverified' ? 'This information was submitted by the athlete and has not been verified yet.' : 'Verified by the Josriri team.'}</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+              <a class="btn btn-dark btn-sm" href="#sponsors" id="dlg-scout">Request Scout Access</a>
+              <button class="btn btn-outline btn-sm" type="button" id="dlg-share">Copy profile link</button>
             </div>
           </div>
-          <div class="role">${esc(m.primary_position || '')}${m.club ? ' · ' + esc(m.club) : ''}</div>
-          ${m.bio ? `<p>${esc(m.bio)}</p>` : ''}
         </div>
-      </div>
-    `).join('');
-  }
-
-  // ---------- Featured athlete spotlight (verified public players; hidden when none) ----------
-  let spotlightIndex = 0;
-  let SPOT = [];
-  function renderSpotlight(){
-    const body = document.getElementById('spotlight-body');
-    const dotsWrap = document.getElementById('spotlight-dots');
-    if(!body || !dotsWrap || !SPOT.length) return;
-    const m = SPOT[spotlightIndex];
-    body.innerHTML = `
-      <div class="spot-silhouette">${ATHLETE_SILHOUETTE.replace('class="silhouette"', '')}</div>
-      <div class="spot-info">
-        <div class="cap-sport">${sportIcon(m.sport)} ${esc(m.sport)} · ${esc(m.county || 'Kenya')}</div>
-        <h3>${esc(m.full_name)}</h3>
-        <div class="role">${esc(m.primary_position || '')}${m.club ? ' · ' + esc(m.club) : ''}</div>
-        ${m.bio ? `<p>${esc(m.bio)}</p>` : ''}
-        <div class="spot-stats"><div><div class="l">${verText(m)}</div></div></div>
-      </div>
-    `;
-    dotsWrap.innerHTML = SPOT.map((_, i) =>
-      `<button class="spot-dot${i === spotlightIndex ? ' active' : ''}" data-idx="${i}" aria-label="Show athlete ${i + 1}"></button>`
-    ).join('');
-  }
-  function spotlightGo(delta){
-    if(!SPOT.length) return;
-    spotlightIndex = (spotlightIndex + delta + SPOT.length) % SPOT.length;
-    renderSpotlight();
-  }
-  async function loadSpotlight(){
-    const sec = document.getElementById('spotlight');
-    try{ SPOT = (await api('/stats/featured')).players || []; }catch(e){ SPOT = []; }
-    sec.style.display = SPOT.length ? '' : 'none';
-    spotlightIndex = 0;
-    renderSpotlight();
-  }
-
-  // ---------- Directory ----------
-  let allPlayers = [];
-  let activeSport = 'All';
-  let searchTerm = '';
-  let searchDebounce = null;
-
-  function capCard(p){
-    const initials = (p.full_name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const verLabel = p.verification_status === 'federation_verified' ? 'Federation verified'
-      : p.verification_status === 'club_verified' ? 'Club verified' : 'Verified: pending';
-    return `
-      <div class="cap-card">
-        <div class="cap-top">
-          <div class="cap-tab">${verLabel}</div>
-          <div class="cap-num">${esc(initials)}</div>
-          <div class="cap-sport">${sportIcon(p.sport)} ${esc(p.sport)}</div>
-          <div class="cap-name">${esc(p.full_name)}</div>
-        </div>
-        <div class="cap-body">
-          <div class="cap-row"><span>Position</span><b>${esc(p.primary_position) || '—'}</b></div>
-          <div class="cap-row"><span>Club</span><b>${esc(p.club) || '—'}</b></div>
-          <div class="cap-row"><span>County</span><b>${esc(p.county) || '—'}</b></div>
-          <div class="cap-row"><span>Division</span><b>${esc(p.division) || '—'}</b></div>
-          ${p.bio ? `<div class="cap-bio">${esc(p.bio)}</div>` : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderDirectory(){
-    const grid = document.getElementById('directory-grid');
-    if(allPlayers.length === 0){
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-        <b>No players match yet.</b>
-        Be the first to register for this sport — or adjust your search above.
-      </div>`;
-      return;
-    }
-    grid.innerHTML = allPlayers.map(capCard).join('');
-  }
-
-  async function refreshPlayers(){
-    try{
-      const params = new URLSearchParams();
-      if(activeSport !== 'All') params.set('sport', activeSport);
-      if(searchTerm.trim()) params.set('q', searchTerm.trim());
-      const data = await api('/players?' + params.toString());
-      allPlayers = data.players || [];
-      renderDirectory();
-      populateHighlightPlayerSelect();
-    }catch(err){
-      document.getElementById('directory-grid').innerHTML =
-        `<div class="empty-state" style="grid-column:1/-1;"><b>Couldn't load the directory.</b> ${err.message}</div>`;
-    }
-  }
-
-  function animateCount(el, target){
-    const duration = 700;
-    const start = performance.now();
-    const from = parseInt(el.textContent, 10) || 0;
-    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      el.textContent = target;
-      return;
-    }
-    function tick(now){
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(from + (target - from) * eased);
-      if(progress < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  async function refreshScoreboard(){
-    try{
-      const data = await api('/stats/summary');
-      animateCount(document.getElementById('stat-players'), data.players);
-      animateCount(document.getElementById('stat-highlights'), data.highlights);
-      animateCount(document.getElementById('stat-counties'), data.counties);
-      document.getElementById('scoreboard-updated').textContent = 'Updated just now';
-    }catch(err){
-      document.getElementById('scoreboard-updated').textContent = 'Unavailable';
-    }
-  }
-
-  function populateHighlightPlayerSelect(){
-    const sel = document.getElementById('h-player');
-    const current = sel.value;
-    sel.innerHTML = '<option value="">Select a registered player…</option>' +
-      allPlayers.map(p => `<option value="${p.id}">${esc(p.full_name)} — ${esc(p.sport)}</option>`).join('');
-    if(current) sel.value = current;
-  }
-
-  // ---------- Highlights ----------
-  async function refreshHighlights(){
-    const list = document.getElementById('highlight-list');
-    try{
-      const data = await api('/highlights');
-      const items = data.highlights || [];
-      if(items.length === 0){
-        list.innerHTML = `<div class="empty-state">
-          <b>No highlights logged yet.</b>
-          Register a player, then add their first highlight-worthy moment.
-        </div>`;
-        return;
-      }
-      list.innerHTML = items.map(h => `
-        <div class="highlight-item">
-          <div class="highlight-thumb">▶</div>
-          <div class="highlight-meta">
-            <div class="title">${esc(h.title)}</div>
-            <div class="sub">${esc(h.player_name || 'Unknown player')} ${h.description ? '· ' + esc(h.description) : ''}
-              ${h.moderation_status === 'pending' ? ' · <span style="color:var(--gold-deep);">pending review</span>' : ''}</div>
-            ${/^https?:\/\//i.test(h.video_url || '') ? `<a href="${esc(h.video_url)}" target="_blank" rel="noopener noreferrer">View clip →</a>` : '<span style="font-size:12px;color:var(--ink-soft);">No link provided</span>'}
-          </div>
-        </div>
-      `).join('');
-    }catch(err){
-      list.innerHTML = `<div class="empty-state"><b>Couldn't load highlights.</b> ${esc(err.message)}</div>`;
-    }
-  }
-
-  // ---------- Event wiring ----------
-  document.getElementById('spot-prev').addEventListener('click', () => spotlightGo(-1));
-  document.getElementById('spot-next').addEventListener('click', () => spotlightGo(1));
-  document.getElementById('spotlight-dots').addEventListener('click', (e) => {
-    const dot = e.target.closest('.spot-dot');
-    if(!dot) return;
-    spotlightIndex = parseInt(dot.dataset.idx, 10);
-    renderSpotlight();
-  });
-
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeSport = chip.dataset.sport;
-      refreshPlayers();
-    });
-  });
-
-  document.getElementById('dir-search').addEventListener('input', (e) => {
-    searchTerm = e.target.value;
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(refreshPlayers, 300);
-  });
-
-  document.getElementById('f-dob').addEventListener('change', (e) => {
-    const box = document.getElementById('guardian-consent');
-    const age = calcAge(e.target.value);
-    box.style.display = (age !== null && age < 18) ? 'block' : 'none';
-  });
-
-  // ---------- Sport picker (icon-based, syncs with hidden <select>) ----------
-  const sportPicker = document.getElementById('sport-picker');
-  const sportSelect = document.getElementById('f-sport');
-  function selectSport(sport){
-    sportSelect.value = sport;
-    sportPicker.querySelectorAll('.sport-option').forEach(opt => {
-      const isSelected = opt.dataset.sport === sport;
-      opt.classList.toggle('selected', isSelected);
-      opt.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-    });
-  }
-  sportPicker.querySelectorAll('.sport-option').forEach(opt => {
-    opt.addEventListener('click', () => selectSport(opt.dataset.sport));
-    opt.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter' || e.key === ' '){
-        e.preventDefault();
-        selectSport(opt.dataset.sport);
-      }
-    });
-  });
-
-  document.getElementById('register-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const dob = document.getElementById('f-dob').value;
-    const age = calcAge(dob);
-    const isMinor = age !== null && age < 18;
-
-    if(!document.getElementById('f-sport').value){
-      showToast('Select a sport to continue.');
-      return;
-    }
-    if(isMinor && !document.getElementById('f-guardian-name').value.trim()){
-      showToast('Guardian full name is required to register a player under 18.');
-      return;
-    }
-    if(isMinor && !document.getElementById('f-consent').checked){
-      showToast('Guardian consent is required to register a player under 18.');
-      return;
-    }
-
-    const submitBtn = e.target.querySelector('button[type=submit]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
-
-    const payload = {
-      fullName: document.getElementById('f-name').value.trim(),
-      dateOfBirth: dob,
-      sport: document.getElementById('f-sport').value,
-      position: document.getElementById('f-position').value.trim(),
-      club: document.getElementById('f-club').value.trim(),
-      county: document.getElementById('f-county').value.trim(),
-      division: document.getElementById('f-division').value.trim(),
-      bio: document.getElementById('f-bio').value.trim(),
-    };
-    if(isMinor){
-      payload.guardianName = document.getElementById('f-guardian-name').value.trim();
-      payload.guardianRelationship = document.getElementById('f-guardian-rel').value.trim();
-      payload.guardianContact = document.getElementById('f-guardian-contact').value.trim();
-      payload.guardianConsent = true;
-    }
-
-    try{
-      const data = await api('/players', { method: 'POST', body: JSON.stringify(payload) });
-      e.target.reset();
-      sportPicker.querySelectorAll('.sport-option').forEach(opt => {
-        opt.classList.remove('selected');
-        opt.setAttribute('aria-checked', 'false');
+        <h3 style="font:800 18px var(--font-display); margin:24px 0 10px;">Highlights</h3>
+        ${hl.length ? `<div class="hl-grid">${hl.map(h => hlCard(h, true)).join('')}</div>` : '<p style="color:var(--ink-muted);">No approved highlights yet.</p>'}`;
+      fillSlots($('#dlg-body'));
+      history.replaceState(null, '', '#p=' + id);
+      $('#dlg-scout').addEventListener('click', closeDialog);
+      $('#dlg-share').addEventListener('click', async () => {
+        const url = location.origin + location.pathname + '#p=' + id;
+        try{ await navigator.clipboard.writeText(url); toast('Profile link copied.'); }catch(e){ toast(url); }
       });
-      document.getElementById('guardian-consent').style.display = 'none';
-      showToast(`Registered — welcome to the directory, ${data.player.full_name.split(' ')[0]}.`);
-      await refreshPlayers();
-      await refreshScoreboard();
-      document.getElementById('directory').scrollIntoView({behavior:'smooth'});
+      wireHighlights($('#dlg-body'));
     }catch(err){
-      showToast(err.message || 'Something went wrong saving your profile.');
-    }finally{
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit registration';
+      $('#dlg-body').innerHTML = `<div class="empty" style="border:0;"><b>Profile unavailable.</b>${esc(err.message)}</div>`;
     }
-  });
+  }
+  document.addEventListener('click', e => { const b = e.target.closest('[data-profile]'); if(b) openProfile(b.dataset.profile); });
 
-  document.getElementById('highlight-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const playerId = document.getElementById('h-player').value;
-    if(!playerId){ showToast('Select a registered player first.'); return; }
-
-    const submitBtn = e.target.querySelector('button[type=submit]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Adding…';
-
-    const payload = {
-      playerId,
-      title: document.getElementById('h-title').value.trim(),
-      videoUrl: document.getElementById('h-link').value.trim(),
-      description: document.getElementById('h-desc').value.trim(),
-    };
+  /* ---------- Highlights ---------- */
+  function embedFor(url){
     try{
-      await api('/highlights', { method: 'POST', body: JSON.stringify(payload) });
-      e.target.reset();
-      showToast('Highlight added — pending review before it appears publicly.');
-      await refreshHighlights();
-      await refreshScoreboard();
-    }catch(err){
-      showToast(err.message || 'Could not save that highlight.');
-    }finally{
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Add to showcase';
-    }
-  });
-
-  document.getElementById('lead-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const payload = {
-      organizationName: document.getElementById('l-org').value.trim(),
-      type: document.getElementById('l-type').value,
-      email: document.getElementById('l-email').value.trim(),
-    };
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      let id = null;
+      if(host === 'youtu.be') id = u.pathname.slice(1);
+      else if(host.endsWith('youtube.com')){ id = u.searchParams.get('v') || (u.pathname.match(/\/(embed|shorts)\/([\w-]{6,})/) || [])[2]; }
+      if(id && /^[\w-]{6,20}$/.test(id)) return { kind:'yt', id, embed:`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`, thumb:`https://i.ytimg.com/vi/${id}/hqdefault.jpg` };
+      if(host === 'vimeo.com'){ const m = u.pathname.match(/^\/(\d{5,12})/); if(m) return { kind:'vimeo', id:m[1], embed:`https://player.vimeo.com/video/${m[1]}?autoplay=1` }; }
+    }catch(e){}
+    return null;
+  }
+  const safeHttp = u => /^https?:\/\//i.test(u || '');
+  function hlCard(h){
+    const em = embedFor(h.video_url);
+    const key = SPORT_KEY[h.sport] || 'people';
+    const thumbImg = em && em.thumb ? `<img src="${esc(em.thumb)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    const canOpen = safeHttp(h.video_url);
+    return `<article class="hl">
+      <button type="button" class="thumb ph" data-sport="${key}" data-art="${SPORT_ICON[h.sport] || 'icon-field'}" ${canOpen ? `data-play="${esc(h.video_url)}" data-title="${esc(h.title)}"` : 'disabled'} aria-label="Play highlight: ${esc(h.title)}">
+        ${thumbImg}<span class="play"><span><svg><use href="#i-play"/></svg></span></span>
+      </button>
+      <div class="body">
+        <h3>${esc(h.title)}</h3>
+        <div class="meta">${esc(h.player_name)}${h.sport ? ' · ' + esc(h.sport) : ''}</div>
+        ${h.description ? `<p>${esc(h.description)}</p>` : ''}
+        <div class="row"><button type="button" data-profile="${esc(h.player_id)}">View athlete profile</button></div>
+      </div></article>`;
+  }
+  function wireHighlights(root){
+    $$('.thumb', root).forEach(b => { b.addEventListener('click', () => playClip(b.dataset.play, b.dataset.title)); });
+    $$('.ph', root).forEach(el => { if(!el.dataset.filled && el.dataset.art !== undefined){ el.dataset.filled = '1'; el.insertAdjacentHTML('afterbegin', artSvg(el.dataset.art)); } });
+  }
+  function playClip(url, title){
+    if(!url) return;
+    const em = embedFor(url);
+    if(!em){ window.open(url, '_blank', 'noopener,noreferrer'); return; }
+    const prev = lastFocus; 
+    openDialog(title || 'Highlight', `<iframe class="video-frame" src="${esc(em.embed)}" title="${esc(title || 'Highlight video')}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe><p style="margin-top:12px; font-size:14px;"><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open on the original site</a></p>`);
+    lastFocus = prev;
+  }
+  async function loadHighlights(){
+    const list = $('#highlight-list');
+    list.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
     try{
-      await api('/leads', { method: 'POST', body: JSON.stringify(payload) });
-      e.target.reset();
-      showToast('Request received — the Josriri team will follow up.');
+      const { highlights } = await api('/highlights');
+      state.hl = new Set((highlights || []).map(h => h.player_id));
+      if(state.players.length) render();
+      if(!highlights.length){
+        list.innerHTML = `<div class="empty"><b>No highlights published yet.</b>Approved highlight clips will appear here. Register, then add your first one below.<br><a class="btn btn-dark btn-sm" href="#register">Register as a Player</a></div>`;
+      } else {
+        list.innerHTML = highlights.map(h => hlCard(h)).join('');
+        fillSlots(list); wireHighlights(list);
+      }
     }catch(err){
-      showToast(err.message || 'Could not submit your request.');
-    }
-  });
-
-  document.getElementById('scoreboard-updated').textContent = 'Loading…';
-
-  // ---------- Theme toggle ----------
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  themeToggleBtn.addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    try{ localStorage.setItem('josriri_theme', next); }catch(e){}
-  });
-
-  // ---------- Mobile menu ----------
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const navLinks = document.getElementById('nav-links');
-  mobileMenuBtn.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    mobileMenuBtn.textContent = isOpen ? '✕' : '☰';
-    mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  });
-  navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('open');
-      mobileMenuBtn.textContent = '☰';
-      mobileMenuBtn.setAttribute('aria-expanded', 'false');
-    });
-  });
-
-  // ---------- Scroll-reveal ----------
-  const revealTargets = document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window && revealTargets.length){
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if(entry.isIntersecting){
-          entry.target.classList.add('in-view');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    revealTargets.forEach(el => io.observe(el));
-  }else{
-    revealTargets.forEach(el => el.classList.add('in-view'));
+      list.innerHTML = `<div class="empty"><b>We couldn't load highlights.</b>${esc(err.message)}</div>`;
+    }finally{ list.setAttribute('aria-busy', 'false'); }
+  }
+  async function loadPlayerSelect(){
+    try{
+      const r = await api('/players?limit=50&sort=name');
+      const sel = $('#h-player');
+      sel.innerHTML = '<option value="">Select a registered athlete…</option>' + r.players.map(p => `<option value="${esc(p.id)}">${esc(p.full_name)} — ${esc(p.sport)}</option>`).join('');
+    }catch(e){}
   }
 
-  // ---------- Scroll progress + scrollspy + back-to-top ----------
-  const progressBar = document.getElementById('scroll-progress');
-  const toTopBtn = document.getElementById('to-top-btn');
-  const spySections = Array.from(document.querySelectorAll('main section[id], section[id]'))
-    .filter(el => document.querySelector(`nav.links a[href="#${el.id}"]`));
-  const spyLinks = document.querySelectorAll('nav.links a[href^="#"]');
-
-  function onScroll(){
-    const doc = document.documentElement;
-    const scrollTop = doc.scrollTop || document.body.scrollTop;
-    const scrollHeight = (doc.scrollHeight - doc.clientHeight) || 1;
-    const pct = Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100));
-    progressBar.style.width = pct + '%';
-
-    toTopBtn.classList.toggle('show', scrollTop > 480);
-
-    let current = null;
-    const probe = scrollTop + 140;
-    spySections.forEach(sec => {
-      if(sec.offsetTop <= probe) current = sec.id;
-    });
-    spyLinks.forEach(link => {
-      link.classList.toggle('active', current && link.getAttribute('href') === `#${current}`);
-    });
+  /* ---------- Managed athletes (real contracts only) ---------- */
+  async function loadRoster(){
+    try{
+      const r = await api('/stats/managed');
+      if(!r.players.length) return;
+      $('#managed-grid').innerHTML = r.players.map(p => athleteCard(Object.assign({ verification_status:'unverified' }, p))).join('');
+      fillSlots($('#managed-grid'));
+      $('#roster').hidden = false;
+    }catch(e){}
   }
-  document.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  onScroll();
 
-  toTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  /* ---------- Registration form ---------- */
+  const picker = $('#sport-picker');
+  function pickSport(sp){
+    $('#f-sport').value = sp;
+    $$('.sport-option', picker).forEach(o => { const on = o.dataset.sport === sp; o.setAttribute('aria-checked', on ? 'true' : 'false'); o.tabIndex = on || (!sp && o === picker.firstElementChild) ? 0 : -1; });
+    setInvalid('g-sport', false);
+  }
+  $$('.sport-option', picker).forEach((o, idx, all) => {
+    o.addEventListener('click', () => pickSport(o.dataset.sport));
+    o.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pickSport(o.dataset.sport); }
+      if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); const n = all[(idx+1) % all.length]; n.focus(); pickSport(n.dataset.sport); }
+      if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); const n = all[(idx-1+all.length) % all.length]; n.focus(); pickSport(n.dataset.sport); }
+    });
+  });
+  const guardianBox = $('#guardian-consent');
+  $('#f-dob').addEventListener('change', e => {
+    const a = calcAge(e.target.value);
+    guardianBox.hidden = !(a !== null && a < 18);
+    setInvalid('g-dob', a === null || a < 5 || a > 70);
+  });
+  let regBusy = false;
+  $('#register-form').addEventListener('submit', async e => {
+    e.preventDefault(); if(regBusy) return;
+    const dob = $('#f-dob').value, age = calcAge(dob), minor = age !== null && age < 18;
+    const bad = [
+      setInvalid('g-sport', !$('#f-sport').value),
+      setInvalid('g-name', !$('#f-name').value.trim()),
+      setInvalid('g-dob', !dob || age === null || age < 5 || age > 70),
+      minor && setInvalid('g-gname', !$('#f-guardian-name').value.trim()),
+      minor && setInvalid('g-consent', !$('#f-consent').checked),
+    ];
+    const firstBad = $$('.invalid')[0];
+    if(bad.some(Boolean) && firstBad){ firstBad.scrollIntoView({ block:'center', behavior: reduceMotion ? 'auto' : 'smooth' }); const f = $('input,select,textarea,[role=radio]', firstBad); if(f) f.focus({ preventScroll:true }); status($('#reg-status'), 'bad', 'Please fix the highlighted fields.'); return; }
+    regBusy = true; const btn = $('#reg-submit'); btn.disabled = true; btn.textContent = 'Submitting…';
+    const payload = { fullName:$('#f-name').value.trim(), dateOfBirth:dob, sport:$('#f-sport').value, position:$('#f-position').value.trim(), club:$('#f-club').value.trim(), county:$('#f-county').value.trim(), division:$('#f-division').value.trim(), bio:$('#f-bio').value.trim() };
+    if(minor){ Object.assign(payload, { guardianName:$('#f-guardian-name').value.trim(), guardianRelationship:$('#f-guardian-rel').value.trim(), guardianContact:$('#f-guardian-contact').value.trim(), guardianConsent:true }); }
+    try{
+      const data = await api('/players', { method:'POST', body:JSON.stringify(payload) });
+      e.target.reset(); pickSport(''); guardianBox.hidden = true;
+      status($('#reg-status'), 'ok', `Registered — welcome, ${data.player.full_name.split(' ')[0]}. ${minor ? 'Because this is a minor profile, it appears publicly only once guardian publication consent is in place.' : 'Your profile can now appear in the directory.'}`);
+      loadDirectory(false); loadStats(); loadSportCounts(); loadPlayerSelect();
+    }catch(err){ status($('#reg-status'), 'bad', err.message || 'Something went wrong saving your profile. Please try again.'); }
+    finally{ regBusy = false; btn.disabled = false; btn.textContent = 'Submit registration'; }
+  });
+  $$('#register-form input, #register-form textarea').forEach(i => i.addEventListener('input', () => { const g = i.closest('.field'); if(g && g.classList.contains('invalid') && (i.type === 'checkbox' ? i.checked : i.value.trim())) setInvalid(g, false); }));
+
+  /* ---------- Highlight form ---------- */
+  let hlBusy = false;
+  $('#highlight-form').addEventListener('submit', async e => {
+    e.preventDefault(); if(hlBusy) return;
+    const link = $('#h-link').value.trim();
+    const bad = [ setInvalid('g-hplayer', !$('#h-player').value), setInvalid('g-htitle', !$('#h-title').value.trim()), setInvalid('g-hlink', !!link && !safeHttp(link)) ];
+    if(bad.some(Boolean)){ status($('#hl-status'), 'bad', 'Please fix the highlighted fields.'); return; }
+    hlBusy = true; const btn = $('#hl-submit'); btn.disabled = true; btn.textContent = 'Submitting…';
+    try{
+      await api('/highlights', { method:'POST', body:JSON.stringify({ playerId:$('#h-player').value, title:$('#h-title').value.trim(), videoUrl:link, description:$('#h-desc').value.trim() }) });
+      e.target.reset(); status($('#hl-status'), 'ok', 'Thanks — your highlight was submitted and will appear after review.');
+    }catch(err){ status($('#hl-status'), 'bad', err.message || 'Could not save that highlight.'); }
+    finally{ hlBusy = false; btn.disabled = false; btn.textContent = 'Submit for review'; }
   });
 
-  // ---------- Card tilt (subtle mouse-follow, pointer devices only) ----------
-  if(window.matchMedia('(hover:hover)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    document.addEventListener('mousemove', (e) => {
-      const card = e.target.closest('.cap-card, .managed-card');
-      if(!card) return;
-      const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `perspective(700px) rotateX(${(py * -6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-2px)`;
-    });
-    document.addEventListener('mouseout', (e) => {
-      const card = e.target.closest('.cap-card, .managed-card');
-      if(card && !card.contains(e.relatedTarget)) card.style.transform = '';
-    });
-  }
+  /* ---------- Scout access form ---------- */
+  let leadBusy = false;
+  $('#lead-form').addEventListener('submit', async e => {
+    e.preventDefault(); if(leadBusy) return;
+    const email = $('#l-email').value.trim();
+    const bad = [ setInvalid('g-lorg', !$('#l-org').value.trim()), setInvalid('g-lemail', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ];
+    if(bad.some(Boolean)){ status($('#lead-status'), 'bad', 'Please fix the highlighted fields.'); return; }
+    leadBusy = true; const btn = $('#lead-submit'); btn.disabled = true; btn.textContent = 'Sending…';
+    try{
+      await api('/leads', { method:'POST', body:JSON.stringify({ organizationName:$('#l-org').value.trim(), type:$('#l-type').value, email, message:$('#l-msg').value.trim() }) });
+      e.target.reset(); status($('#lead-status'), 'ok', 'Request received. The Josriri team will review it and reply by email.');
+    }catch(err){ status($('#lead-status'), 'bad', err.message || 'Could not submit your request. Please try again.'); }
+    finally{ leadBusy = false; btn.disabled = false; btn.textContent = 'Request Scout Access'; }
+  });
 
-  // ---------- Init ----------
-  renderManaged();
-  loadSpotlight();
-  refreshPlayers();
-  refreshHighlights();
-  refreshScoreboard();
+  /* ---------- Init ---------- */
+  pickSport('');
+  loadImages();
+  loadStats(); loadSportCounts(); loadDirectory(false); loadHighlights(); loadPlayerSelect(); loadRoster();
+  if(location.hash.startsWith('#p=')) openProfile(decodeURIComponent(location.hash.slice(3)));
+  window.addEventListener('hashchange', () => { if(location.hash.startsWith('#p=')) openProfile(decodeURIComponent(location.hash.slice(3))); });
 })();
 </script>
-
 </body>
 </html>

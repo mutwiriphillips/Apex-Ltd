@@ -6,17 +6,28 @@ const router = express.Router();
 
 // GET /api/highlights — latest highlights, joined with player name for display.
 // Only approved highlights are shown publicly; new submissions start pending
-// and would be reviewed via an admin moderation tool in a later milestone.
+// and are reviewed in the admin panel (/admin.html).
 router.get('/', async (req, res, next) => {
   try {
+    const params = [];
+    let extra = '';
+    if (req.query.playerId) {
+      params.push(req.query.playerId);
+      extra = `AND p.id::text = $${params.length}`;
+    }
+    // Public read: approved highlights only, and only for players that are
+    // visible in the public directory view (so minors without guardian
+    // publication consent never surface here).
     const result = await pool.query(
-      `SELECT h.id, h.title, h.description, h.video_url, h.moderation_status,
-              h.created_at, p.id AS player_id, p.full_name AS player_name
+      `SELECT h.id, h.title, h.description, h.video_url, h.created_at,
+              p.id AS player_id, p.full_name AS player_name, d.sport
        FROM highlights h
        JOIN players p ON p.id = h.player_id
-       WHERE h.moderation_status IN ('approved','pending')
+       JOIN v_public_player_directory d ON d.id = p.id
+       WHERE h.moderation_status = 'approved' ${extra}
        ORDER BY h.created_at DESC
-       LIMIT 100`
+       LIMIT 60`,
+      params
     );
     res.json({ highlights: result.rows });
   } catch (err) {

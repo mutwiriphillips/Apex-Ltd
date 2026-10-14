@@ -15,35 +15,48 @@ const VALID_SPORTS = ['Football', 'Rugby', 'Basketball', 'E-Football'];
 // view, never the players table directly (see Database Design Document, 4.5).
 router.get('/', async (req, res, next) => {
   try {
-    const { sport, q, county } = req.query;
+    const { sport, q, county, club, position, division, sort } = req.query;
     const clauses = [];
     const params = [];
+    const like = (col, val) => {
+      params.push(`%${String(val).trim().slice(0, 80)}%`);
+      clauses.push(`${col} ILIKE $${params.length}`);
+    };
 
     if (sport && VALID_SPORTS.includes(sport)) {
       params.push(sport);
       clauses.push(`sport = $${params.length}`);
     }
-    if (county) {
-      params.push(`%${county}%`);
-      clauses.push(`county ILIKE $${params.length}`);
-    }
+    if (county) like('county', county);
+    if (club) like('club', club);
+    if (position) like('primary_position', position);
+    if (division) like('division', division);
     if (q) {
-      params.push(`%${q}%`);
+      params.push(`%${String(q).trim().slice(0, 80)}%`);
       const idx = params.length;
       clauses.push(`(full_name ILIKE $${idx} OR club ILIKE $${idx} OR county ILIKE $${idx})`);
     }
 
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 50);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+    const orderBy = sort === 'name' ? 'full_name ASC'
+      : sort === 'verified' ? "(verification_status <> 'unverified') DESC, created_at DESC"
+      : 'created_at DESC';
+
     const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-    const result = await pool.query(
-      `SELECT id, full_name, sport, primary_position, county, club, division,
-              verification_status, bio, created_at
-       FROM v_public_player_directory
-       ${where}
-       ORDER BY created_at DESC
-       LIMIT 200`,
-      params
-    );
-    res.json({ players: result.rows });
+    const [result, total] = await Promise.all([
+      pool.query(
+        `SELECT id, full_name, sport, primary_position, county, club, division,
+                verification_status, bio, created_at
+         FROM v_public_player_directory
+         ${where}
+         ORDER BY ${orderBy}
+         LIMIT ${limit} OFFSET ${offset}`,
+        params
+      ),
+      pool.query(`SELECT COUNT(*)::int AS n FROM v_public_player_directory ${where}`, params),
+    ]);
+    res.json({ players: result.rows, total: total.rows[0].n, limit, offset });
   } catch (err) {
     next(err);
   }

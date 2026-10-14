@@ -580,3 +580,28 @@ players (`GET /api/stats/featured`) and the "Managed athletes" section shows
 real contracts (`GET /api/stats/managed`); each hides itself when empty. The
 only seed rows left are reference data (sports, counties). All user-submitted
 text is HTML-escaped on render.
+
+
+## Homepage redesign (Oct 2026)
+
+`public/index.html` was rebuilt: dark charcoal/navy hero, nav and footer with
+off-white content sections, electric-lime accents (tokens at the top of the
+stylesheet), Manrope + Exo 2, a typing headline that is readable with JS off
+or reduced motion, sport cards that jump into the directory, a filterable and
+paginated directory (name, sport, county, club, position, level, sort), athlete
+profile dialogs with shareable `#p=<id>` links, a highlight showcase with safe
+YouTube/Vimeo embeds, grouped registration with inline validation, a trust
+section, and a scout-access form.
+
+- **Photography:** drop real photos into `public/assets/img/` and list them in
+  `manifest.json` (see the README there). Until then, designed sport panels
+  are shown, with no silhouettes and no broken images.
+- **Backend changes:** `GET /api/players` now supports `club`, `position`,
+  `division`, `sort`, `limit`, `offset` and returns `total`;
+  `GET /api/highlights` returns only *approved* highlights for players visible
+  in the public directory view, and accepts `?playerId=`.
+- **Removed:** the registration "contact" field. The API never stored it, so
+  it collected data it didn't keep. Re-add it once a private contact column
+  and access rules exist.
+- **Still needed (backend):** athlete photo upload/storage, direct video
+  upload, and a stored private-contact pathway for scouts.
