@@ -48,7 +48,7 @@ async function findOwnedPlayer(playerId, user) {
 router.get('/me', async (req, res, next) => {
   try {
     const userRes = await pool.query(
-      'SELECT id, email, role, created_at, last_login_at FROM users WHERE id = $1',
+      'SELECT id, email, role, is_email_verified, created_at, last_login_at FROM users WHERE id = $1',
       [req.user.sub]
     );
     if (userRes.rows.length === 0) {

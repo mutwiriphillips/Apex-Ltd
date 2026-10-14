@@ -189,6 +189,7 @@
   .svc li{display:flex; gap:10px; align-items:flex-start; font-weight:600; font-size:15.5px;}
   .chk{width:20px; height:20px; border-radius:50%; flex-shrink:0; margin-top:2px; background:var(--violet) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23101B2D' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat;}
   .disclaim{font-size:13.5px; color:var(--on-dark-soft); margin-top:var(--s4); max-width:60ch;}
+  .placement{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:var(--r-lg,14px); padding:var(--s5);} .placement .pl-type{font:700 11px var(--font-sans,inherit); letter-spacing:.12em; text-transform:uppercase; color:var(--lilac,#C9B8FF);} .placement .pl-name{font:400 22px var(--font-serif); margin:6px 0 4px;} .placement .pl-meta{color:var(--on-dark-soft); font-size:15px;}
   .roster{margin-top:var(--s7);} .roster h3{font:400 28px var(--font-serif); margin-bottom:var(--s4);}
   @media (max-width:900px){ .managed-grid2{grid-template-columns:1fr;} .managed-grid2 .photo-frame{order:-1;} .svc{grid-template-columns:1fr;} }
 
@@ -501,6 +502,7 @@
       </div>
     </div>
     <div class="roster" id="roster" hidden><h3>Currently represented</h3><div class="card-grid" id="managed-grid"></div></div>
+    <div class="roster" id="placements" hidden><h3>Recent placements</h3><div class="card-grid" id="placements-grid"></div></div>
   </div>
 </section>
 
@@ -1109,6 +1111,16 @@
     }catch(e){}
   }
 
+  async function loadPlacements(){
+    try{
+      const r = await api('/stats/placements');
+      if(!r.placements.length) return;
+      const label = { transfer:'Transfer', employment_contract:'Signed', sponsorship:'Sponsorship', endorsement:'Endorsement' };
+      $('#placements-grid').innerHTML = r.placements.map(d => `<div class="placement"><div class="pl-type">${esc(label[d.deal_type] || 'Placement')}</div><div class="pl-name">${esc(d.full_name)}</div><div class="pl-meta">${esc(d.sport)} · ${esc(d.counterparty_name)}</div>${d.public_summary ? `<p class="pl-meta" style="margin-top:8px">${esc(d.public_summary)}</p>` : ''}</div>`).join('');
+      $('#placements').hidden = false;
+    }catch(e){}
+  }
+
   /* ---------- Registration form ---------- */
   const picker = $('#sport-picker');
   function pickSport(sp){
@@ -1189,7 +1201,7 @@
   /* ---------- Init ---------- */
   pickSport('');
   loadImages();
-  loadStats(); loadSportCounts(); loadDirectory(false); loadHighlights(); loadPlayerSelect(); loadRoster();
+  loadStats(); loadSportCounts(); loadDirectory(false); loadHighlights(); loadPlayerSelect(); loadRoster(); loadPlacements();
   if(location.hash.startsWith('#p=')) openProfile(decodeURIComponent(location.hash.slice(3)));
   window.addEventListener('hashchange', () => { if(location.hash.startsWith('#p=')) openProfile(decodeURIComponent(location.hash.slice(3))); });
 })();

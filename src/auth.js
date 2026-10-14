@@ -54,9 +54,14 @@ async function requireAuth(req, res, next) {
   // suspending a user, or changing their role, takes effect immediately
   // instead of waiting for the 12h token to expire.
   try {
-    const r = await pool.query('SELECT role, is_active FROM users WHERE id = $1', [payload.sub]);
+    const r = await pool.query('SELECT role, is_active, password_changed_at FROM users WHERE id = $1', [payload.sub]);
     if (r.rows.length === 0 || !r.rows[0].is_active) {
       return res.status(401).json({ error: 'This account is no longer active.' });
+    }
+    // A password change/reset invalidates every session issued before it.
+    const changed = r.rows[0].password_changed_at;
+    if (changed && payload.iat * 1000 < new Date(changed).getTime() - 1000) {
+      return res.status(401).json({ error: 'Your password was changed. Please sign in again.' });
     }
     payload.role = r.rows[0].role;
     req.user = payload;

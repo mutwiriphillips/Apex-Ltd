@@ -259,7 +259,7 @@ router.post('/users/:id/reset-password', async (req, res, next) => {
     if (target.id !== req.user.sub && !canManage(req.user, target)) {
       return res.status(403).json({ error: 'Only a superadmin can reset an admin password.' });
     }
-    await pool.query('UPDATE users SET password_hash = $2 WHERE id = $1', [target.id, await hashPassword(password)]);
+    await pool.query('UPDATE users SET password_hash = $2, password_changed_at = now() WHERE id = $1', [target.id, await hashPassword(password)]);
     console.log(`[admin-audit] ${req.user.email} reset password for ${target.email}`);
     res.json({ ok: true });
   } catch (err) { next(err); }
@@ -373,5 +373,8 @@ router.get('/players/:id/contact', async (req, res, next) => {
     res.json({ player: p.rows[0].full_name, contact: c.rows[0] || null });
   } catch (err) { next(err); }
 });
+
+// Phase 3: agents, contracts and deals (same staff-only protection).
+router.use('/', require('./representation'));
 
 module.exports = router;

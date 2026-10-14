@@ -54,6 +54,9 @@
       <button class="tab" role="tab" id="t-highlights" aria-selected="true" aria-controls="panel-highlights" data-panel="highlights">Highlights<span class="n" hidden></span></button>
       <button class="tab" role="tab" id="t-photos" aria-selected="false" aria-controls="panel-photos" data-panel="photos">Photos<span class="n" hidden></span></button>
       <button class="tab" role="tab" id="t-intros" aria-selected="false" aria-controls="panel-intros" data-panel="intros">Introductions<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-agents" aria-selected="false" aria-controls="panel-agents" data-panel="agents">Agents<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-contracts" aria-selected="false" aria-controls="panel-contracts" data-panel="contracts">Contracts<span class="n" hidden></span></button>
+      <button class="tab" role="tab" id="t-deals" aria-selected="false" aria-controls="panel-deals" data-panel="deals">Deals</button>
       <button class="tab" role="tab" id="t-players" aria-selected="false" aria-controls="panel-players" data-panel="players">Unverified players<span class="n" hidden></span></button>
       <button class="tab" role="tab" id="t-leads" aria-selected="false" aria-controls="panel-leads" data-panel="leads">Scout &amp; sponsor leads</button>
       <button class="tab" role="tab" id="t-users" aria-selected="false" aria-controls="panel-users" data-panel="users">Users &amp; sign-ins</button>
@@ -65,6 +68,73 @@
       <div class="toolbar"><label class="sr-only" for="intro-status">Status</label>
         <select class="mini" id="intro-status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="declined">Declined</option><option value="closed">Closed</option><option value="">All</option></select></div>
       <div id="intro-list"></div>
+    </div>
+    <div class="panel" id="panel-agents" role="tabpanel" aria-labelledby="t-agents">
+      <div class="toolbar"><button class="btn btn-violet btn-sm" type="button" id="agent-new">+ New agent</button></div>
+      <form id="agent-form" class="card" hidden novalidate>
+        <h2 class="serif" style="font-size:24px; margin-bottom:12px;">New agent</h2>
+        <div class="msg bad" data-form-err role="alert"></div>
+        <div class="form-grid">
+          <div class="field"><label for="ag-name">Full name <span class="hint">(required)</span></label><input id="ag-name" name="fullName" maxlength="100"><span class="err"></span></div>
+          <div class="field"><label for="ag-email">Email</label><input id="ag-email" name="email" type="email" maxlength="254"><span class="err"></span></div>
+          <div class="field"><label for="ag-phone">Phone</label><input id="ag-phone" name="phone" type="tel" maxlength="30"><span class="err"></span></div>
+          <div class="field"><label for="ag-lic">FIFA licence number</label><input id="ag-lic" name="fifaLicenseNumber" maxlength="40"><span class="err"></span></div>
+          <div class="field"><label for="ag-status">Licence status</label><select id="ag-status" name="licenseStatus"><option value="pending">Pending (not yet verified)</option><option value="active">Active (verified)</option><option value="suspended">Suspended</option><option value="expired">Expired</option></select><span class="err"></span></div>
+          <div class="field"><label for="ag-exp">Licence expiry</label><input id="ag-exp" name="licenseExpiry" type="date"><span class="err"></span></div>
+        </div>
+        <div class="field" id="ag-sports"><span class="lbl">Sports this agent is registered for</span>
+          <div style="display:flex; gap:16px; flex-wrap:wrap;"><label class="check" style="margin:0"><input type="checkbox" name="sports" value="Football"><span>Football</span></label><label class="check" style="margin:0"><input type="checkbox" name="sports" value="Rugby"><span>Rugby</span></label><label class="check" style="margin:0"><input type="checkbox" name="sports" value="Basketball"><span>Basketball</span></label><label class="check" style="margin:0"><input type="checkbox" name="sports" value="E-Football"><span>E-Football</span></label></div><span class="err"></span></div>
+        <div class="field"><label for="ag-link">Link a login <span class="hint">(optional: email of an account whose role is “agent”)</span></label><input id="ag-link" name="linkUserEmail" type="email"><span class="err"></span></div>
+        <div class="field"><label for="ag-notes">Notes</label><input id="ag-notes" name="notes" maxlength="300"></div>
+        <p class="note" style="margin-bottom:14px">Only mark a licence “Active” after you have checked it against the FIFA/federation register. Football contracts are blocked for any agent without an active, unexpired licence.</p>
+        <div class="actions"><button class="btn btn-ink btn-sm" type="submit">Save agent</button><button class="btn btn-outline btn-sm" type="button" data-cancel>Cancel</button></div>
+      </form>
+      <div id="agent-list"></div>
+    </div>
+    <div class="panel" id="panel-contracts" role="tabpanel" aria-labelledby="t-contracts">
+      <div id="rep-summary" class="stats"></div>
+      <div class="toolbar"><button class="btn btn-violet btn-sm" type="button" id="contract-new">+ New contract</button>
+        <label class="sr-only" for="contract-status">Status</label><select class="mini" id="contract-status"><option value="active">Active</option><option value="expired">Expired</option><option value="terminated">Terminated</option><option value="">All</option></select></div>
+      <form id="contract-form" class="card" hidden novalidate>
+        <h2 class="serif" style="font-size:24px; margin-bottom:12px;">New management contract</h2>
+        <div class="msg bad" data-form-err role="alert"></div>
+        <div class="field"><label for="ct-psearch">Find player</label><input id="ct-psearch" type="search" placeholder="Type a name…" autocomplete="off"></div>
+        <div class="form-grid">
+          <div class="field"><label for="ct-player">Player</label><select id="ct-player" name="playerId"><option value="">Search above, then choose…</option></select><span class="err"></span></div>
+          <div class="field"><label for="ct-agent">Agent</label><select id="ct-agent" name="agentId"></select><span class="err"></span></div>
+          <div class="field"><label for="ct-start">Contract start</label><input id="ct-start" name="contractStart" type="date"><span class="err"></span></div>
+          <div class="field"><label for="ct-end">Contract end <span class="hint">(optional)</span></label><input id="ct-end" name="contractEnd" type="date"><span class="err"></span></div>
+          <div class="field"><label for="ct-rate">Commission % </label><input id="ct-rate" name="commissionRate" type="number" min="0" max="100" step="0.5"><span class="err"></span></div>
+          <div class="field"><label for="ct-tier">Package</label><select id="ct-tier" name="packageTier"><option value="standard">Standard</option><option value="premium">Premium</option></select><span class="err"></span></div>
+        </div>
+        <div class="field"><label for="ct-gc">Guardian consent reference <span class="hint">(required if the player is under 18)</span></label><input id="ct-gc" name="guardianConsentRef" maxlength="120" placeholder="e.g. signed form GC-2026-014"><span class="err"></span></div>
+        <label class="check"><input type="checkbox" name="exclusivity" checked><span>Exclusive representation</span></label>
+        <div class="field"><label for="ct-notes">Notes</label><input id="ct-notes" name="notes" maxlength="300"></div>
+        <div class="actions"><button class="btn btn-ink btn-sm" type="submit">Create contract</button><button class="btn btn-outline btn-sm" type="button" data-cancel>Cancel</button></div>
+      </form>
+      <div id="contract-list"></div>
+    </div>
+    <div class="panel" id="panel-deals" role="tabpanel" aria-labelledby="t-deals">
+      <div class="toolbar"><button class="btn btn-violet btn-sm" type="button" id="deal-new">+ New deal</button>
+        <label class="sr-only" for="deal-status">Status</label><select class="mini" id="deal-status"><option value="">All</option><option value="negotiating">Negotiating</option><option value="closed">Closed</option><option value="fell_through">Fell through</option></select></div>
+      <form id="deal-form" class="card" hidden novalidate>
+        <h2 class="serif" style="font-size:24px; margin-bottom:12px;">New deal</h2>
+        <div class="msg bad" data-form-err role="alert"></div>
+        <div class="field"><label for="dl-psearch">Find player</label><input id="dl-psearch" type="search" placeholder="Type a name…" autocomplete="off"></div>
+        <div class="form-grid">
+          <div class="field"><label for="dl-player">Player</label><select id="dl-player" name="playerId"><option value="">Search above, then choose…</option></select><span class="err"></span></div>
+          <div class="field"><label for="dl-contract">Management contract <span class="hint">(required for football transfers)</span></label><select id="dl-contract" name="managedAthleteId"><option value="">None</option></select><span class="err"></span></div>
+          <div class="field"><label for="dl-type">Deal type</label><select id="dl-type" name="dealType"><option value="sponsorship">Sponsorship</option><option value="endorsement">Endorsement</option><option value="transfer">Transfer</option><option value="employment_contract">Employment contract</option></select><span class="err"></span></div>
+          <div class="field"><label for="dl-cp">Other party</label><input id="dl-cp" name="counterpartyName" maxlength="120"><span class="err"></span></div>
+          <div class="field"><label for="dl-val">Deal value</label><input id="dl-val" name="valueAmount" type="number" min="0" step="0.01"><span class="err"></span></div>
+          <div class="field"><label for="dl-cur">Currency</label><select id="dl-cur" name="currency"><option>KES</option><option>USD</option><option>EUR</option><option>GBP</option></select><span class="err"></span></div>
+          <div class="field"><label for="dl-comm">Commission <span class="hint">(blank = contract rate × value)</span></label><input id="dl-comm" name="commissionAmount" type="number" min="0" step="0.01"><span class="err"></span></div>
+          <div class="field"><label for="dl-st">Status</label><select id="dl-st" name="status"><option value="negotiating">Negotiating</option><option value="closed">Closed</option><option value="fell_through">Fell through</option></select><span class="err"></span></div>
+        </div>
+        <div class="field"><label for="dl-notes">Internal notes</label><input id="dl-notes" name="notes" maxlength="300"></div>
+        <div class="actions"><button class="btn btn-ink btn-sm" type="submit">Save deal</button><button class="btn btn-outline btn-sm" type="button" data-cancel>Cancel</button></div>
+      </form>
+      <div id="deal-list"></div>
     </div>
     <div class="panel" id="panel-players" role="tabpanel" aria-labelledby="t-players"></div>
     <div class="panel" id="panel-leads" role="tabpanel" aria-labelledby="t-leads"></div>
@@ -129,7 +199,7 @@
     }, options));
     let body = null; try{ body = await res.json(); }catch(e){}
     if(res.status === 401){ clearToken(); showLogin(); throw new Error((body && body.error) || 'Session expired. Please sign in again.'); }
-    if(!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
+    if(!res.ok){ const e = new Error((body && body.error) || `Request failed (${res.status})`); e.fields = body && body.fields; e.code = body && body.code; throw e; }
     return body;
   }
   async function blobUrl(path){
@@ -141,7 +211,7 @@
   function showLogin(){ $('#login-view').hidden = false; $('#dashboard-view').hidden = true; $('#logout-btn').hidden = true; }
   function showDashboard(){
     $('#login-view').hidden = true; $('#dashboard-view').hidden = false; $('#logout-btn').hidden = false;
-    loadHighlights(); loadPhotos(); loadIntros(); loadPlayers(); loadLeads(); loadUsers();
+    loadHighlights(); loadPhotos(); loadIntros(); loadPlayers(); loadLeads(); loadUsers(); loadAgents(); loadContracts(); loadDeals(); loadRepSummary();
   }
 
   $('#login-form').addEventListener('submit', async e => {
@@ -349,6 +419,196 @@
       });
     }catch(err){ list.innerHTML = empty("Couldn't load users.", err.message); }
   }
+
+
+  /* ---------- Phase 3: agents, contracts, deals ---------- */
+  const money = (v, c) => v == null ? '—' : new Intl.NumberFormat('en-KE', { style:'currency', currency: c || 'KES', maximumFractionDigits: 0 }).format(v);
+  const dateOnly = d => d ? fmt(String(d).slice(0, 10) + 'T12:00:00') : '—';
+  function clearErrors(form){ $$('.field', form).forEach(f => { f.classList.remove('invalid'); const e = $('.err', f); if(e) e.textContent = ''; }); const m = $('[data-form-err]', form); if(m) m.textContent = ''; }
+  function showErrors(form, err){
+    const fields = err.fields || {}; let first = null;
+    Object.keys(fields).forEach(k => {
+      const el = form.elements[k] ? (form.elements[k].length && !form.elements[k].tagName ? form.elements[k][0] : form.elements[k]) : null;
+      const g = el && el.closest('.field') || (k === 'sports' ? $('#ag-sports', form) : null);
+      if(g){ g.classList.add('invalid'); const e = $('.err', g); if(e) e.textContent = fields[k]; if(!first) first = el || g; }
+    });
+    const m = $('[data-form-err]', form); if(m) m.textContent = Object.keys(fields).length ? 'Please check the highlighted fields.' : err.message;
+    if(first && first.focus) first.focus();
+  }
+  function wireToggle(btnId, formId, onOpen){
+    $('#' + btnId).addEventListener('click', () => { const f = $('#' + formId); f.hidden = !f.hidden; if(!f.hidden && onOpen) onOpen(f); if(!f.hidden) $('input,select', f).focus(); });
+    $('#' + formId + ' [data-cancel]').addEventListener('click', () => { const f = $('#' + formId); f.hidden = true; f.reset(); clearErrors(f); });
+  }
+  let AGENTS = [], CONTRACTS = [];
+
+  async function loadRepSummary(){
+    try{
+      const s = await api('/admin/representation/summary');
+      $('#rep-summary').innerHTML =
+        `<div><b>${s.contracts.active}</b><span>Active contracts</span></div>` +
+        `<div><b>${s.contracts.ending_soon}</b><span>Ending in 60 days</span></div>` +
+        `<div><b>${s.agents.licensed}/${s.agents.total}</b><span>Agents licensed</span></div>` +
+        `<div><b>${s.agents.expiring}</b><span>Licences expiring (60 d)</span></div>` +
+        `<div><b>${s.deals.negotiating}</b><span>Deals negotiating</span></div>` +
+        (s.closedByCurrency.map(c => `<div><b>${money(c.commission, c.currency)}</b><span>Commission closed (${esc(c.currency)})</span></div>`).join(''));
+      badgeCount('contracts', s.contracts.ending_soon);
+    }catch(e){ $('#rep-summary').innerHTML = ''; }
+  }
+
+  /* agents */
+  function agentLicenceBadge(a){
+    if(a.licence_lapsed) return '<span class="pill off">Licence expired</span>';
+    if(a.licence_ok) return '<span class="pill ok">Licensed</span>';
+    return `<span class="pill ${a.license_status === 'suspended' ? 'off' : 'warn'}">${esc(a.license_status)}</span>`;
+  }
+  async function loadAgents(){
+    const list = $('#agent-list');
+    try{
+      AGENTS = (await api('/admin/agents')).agents || [];
+      badgeCount('agents', AGENTS.filter(a => a.license_status === 'pending' || a.licence_lapsed).length);
+      if(!AGENTS.length){ list.innerHTML = empty('No agents yet.', 'Add an agent before creating a management contract.'); return; }
+      list.innerHTML = AGENTS.map(a => `<div class="card" data-id="${esc(a.id)}"><div class="row">
+          <div class="main"><div class="title-sm">${esc(a.full_name)} ${agentLicenceBadge(a)}</div>
+            <div class="sub-sm">${a.sports.map(esc).join(', ') || 'No sports'} · ${a.active_contracts} active contract${a.active_contracts === 1 ? '' : 's'}</div>
+            <div class="sub-sm">Licence ${a.fifa_license_number ? esc(a.fifa_license_number) : '—'} · expires ${dateOnly(a.license_expiry)}${a.license_verified_at ? ' · verified ' + fmt(a.license_verified_at) : ''}</div>
+            <div class="sub-sm">${a.email ? `<a href="mailto:${esc(a.email)}">${esc(a.email)}</a>` : ''}${a.phone ? ' · ' + esc(a.phone) : ''}${a.login_email ? ' · login: ' + esc(a.login_email) : ''}</div>
+            ${a.notes ? `<div class="sub-sm">${esc(a.notes)}</div>` : ''}</div>
+          <div class="actions">
+            <label class="sr-only" for="ls-${esc(a.id)}">Licence status</label>
+            <select class="mini" id="ls-${esc(a.id)}" data-act="status">${['pending','active','suspended','expired'].map(x => `<option value="${x}" ${x === a.license_status ? 'selected' : ''}>${x}</option>`).join('')}</select>
+            <label class="sr-only" for="le-${esc(a.id)}">Licence expiry</label>
+            <input class="mini" id="le-${esc(a.id)}" type="date" data-act="expiry" value="${a.license_expiry ? String(a.license_expiry).slice(0,10) : ''}" style="min-height:40px; padding:6px 10px; border:1.5px solid #B9B2A3; border-radius:6px; font:inherit;">
+            <button class="btn btn-ink btn-sm" data-act="save">Update licence</button></div></div></div>`).join('');
+      $$('.card', list).forEach(card => $('[data-act=save]', card).addEventListener('click', async () => {
+        const body = { licenseStatus: $('[data-act=status]', card).value, licenseExpiry: $('[data-act=expiry]', card).value };
+        const a = AGENTS.find(x => x.id === card.dataset.id);
+        if(body.licenseStatus === 'active' && !confirm(`Mark ${a.full_name}'s licence as ACTIVE? Only do this after checking it against the official register.`)) return;
+        try{ await api('/admin/agents/' + card.dataset.id, { method:'PATCH', body: JSON.stringify(body) }); toast('Licence updated.'); loadAgents(); loadContracts(); loadRepSummary(); }
+        catch(err){ toast((err.fields && Object.values(err.fields)[0]) || err.message); }
+      }));
+    }catch(err){ list.innerHTML = empty("Couldn't load agents.", err.message); }
+  }
+  wireToggle('agent-new', 'agent-form');
+  $('#agent-form').addEventListener('submit', async e => {
+    e.preventDefault(); clearErrors(e.target);
+    const fd = new FormData(e.target); const body = Object.fromEntries(fd.entries()); body.sports = fd.getAll('sports');
+    const btn = $('button[type=submit]', e.target); btn.disabled = true;
+    try{ await api('/admin/agents', { method:'POST', body: JSON.stringify(body) }); toast('Agent saved.'); e.target.reset(); e.target.hidden = true; loadAgents(); loadRepSummary(); }
+    catch(err){ showErrors(e.target, err); } finally{ btn.disabled = false; }
+  });
+
+  /* player picker */
+  function wirePlayerPicker(searchId, selectId, onChange){
+    let t = null; const sel = $('#' + selectId);
+    const run = async () => {
+      try{
+        const r = await api('/admin/representation/players?q=' + encodeURIComponent($('#' + searchId).value.trim()));
+        sel.innerHTML = '<option value="">Choose…</option>' + r.players.map(p => `<option value="${esc(p.id)}">${esc(p.full_name)} — ${esc(p.sport)}${p.is_minor ? ' (minor)' : ''}</option>`).join('');
+      }catch(e){}
+    };
+    $('#' + searchId).addEventListener('input', () => { clearTimeout(t); t = setTimeout(run, 250); });
+    sel.addEventListener('change', () => onChange && onChange(sel.value));
+    return run;
+  }
+
+  /* contracts */
+  function contractCard(c){
+    const active = c.status === 'active';
+    return `<div class="card" data-id="${esc(c.id)}"><div class="row">
+      <div class="main"><div class="title-sm">${esc(c.player_name)} ${c.is_minor ? '<span class="pill off">Minor</span>' : ''} <span class="pill">${esc(c.sport)}</span>
+        <span class="pill ${active ? 'ok' : 'off'}">${esc(c.status)}</span>${active && !c.agent_licence_ok ? '<span class="pill off">Agent licence not active</span>' : ''}</div>
+        <div class="sub-sm">Agent: ${esc(c.agent_name)} · ${esc(c.package_tier)} · ${Number(c.commission_rate)}% commission · ${c.exclusivity ? 'exclusive' : 'non-exclusive'}</div>
+        <div class="sub-sm">${dateOnly(c.contract_start)} → ${c.contract_end ? dateOnly(c.contract_end) : 'open-ended'}${c.guardian_consent_ref ? ' · guardian consent: ' + esc(c.guardian_consent_ref) : ''}</div>
+        ${c.notes ? `<div class="sub-sm">${esc(c.notes)}</div>` : ''}</div>
+      ${active ? `<div class="actions"><button class="btn btn-danger btn-sm" data-act="terminate">Terminate</button></div>` : ''}</div></div>`;
+  }
+  async function loadContracts(){
+    const list = $('#contract-list'); const st = $('#contract-status').value;
+    try{
+      CONTRACTS = (await api('/admin/contracts' + (st ? '?status=' + st : ''))).contracts || [];
+      if(!CONTRACTS.length){ list.innerHTML = empty('No contracts here.', st === 'active' || !st ? 'Create the first one with “+ New contract”. The homepage roster stays hidden until one exists.' : 'Nothing with that status.'); return; }
+      list.innerHTML = CONTRACTS.map(contractCard).join('');
+      $$('.card', list).forEach(card => { const b = $('[data-act=terminate]', card); if(b) b.addEventListener('click', async () => {
+        const c = CONTRACTS.find(x => x.id === card.dataset.id);
+        if(!confirm(`Terminate the contract with ${c.player_name}? They will leave the public roster immediately.`)) return;
+        try{ await api('/admin/contracts/' + c.id, { method:'PATCH', body: JSON.stringify({ status:'terminated' }) }); toast('Contract terminated.'); loadContracts(); loadRepSummary(); }
+        catch(err){ toast(err.message); }
+      }); });
+    }catch(err){ list.innerHTML = empty("Couldn't load contracts.", err.message); }
+  }
+  const runContractPlayers = wirePlayerPicker('ct-psearch', 'ct-player');
+  wireToggle('contract-new', 'contract-form', async () => {
+    runContractPlayers();
+    if(!AGENTS.length) await loadAgents();
+    $('#ct-agent').innerHTML = '<option value="">Choose…</option>' + AGENTS.map(a => `<option value="${esc(a.id)}">${esc(a.full_name)} — ${a.licence_ok ? 'licensed' : esc(a.license_status)} (${a.sports.map(esc).join(', ')})</option>`).join('');
+    if(!$('#ct-start').value) $('#ct-start').value = new Date().toISOString().slice(0, 10);
+  });
+  $('#contract-status').addEventListener('change', loadContracts);
+  $('#contract-form').addEventListener('submit', async e => {
+    e.preventDefault(); clearErrors(e.target);
+    const f = e.target.elements;
+    const body = { playerId: f.playerId.value, agentId: f.agentId.value, contractStart: f.contractStart.value, contractEnd: f.contractEnd.value,
+      commissionRate: f.commissionRate.value, packageTier: f.packageTier.value, guardianConsentRef: f.guardianConsentRef.value, exclusivity: f.exclusivity.checked, notes: f.notes.value };
+    const btn = $('button[type=submit]', e.target); btn.disabled = true;
+    try{ await api('/admin/contracts', { method:'POST', body: JSON.stringify(body) }); toast('Contract created.'); e.target.reset(); e.target.hidden = true; $('#contract-status').value = 'active'; loadContracts(); loadAgents(); loadRepSummary(); }
+    catch(err){
+      if(err.code === 'GUARDIAN_CONSENT') err.fields = { guardianConsentRef: err.message };
+      if(err.code === 'AGENT_LICENCE' || err.code === 'AGENT_SPORT') err.fields = { agentId: err.message };
+      showErrors(e.target, err);
+    } finally{ btn.disabled = false; }
+  });
+
+  /* deals */
+  function dealCard(d){
+    const closed = d.status === 'closed';
+    return `<div class="card" data-id="${esc(d.id)}"><div class="row">
+      <div class="main"><div class="title-sm">${esc(d.player_name)} ${d.is_minor ? '<span class="pill off">Minor</span>' : ''} <span class="pill">${esc(d.deal_type.replace('_', ' '))}</span>
+        <span class="pill ${closed ? 'ok' : d.status === 'fell_through' ? 'off' : 'warn'}">${esc(d.status.replace('_', ' '))}</span>${d.is_public ? '<span class="pill">Public</span>' : ''}</div>
+        <div class="sub-sm">With ${esc(d.counterparty_name)} · ${esc(d.sport)}${closed ? ' · closed ' + dateOnly(d.closed_at) : ''}</div>
+        <div class="sub-sm">Value ${money(d.value_amount, d.currency)} · commission ${money(d.commission_amount, d.currency)}</div>
+        ${d.notes ? `<div class="sub-sm">${esc(d.notes)}</div>` : ''}
+        ${closed ? `<div class="msg bad" data-pub-err role="alert" style="margin:10px 0 0"></div>
+        <div class="field" style="margin:10px 0 0"><label class="check" style="margin:0"><input type="checkbox" data-act="consent" ${d.athlete_consented ? 'checked' : ''}><span>The athlete${d.is_minor ? "'s guardian" : ''} agreed to this being shown publicly</span></label></div>
+        <div class="field" style="margin:8px 0 0"><label for="ps-${esc(d.id)}">Public summary <span class="hint">(no amounts; shown on the homepage)</span></label><input id="ps-${esc(d.id)}" data-act="summary" maxlength="160" value="${esc(d.public_summary || '')}"></div>` : ''}</div>
+      <div class="actions" style="flex-direction:column; align-items:stretch;">
+        ${d.status === 'negotiating' ? '<button class="btn btn-violet btn-sm" data-act="close">Mark closed</button><button class="btn btn-outline btn-sm" data-act="fell">Fell through</button>' : ''}
+        ${closed ? `<button class="btn ${d.is_public ? 'btn-outline' : 'btn-violet'} btn-sm" data-act="publish">${d.is_public ? 'Unpublish' : 'Publish placement'}</button>` : ''}
+      </div></div></div>`;
+  }
+  async function loadDeals(){
+    const list = $('#deal-list'); const st = $('#deal-status').value;
+    try{
+      const items = (await api('/admin/deals' + (st ? '?status=' + st : ''))).deals || [];
+      if(!items.length){ list.innerHTML = empty('No deals here.', 'Record transfers, sponsorships and endorsements here. Nothing is public unless you publish a closed one.'); return; }
+      list.innerHTML = items.map(dealCard).join('');
+      $$('.card', list).forEach(card => {
+        const id = card.dataset.id; const d = items.find(x => x.id === id);
+        const patch = async (body, msg) => {
+          try{ await api('/admin/deals/' + id, { method:'PATCH', body: JSON.stringify(body) }); toast(msg); loadDeals(); loadRepSummary(); }
+          catch(err){ const m = $('[data-pub-err]', card); const text = (err.fields && Object.values(err.fields)[0]) || err.message; if(m) m.textContent = text; else toast(text); }
+        };
+        const c = $('[data-act=close]', card); if(c) c.addEventListener('click', () => patch({ status:'closed' }, 'Deal marked closed.'));
+        const f = $('[data-act=fell]', card); if(f) f.addEventListener('click', () => { if(confirm('Mark this deal as fell through?')) patch({ status:'fell_through' }, 'Deal updated.'); });
+        const p = $('[data-act=publish]', card); if(p) p.addEventListener('click', () => {
+          if(d.is_public) return patch({ isPublic:false }, 'Placement unpublished.');
+          patch({ athleteConsented: $('[data-act=consent]', card).checked, publicSummary: $('[data-act=summary]', card).value, isPublic:true }, 'Placement published.');
+        });
+      });
+    }catch(err){ list.innerHTML = empty("Couldn't load deals.", err.message); }
+  }
+  const runDealPlayers = wirePlayerPicker('dl-psearch', 'dl-player', pid => {
+    const mine = CONTRACTS.filter(c => c.player_id === pid && c.status === 'active');
+    $('#dl-contract').innerHTML = '<option value="">None</option>' + mine.map(c => `<option value="${esc(c.id)}">${esc(c.agent_name)} (${Number(c.commission_rate)}%)</option>`).join('');
+  });
+  wireToggle('deal-new', 'deal-form', async () => { runDealPlayers(); await loadContracts(); });
+  $('#deal-status').addEventListener('change', loadDeals);
+  $('#deal-form').addEventListener('submit', async e => {
+    e.preventDefault(); clearErrors(e.target);
+    const body = Object.fromEntries(new FormData(e.target).entries());
+    const btn = $('button[type=submit]', e.target); btn.disabled = true;
+    try{ await api('/admin/deals', { method:'POST', body: JSON.stringify(body) }); toast('Deal saved.'); e.target.reset(); e.target.hidden = true; loadDeals(); loadRepSummary(); }
+    catch(err){ showErrors(e.target, err); } finally{ btn.disabled = false; }
+  });
 
   getToken() ? showDashboard() : showLogin();
 })();

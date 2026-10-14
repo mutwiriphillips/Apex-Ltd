@@ -47,7 +47,17 @@
             <div class="field"><label for="login-password">Password</label><input type="password" id="login-password" required autocomplete="current-password" /></div>
             <button type="submit" class="btn btn-violet btn-block">Sign in</button>
           </form>
-          <p class="note" style="margin-top:14px">Josriri staff sign in on the <a href="/admin.html">staff page</a>.</p>
+          <p class="note" style="margin-top:14px"><button type="button" class="linkbtn" id="show-forgot" style="color:var(--violet-deep); font-weight:700; background:none; border:0; cursor:pointer; padding:0; font-size:inherit;">Forgot your password?</button> · Josriri staff sign in on the <a href="/admin.html">staff page</a>.</p>
+        </div>
+        <div id="forgot-panel" role="region" aria-label="Reset your password" hidden>
+          <h2 class="serif" style="font-size:24px; margin-bottom:6px;">Reset your password</h2>
+          <p class="note" style="margin-bottom:16px;">Enter your account email and we'll send you a link to choose a new password.</p>
+          <div class="msg bad" id="forgot-error" role="alert"></div><div class="msg ok" id="forgot-ok" role="status"></div>
+          <form id="forgot-form" novalidate>
+            <div class="field"><label for="forgot-email">Email</label><input type="email" id="forgot-email" required autocomplete="username" /></div>
+            <button type="submit" class="btn btn-violet btn-block">Send reset link</button>
+          </form>
+          <p class="note" style="margin-top:14px"><button type="button" class="linkbtn" id="back-login" style="color:var(--violet-deep); font-weight:700; background:none; border:0; cursor:pointer; padding:0; font-size:inherit;">Back to sign in</button></p>
         </div>
         <div id="register-panel" role="tabpanel" aria-labelledby="tab-register" hidden>
           <div class="msg bad" id="register-error" role="alert"></div>
@@ -69,7 +79,23 @@
   <div id="dashboard-view" hidden>
     <div class="eyebrow">My account</div>
     <h1 class="title" id="dash-title">Your <em>profile</em></h1>
+    <div id="verify-banner" class="msg info" hidden style="margin-top:20px; display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+      <span>Please confirm your email address. We sent you a link when you signed up.</span>
+      <button type="button" class="btn btn-ink btn-sm" id="resend-verify">Resend email</button>
+    </div>
     <div id="dashboard-content" style="margin-top:28px" aria-live="polite"></div>
+    <article class="card" id="pw-card" hidden>
+      <h2>Change password</h2>
+      <p class="meta">Changing it signs you out on every other device.</p>
+      <form id="pw-form" novalidate>
+        <div class="msg bad" id="pw-error" role="alert"></div>
+        <div class="form-grid">
+          <div class="field"><label for="pw-cur">Current password</label><input type="password" id="pw-cur" autocomplete="current-password" required></div>
+          <div class="field"><label for="pw-new">New password</label><input type="password" id="pw-new" minlength="8" autocomplete="new-password" required><span class="hint">At least 8 characters.</span></div>
+        </div>
+        <button class="btn btn-ink btn-sm" type="submit">Change password</button>
+      </form>
+    </article>
   </div>
 
 </div></div>
@@ -141,14 +167,40 @@
   }
 
   function showAuth(){ $('#auth-view').hidden = false; $('#dashboard-view').hidden = true; $('#logout-btn').hidden = true; }
+  $('#resend-verify').addEventListener('click', async () => {
+    try{ const r = await api('/auth/send-verification', { method:'POST' }); toast(r.alreadyVerified ? 'Your email is already confirmed.' : 'Confirmation email sent. Check your inbox.'); if(r.alreadyVerified) $('#verify-banner').hidden = true; }
+    catch(err){ toast(err.message); }
+  });
+  $('#pw-form').addEventListener('submit', async e => {
+    e.preventDefault(); $('#pw-error').textContent = '';
+    try{
+      const r = await api('/auth/change-password', { method:'POST', body: JSON.stringify({ currentPassword: $('#pw-cur').value, newPassword: $('#pw-new').value }) });
+      setToken(r.token); e.target.reset(); toast('Password changed. Other devices were signed out.');
+    }catch(err){ $('#pw-error').textContent = err.message; }
+  });
   function showDashboard(){ $('#auth-view').hidden = true; $('#dashboard-view').hidden = false; $('#logout-btn').hidden = false; loadDashboard(); }
 
   /* ---------- auth ---------- */
   function setMode(mode){
-    const login = mode === 'login';
-    $('#tab-login').setAttribute('aria-selected', login); $('#tab-register').setAttribute('aria-selected', !login);
-    $('#login-panel').hidden = !login; $('#register-panel').hidden = login;
+    const login = mode === 'login', forgot = mode === 'forgot';
+    $('#tab-login').setAttribute('aria-selected', login || forgot); $('#tab-register').setAttribute('aria-selected', mode === 'register');
+    $('#login-panel').hidden = !login; $('#register-panel').hidden = mode !== 'register'; $('#forgot-panel').hidden = !forgot;
+    $('.seg').hidden = forgot;
   }
+  $('#show-forgot').addEventListener('click', () => { setMode('forgot'); $('#forgot-email').value = $('#login-email').value; $('#forgot-email').focus(); });
+  $('#back-login').addEventListener('click', () => setMode('login'));
+  if(location.hash === '#forgot'){ setTimeout(() => $('#show-forgot').click(), 0); }
+  $('#forgot-form').addEventListener('submit', async e => {
+    e.preventDefault(); $('#forgot-error').textContent = ''; $('#forgot-ok').textContent = '';
+    const btn = $('button[type=submit]', e.target); btn.disabled = true;
+    try{
+      const res = await fetch('/api/auth/forgot-password', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ email: $('#forgot-email').value.trim() }) });
+      const b = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(b.error || 'Something went wrong. Please try again.');
+      $('#forgot-ok').textContent = b.message;
+    }catch(err){ $('#forgot-error').textContent = err.message; }
+    finally{ btn.disabled = false; }
+  });
   $('#tab-login').addEventListener('click', () => setMode('login'));
   $('#tab-register').addEventListener('click', () => setMode('register'));
   $('#reg-role').addEventListener('change', e => {
@@ -377,6 +429,7 @@
     const el = $('#dashboard-content');
     try{
       const data = await api('/account/me'); const user = data.user;
+      $('#verify-banner').hidden = !!user.is_email_verified; $('#pw-card').hidden = false;
       if(user.role === 'player'){
         if(!data.player){ $('#dash-title').innerHTML = 'Welcome, <em>athlete</em>'; el.innerHTML = createForm(false); wireCreate(el, false); return; }
         $('#dash-title').innerHTML = 'My <em>profile</em>';

@@ -58,4 +58,31 @@ function notifyAdmin(subject, lines) {
   });
 }
 
-module.exports = { notifyAdmin };
+// Send a transactional email to a user (password reset, verification).
+// Resolves true if handed to SMTP, false otherwise; never rejects.
+// Without SMTP configured: in development the message (including its link)
+// is printed to the console so flows can be tested locally; in production
+// nothing sensitive is logged and the caller still returns a generic response.
+async function sendMail({ to, subject, lines }) {
+  const text = lines.join('\n');
+  const tx = getTransporter();
+  if (!tx) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[mailer:dev] To: ${to}\nSubject: ${subject}\n${text}\n`);
+    }
+    return false;
+  }
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const html = `<div style="font-family:sans-serif;font-size:15px;line-height:1.6;color:#101B2D;">
+    ${lines.map((l) => `<p style="margin:0 0 12px;">${/^https?:\/\//.test(l) ? `<a href="${esc(l)}">${esc(l)}</a>` : esc(l)}</p>`).join('')}
+  </div>`;
+  try {
+    await tx.sendMail({ from: `Josriri Sports Management <${process.env.SMTP_USER}>`, to, subject, text, html });
+    return true;
+  } catch (err) {
+    console.error('[mailer] failed to send to user:', err.message);
+    return false;
+  }
+}
+
+module.exports = { notifyAdmin, sendMail };

@@ -476,23 +476,68 @@ curl -X POST http://localhost:3000/api/players \
   `prefers-reduced-motion` fallbacks
 
 **Not yet implemented — flagged here rather than left silently missing:**
-- **Claiming a pre-existing anonymous profile.** If someone registered a
-  profile before creating an account, there's no safe way yet to link the
-  two — that needs an identity-verification step (e.g. email OTP) that
-  doesn't exist yet. Documented above under "Player and guardian accounts".
-- **Managed Athletes and deals.** The homepage "Managed athletes" section
-  now reads live from `managed_athletes` and stays hidden until real
-  contracts exist. There is no admin UI yet for creating agents or
-  contracts (Phase 3 — it should wait until agent onboarding and
-  licence-status tracking exist). `deals` is not surfaced anywhere yet.
-- **File uploads.** Highlights currently accept a video *link* rather than
-  a direct upload. Real video upload/hosting (e.g. S3-compatible storage)
-  is a separate build step (Phase 5).
-- **Payments.** No integration yet for premium subscriptions or sponsor
-  access fees (Phase 4 — Paystack/Flutterwave are the practical choices
-  for Kenyan payment rails, given M-Pesa support).
-- **Password reset / email verification.** Login exists; account recovery
-  doesn't yet.
+- **Claiming a pre-existing anonymous profile.** Still not possible: an
+  identity-verification step is needed. Phase 1 (below) now provides the
+  verified email it depends on; the claim flow itself is Phase 2.
+- **Payments.** No integration yet (Phase 4; Paystack or Flutterwave for M-Pesa).
+- **Object storage.** Photos and videos now upload directly but live in Postgres
+  (Phase 5 moves them to S3-compatible storage).
+
+## Roadmap
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Account recovery: password reset, email verification, change password, sessions end on password change | **Done** |
+| 2 | Claim an existing anonymous profile (email one-time code to the address on the profile, guardian checks for minors, staff fallback) | Skipped for now |
+| 3 | Agents, licence-status tracking and managed-athlete contracts: admin UI, then surface `deals` | **Done** (this release) |
+| 4 | Payments: Paystack/Flutterwave, M-Pesa, premium plans, scout access fees, webhooks and receipts | Planned |
+| 5 | Move uploads from Postgres to object storage (S3/R2), thumbnails, transcoding | Planned |
+
+## Agents, licences, contracts and deals (Phase 3)
+
+Admin tabs **Agents**, **Contracts** and **Deals** (staff_admin and superadmin).
+Migration `005_representation.sql` adds the columns and a database trigger, so
+the rules hold even if the API is bypassed.
+
+Rules enforced:
+- Football contracts need an agent whose licence is `active` and unexpired.
+- An agent can only represent sports they are registered for.
+- Players under 18 need a guardian consent reference on the contract.
+- One active contract per player; contracts expire automatically after `contract_end`.
+- Football transfer and employment deals must be linked to an active licensed contract.
+- Marking a licence active is a deliberate staff action: check it against the official register first. The system does not verify licences itself.
+
+Endpoints (all under `/api/admin`): `GET /representation/summary`,
+`GET /representation/players`, `GET|POST|PATCH /agents`,
+`GET|POST|PATCH /contracts`, `GET|POST|PATCH /deals`.
+
+Public surface: `/api/stats/managed` (active contracts) fills the homepage
+roster; `/api/stats/placements` fills "Recent placements". A placement appears only
+when the deal is closed, the athlete (or guardian) consented, and staff wrote a
+public summary. Amounts and commission are never exposed publicly.
+
+## Account recovery (Phase 1)
+
+- `POST /api/auth/forgot-password` always returns the same message (no account
+  enumeration); max 3 emails/hour/account; suspended accounts get none.
+- Reset and verification links carry a random 32-byte token in the URL
+  **fragment** (not sent to the server until the page posts it). Only a SHA-256
+  hash is stored; tokens are single-use, a newer request voids older ones, reset
+  expires after 1 h and verification after 24 h.
+- `POST /api/auth/reset-password`, `/verify-email`, `/send-verification`,
+  `/change-password`. Resetting also marks the email verified.
+- Any password change or admin reset signs out every other session
+  (`users.password_changed_at`, checked in `requireAuth`).
+- Pages: `/reset-password.html`, `/verify-email.html`; account page has
+  "Forgot your password?", a verification banner and a Change password card.
+- **Config:** emails need the SMTP variables. Link base URL comes from `APP_URL`
+  or Render's `RENDER_EXTERNAL_URL` (never the request Host header in
+  production). Without SMTP, links are printed to the console in development
+  only and nothing is sent in production. `AUTH_RATE_LIMIT` (default 10 per 15
+  min) can be raised for automated tests.
+- Staff sign-in has no self-service reset; a superadmin resets it from Admin > Users.
+- Tested locally: 27 API checks and 33 browser checks (one flagged item was the
+  expected 403 from a deliberate wrong-password test). Real SMTP delivery not tested.
 
 None of these block a working demo deploy, or the admin team actually
 moderating content day-to-day — they're the honest list of what's still

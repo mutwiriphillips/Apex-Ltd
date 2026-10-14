@@ -45,7 +45,7 @@ const writeLimiter = rateLimit({
 });
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10,
+  limit: Number(process.env.AUTH_RATE_LIMIT) || 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Please try again later.' },
