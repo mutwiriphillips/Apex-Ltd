@@ -593,9 +593,10 @@ profile dialogs with shareable `#p=<id>` links, a highlight showcase with safe
 YouTube/Vimeo embeds, grouped registration with inline validation, a trust
 section, and a scout-access form.
 
-- **Photography:** drop real photos into `public/assets/img/` and list them in
-  `manifest.json` (see the README there). Until then, designed sport panels
-  are shown, with no silhouettes and no broken images.
+- **Photography:** 13 illustrative (AI-generated) images are wired in via
+  `public/assets/img/manifest.json` (see the README there); the founder section
+  shows initials until a real portrait is added. Fallback sport panels cover any
+  missing image. The site discloses that photography is illustrative.
 - **Backend changes:** `GET /api/players` now supports `club`, `position`,
   `division`, `sort`, `limit`, `offset` and returns `total`;
   `GET /api/highlights` returns only *approved* highlights for players visible

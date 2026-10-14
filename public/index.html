@@ -62,7 +62,7 @@
 
   /* ===== Photo slots (real photo when in manifest, designed fallback otherwise) ===== */
   .ph{position:relative; overflow:hidden; background:var(--navy); isolation:isolate;}
-  .ph > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .6s ease;}
+  .ph > img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:var(--pos,50% 50%); transition:transform .6s ease;}
   .ph-art{position:absolute; inset:0; z-index:0;}
   .ph-art svg{position:absolute; right:-6%; bottom:-10%; width:70%; height:auto; color:#fff; opacity:.10;}
   .ph[data-sport="football"]{background:radial-gradient(120% 90% at 20% 0%, #1f6b46 0%, #124232 45%, #0c2a24 100%);}
@@ -116,7 +116,20 @@
   .hero .lead{font-size:clamp(16px, 1.5vw, 19px); color:var(--on-dark-muted); max-width:56ch; margin-top:var(--s5);}
   .hero-actions{display:flex; gap:var(--s3); flex-wrap:wrap; margin-top:var(--s6);}
   .hero-note{margin-top:var(--s5); font-size:14px; color:var(--on-dark-muted); border-left:2px solid var(--lime); padding-left:var(--s3);}
-  .hero-media{position:relative; aspect-ratio:4/5; border-radius:var(--r-lg); box-shadow:var(--shadow-2); max-height:620px; width:100%;}
+  .hero-visual{display:grid; gap:12px;}
+  .hero-media{position:relative; aspect-ratio:4/3; border-radius:var(--r-lg); box-shadow:var(--shadow-2); width:100%;}
+  .mini-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .mini{position:relative; aspect-ratio:4/3; border-radius:var(--r-md); overflow:hidden; border:1px solid var(--line-dark); cursor:pointer; padding:0; background:none; color:#fff; font:700 13px var(--font-ui); text-align:left;}
+  .mini .ph{position:absolute; inset:0;} .mini:hover .ph > img{transform:scale(1.06);}
+  .mini span{position:absolute; left:0; right:0; bottom:0; z-index:4; padding:22px 10px 8px; background:linear-gradient(to top, rgba(16,24,32,.92), transparent);}
+  .strip{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--s3); margin-top:var(--s7);}
+  .strip .tile{aspect-ratio:3/4; border-radius:var(--r-md);} .strip .tile.ph{border:1px solid var(--border);}
+  .banner{aspect-ratio:2/1; border-radius:var(--r-lg); margin-top:var(--s5); box-shadow:var(--shadow-1);}
+  .photo-card{aspect-ratio:4/3; border-radius:var(--r-lg); margin-top:var(--s6); box-shadow:var(--shadow-2);}
+  .split-head{display:grid; grid-template-columns:1.1fr .9fr; gap:var(--s7); align-items:center; margin-bottom:var(--s7);}
+  .split-head .sec-head{margin-bottom:0;} .split-head .photo-card{margin-top:0; aspect-ratio:16/10;}
+  .img-note{font-size:12.5px; color:var(--ink-muted); margin-top:var(--s3);}
+  @media (max-width:860px){ .split-head{grid-template-columns:1fr;} .strip{grid-template-columns:repeat(2,1fr);} }
   .hero-media .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
   .hero-media .pitch-lines{position:absolute; inset:0; z-index:1; opacity:.22;}
   .hero-media .cap{position:absolute; left:16px; bottom:16px; z-index:3; background:rgba(16,24,32,.88); border:1px solid var(--line-dark); border-radius:var(--r-md); padding:10px 14px; font-size:13px; color:var(--on-dark-muted); max-width:80%;}
@@ -128,7 +141,7 @@
   .trust-item span{font-size:13px; font-weight:600; color:var(--on-dark-muted); text-transform:uppercase; letter-spacing:.08em;}
   @media (max-width:900px){
     .hero-grid{grid-template-columns:1fr; padding-top:var(--s7); padding-bottom:var(--s7); gap:var(--s6);}
-    .hero-media{aspect-ratio:16/11; max-height:none;}
+    .hero-media{aspect-ratio:16/11;}
   }
 
   /* ===== Sections ===== */
@@ -272,7 +285,7 @@
   .svc{list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:12px 20px; margin:var(--s6) 0;}
   .svc li{display:flex; gap:10px; align-items:flex-start; font-weight:600; color:var(--white); font-size:15.5px;}
   .svc li::before{content:""; width:20px; height:20px; border-radius:50%; background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23101820' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/12px no-repeat; flex-shrink:0; margin-top:2px;}
-  .managed-media{aspect-ratio:5/4; border-radius:var(--r-lg); box-shadow:var(--shadow-2);} .managed-media .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
+  .managed-media{position:relative; aspect-ratio:5/4; border-radius:var(--r-lg); box-shadow:var(--shadow-2);} .managed-media .ph{position:absolute; inset:0; border-radius:var(--r-lg);}
   .disclaim{font-size:13.5px; color:var(--on-dark-muted); margin-top:var(--s4); max-width:60ch;}
   .roster{margin-top:var(--s7);}
   .roster h3{font:800 22px var(--font-display); margin-bottom:var(--s4);}
@@ -454,9 +467,16 @@
       </div>
       <p class="hero-note">From grassroots talent to the next generation of professional athletes.</p>
     </div>
-    <div class="hero-media" role="img" aria-label="Footballer in action on a floodlit pitch">
-      <div class="ph" data-slot="hero" data-sport="hero" data-alt="African footballer in action on a professional pitch">
-        <svg class="pitch-lines" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><rect x="20" y="20" width="360" height="460" rx="4"/><line x1="20" y1="250" x2="380" y2="250"/><circle cx="200" cy="250" r="56"/><rect x="110" y="20" width="180" height="84"/><rect x="110" y="396" width="180" height="84"/></g></svg>
+    <div class="hero-visual">
+      <div class="hero-media">
+        <div class="ph" data-slot="hero" data-sport="hero" data-alt="Footballer in action on a professional pitch">
+          <svg class="pitch-lines" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2"><rect x="20" y="20" width="360" height="460" rx="4"/><line x1="20" y1="250" x2="380" y2="250"/><circle cx="200" cy="250" r="56"/><rect x="110" y="20" width="180" height="84"/><rect x="110" y="396" width="180" height="84"/></g></svg>
+        </div>
+      </div>
+      <div class="mini-row">
+        <button class="mini" type="button" data-pick="Rugby" aria-label="Explore rugby talent"><div class="ph" data-slot="rugby" data-sport="rugby" data-art="icon-posts"></div><span>Rugby</span></button>
+        <button class="mini" type="button" data-pick="Basketball" aria-label="Explore basketball talent"><div class="ph" data-slot="basketball" data-sport="basketball" data-art="icon-hoop"></div><span>Basketball</span></button>
+        <button class="mini" type="button" data-pick="E-Football" aria-label="Explore e-football talent"><div class="ph" data-slot="efootball" data-sport="efootball" data-art="icon-controller"></div><span>E-Football</span></button>
       </div>
     </div>
   </div>
@@ -511,6 +531,10 @@
       <article class="step reveal"><div class="num">STEP 02</div><div class="ic"><svg><use href="#i-film"/></svg></div><h3>Show your talent</h3><p>Add match highlights, achievements, and supporting information to help scouts understand your abilities.</p></article>
       <article class="step reveal"><div class="num">STEP 03</div><div class="ic"><svg><use href="#i-eye"/></svg></div><h3>Get discovered</h3><p>Make your profile available to authorized scouts, clubs, and sponsors according to the platform's verification and privacy rules.</p></article>
     </div>
+    <div class="strip reveal" aria-label="Athletes from every sport and level">
+      <div class="ph tile" data-slot="p1" data-sport="people"></div><div class="ph tile" data-slot="p2" data-sport="people"></div><div class="ph tile" data-slot="p3" data-sport="people"></div><div class="ph tile" data-slot="p4" data-sport="people"></div>
+    </div>
+    <p class="img-note">Photography on this site is illustrative and does not show registered athletes.</p>
     <p class="fine">Registration is free. It does not guarantee a contract, sponsorship, selection, or professional placement — it makes you visible to the people who decide those things.</p>
   </div>
 </section>
@@ -559,6 +583,7 @@
       <span class="sec-eyebrow">Join the registry</span>
       <h2 class="display" id="reg-title">Register your profile</h2>
       <p>It takes about two minutes and it is free. Your sporting profile can then be found by scouts, clubs and sponsors.</p>
+      <div class="ph banner" data-slot="community" data-sport="people"></div>
       <div class="privacy-box"><b>How we handle your information.</b> Your name, sport, position, club, county, level and bio can appear in the public directory. Players under 18 need a parent or guardian's consent, and only appear publicly once that consent covers publication. Read the <a href="/privacy.html">privacy policy</a> and <a href="/child-safety.html">child safeguarding policy</a>.</div>
       <div class="privacy-box" style="border-left-color:var(--slate);">Want to edit your profile later, or manage a child's profile? <a href="/account.html">Create an account</a> first, then register from there — it links automatically.</div>
     </div>
@@ -610,10 +635,13 @@
 <!-- ============ SHOWCASE ============ -->
 <section id="showcase" class="sec-light" aria-labelledby="show-title">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="sec-eyebrow">Video showcase</span>
-      <h2 class="display" id="show-title">Let your performance speak.</h2>
-      <p>Highlight clips linked to registered athletes. Every clip is reviewed by the Josriri team before it appears here. Clips are shared as links to the original video, such as YouTube or Vimeo.</p>
+    <div class="split-head reveal">
+      <div class="sec-head">
+        <span class="sec-eyebrow">Video showcase</span>
+        <h2 class="display" id="show-title">Let your performance speak.</h2>
+        <p>Highlight clips linked to registered athletes. Every clip is reviewed by the Josriri team before it appears here. Clips are shared as links to the original video, such as YouTube or Vimeo.</p>
+      </div>
+      <div class="ph photo-card" data-slot="track" data-sport="people" data-art="icon-field"></div>
     </div>
     <div class="hl-grid" id="highlight-list" aria-busy="true"></div>
     <div class="hl-form-wrap reveal">
@@ -693,6 +721,7 @@
         <li>Appropriate profile verification</li>
         <li>Contact pathways managed according to privacy permissions</li>
       </ul>
+      <div class="ph photo-card" data-slot="scout" data-sport="people" data-art="icon-field"></div>
     </div>
     <div class="lead-form reveal">
       <h3>Request Scout Access</h3>
@@ -758,7 +787,7 @@
       <div><h4>Organisations</h4><ul><li><a href="#sponsors">Scout &amp; sponsor access</a></li><li><a href="#contact">Partnerships</a></li><li><a href="/account.html">My account</a></li></ul></div>
       <div><h4>Contact &amp; policies</h4><ul><li><a href="tel:+254771648205">+254 771 648 205</a></li><li><a href="mailto:skywalkerstalents@gmail.com">skywalkerstalents@gmail.com</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/child-safety.html">Child safeguarding</a></li><li><a href="/terms.html">Terms of use</a></li></ul></div>
     </div>
-    <div class="foot-bottom"><span>© 2026 Josriri Sports Management. Nairobi, Kenya.</span><span>Early-stage platform.</span></div>
+    <div class="foot-bottom"><span>© 2026 Josriri Sports Management. Nairobi, Kenya.</span><span>Early-stage platform. Photography is illustrative.</span></div>
   </div>
 </footer>
 
@@ -802,6 +831,7 @@
       img.alt = m.alt || el.dataset.alt || ''; img.decoding = 'async';
       if(!el.closest('.hero')) img.loading = 'lazy';
       if(m.srcset) img.srcset = m.srcset, img.sizes = m.sizes || '100vw';
+      if(m.pos) img.style.setProperty('--pos', m.pos);
       img.src = m.src;
       img.onerror = () => img.remove();            // fall back to the designed panel, never a broken icon
       img.onload = () => { if(el.dataset.slot === 'founder'){ const mono = $('#founder-mono'); if(mono) mono.hidden = true; } };
@@ -979,7 +1009,7 @@
   $('#fl-sort').addEventListener('change', () => loadDirectory(false));
   $('#clear-filters').addEventListener('click', clearFilters);
   $('#load-more').addEventListener('click', () => loadDirectory(true));
-  $$('.sport-card').forEach(c => c.addEventListener('click', () => { setSport(c.dataset.pick, true); $('#directory').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' }); }));
+  $$('[data-pick]').forEach(c => c.addEventListener('click', () => { setSport(c.dataset.pick, true); $('#directory').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' }); }));
 
   /* ---------- Profile + video dialogs ---------- */
   const dlg = $('#dlg'); let lastFocus = null;
