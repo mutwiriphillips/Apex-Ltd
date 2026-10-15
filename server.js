@@ -29,7 +29,13 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+// HTML and the imagery config must always be revalidated so a redeploy shows up
+// immediately; other assets are revalidated with ETags (no stale long-lived cache).
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders(res, file) {
+    if (/\.(html|json)$/i.test(file)) res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  },
+}));
 
 app.get('/healthz', (req, res) => res.json({ status: 'ok' }));
 

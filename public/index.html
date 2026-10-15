@@ -728,7 +728,7 @@
   function status(el, kind, msg){ el.className = 'form-status show ' + kind; el.textContent = msg; }
   function setInvalid(group, bad){ const g = typeof group === 'string' ? $('#'+group) : group; if(g) g.classList.toggle('invalid', !!bad); const i = g && $('input,select,textarea', g); if(i) i.setAttribute('aria-invalid', bad ? 'true' : 'false'); return bad; }
 
-  /* ---------- Photo slots: real photos load only if listed in /assets/img/manifest.json ---------- */
+  /* ---------- Photo slots: real photos load only if listed in /assets/imagery.json ---------- */
   let IMAGES = {};
   function artSvg(id){ return id ? `<div class="ph-art" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#${id}"/></svg></div>` : ''; }
   function fillSlots(root){
@@ -747,7 +747,7 @@
     });
   }
   async function loadImages(){
-    try{ const r = await fetch('/assets/img/manifest.json', { cache:'no-cache' }); if(r.ok) IMAGES = await r.json(); }catch(e){}
+    try{ const r = await fetch('/assets/imagery.json', { cache:'no-cache' }); if(r.ok) IMAGES = await r.json(); }catch(e){}
     fillSlots(document);
   }
 
