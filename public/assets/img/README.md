@@ -1,12 +1,20 @@
 # Imagery
 
-Images are listed in `manifest.json` (key -> src, alt, optional `pos` focal point).
-Keys: hero, football, rugby, basketball, efootball, track, tower, stadium, roof.
-Replace a file (same name) or edit the manifest to swap an image; delete a key to
-fall back to the designed panel. Add a `founder` key only with a real, consented photo.
+This folder is intentionally empty. The homepage photo slots (hero, sports, track,
+stadium, etc.) fall back to the designed vector panels when no `manifest.json` is
+present, so nothing is broken or blurry.
 
-All current images are AI-generated crops of the project design board (venue and
-equipment only, no people). None are sourced from third parties. They are low
-resolution and upscaled; regenerate at 1600 px+ wide (WebP/AVIF, under ~250 KB) before
-launch. Never use generated images to represent real registered athletes. Athlete
-profile photos need a backend upload feature (see main README).
+The earlier placeholder photos were low resolution (about 500 px, stretched to
+full width) and were removed. To add imagery later:
+
+1. Use only high-quality photography you have the rights to (1600 px wide or more,
+   WebP/AVIF, under about 250 KB each). Never use generated images to represent real
+   registered athletes.
+2. Put the files here and add a `manifest.json` mapping a slot key to
+   `{ "src": "/assets/img/<file>", "alt": "...", "pos": "50% 50%" }`.
+   Keys: hero, football, rugby, basketball, efootball, track, tower, stadium, roof.
+   Add a `founder` key only with a real, consented photo.
+3. Delete a key to fall back to the designed panel for that slot.
+
+Athlete profile photos are separate: athletes upload them from their account and
+staff approve them before they appear.

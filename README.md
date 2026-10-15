@@ -642,11 +642,10 @@ All existing routes, APIs, forms, auth, search and minors' protections are uncha
 
 - **Imagery:** venue and equipment only (stadium, boots and ball, rugby ball,
   basketball court, e-football setup, running track, floodlight tower, arena
-  roof). All 9 images are AI-generated crops of the supplied design board
-  (none externally sourced, no third-party licences involved). They are
-  board-resolution and upscaled, so they look soft; regenerate at 1600 px+ wide.
-  Wired through `public/assets/img/manifest.json`; missing images fall back to a
-  designed panel. There is no founder portrait and no people imagery.
+  roof). These placeholder images were low resolution and have been removed.
+  The slots now show the designed vector panels. See `public/assets/img/README.md`
+  for how to add real photography later. There is no founder portrait and no
+  people imagery.
 - **Backend changes (earlier):** `GET /api/players` supports `club`, `position`,
   `division`, `sort`, `limit`, `offset` and returns `total`; `GET /api/highlights`
   returns only approved highlights for players visible in the public view.
